@@ -23,7 +23,7 @@ func main() {
 	defer portaudio.Terminate()
 
 	// FFmpeg command to output PCM data
-	cmd := exec.Command("ffmpeg", "-i", "input.mp3", "-f", "s16le", "-ac", strconv.Itoa(channels), "-ar", strconv.Itoa(sampleRate), "pipe:1")
+	cmd := exec.Command("ffmpeg", "-i", "test-audio.ogg", "-f", "s16le", "-ac", strconv.Itoa(channels), "-ar", strconv.Itoa(sampleRate), "pipe:1")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
