@@ -14,11 +14,12 @@ import (
 
 const sampleRate = 44100
 const channels = 2
-const framesPerBuffer = 1024 // Setting a specific buffer size
+const framesPerBuffer = 1024
 
 type AudioChunk = struct {
-	Left  []float32
-	Right []float32
+	Left   []float32
+	Right  []float32
+	Length int16
 }
 
 func Start() {
@@ -36,55 +37,16 @@ func Start() {
 	audioChunks := make(chan AudioChunk, 16)
 
 	go func() {
+		var lastAudioChunk *AudioChunk
+
 		for {
 			file := <-files
 
-			cmd := exec.Command("ffmpeg", "-i", file, "-f", "s16le", "-ac", strconv.Itoa(channels), "-ar", strconv.Itoa(sampleRate), "pipe:1")
-			stdout, err := cmd.StdoutPipe()
-			if err != nil {
-				log.Fatal(err)
+			lastAudioChunk = readEntireFile(file, lastAudioChunk, audioChunks)
+
+			if lastAudioChunk.Length >= framesPerBuffer {
+				lastAudioChunk = nil
 			}
-
-			if err := cmd.Start(); err != nil {
-				log.Fatal(err)
-			}
-
-			reader := bufio.NewReader(stdout)
-
-			for {
-				chunk := AudioChunk{
-					Left:  make([]float32, framesPerBuffer),
-					Right: make([]float32, framesPerBuffer),
-				}
-
-				var err error
-				var left float32
-				var right float32
-
-				for i := 0; i < framesPerBuffer; i++ {
-					err, left, right = readFrame(reader)
-
-					if err != nil {
-						break
-						// TODO: fill remaining space with samples from next file
-					}
-
-					chunk.Left[i] = left
-					chunk.Right[i] = right
-				}
-
-				audioChunks <- chunk
-
-				if err == io.EOF {
-					break
-				}
-
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
-
-			stdout.Close()
 		}
 	}()
 
@@ -106,7 +68,7 @@ func Start() {
 	}
 	defer stream.Stop()
 
-	time.Sleep(20 * time.Second)
+	time.Sleep(25 * time.Second)
 }
 
 // readFrame reads two 16-bit samples from the PCM stream
@@ -127,4 +89,67 @@ func readFrame(reader *bufio.Reader) (error, float32, float32) {
 	}
 
 	return nil, float32(left) / 32768.0, float32(right) / 32768.0
+}
+
+func readEntireFile(file string, firstChunk *AudioChunk, chunkChan chan AudioChunk) *AudioChunk {
+	cmd := exec.Command("ffmpeg", "-i", file, "-f", "s16le", "-ac", strconv.Itoa(channels), "-ar", strconv.Itoa(sampleRate), "pipe:1")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stdout.Close()
+
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+
+	reader := bufio.NewReader(stdout)
+
+	nextChunk := firstChunk
+	var lastChunk *AudioChunk
+
+	for {
+		var chunk AudioChunk
+
+		if nextChunk == nil {
+			chunk = AudioChunk{
+				Left:  make([]float32, framesPerBuffer),
+				Right: make([]float32, framesPerBuffer),
+			}
+		} else {
+			chunk = *nextChunk
+			nextChunk = nil
+		}
+
+		lastChunk = &chunk
+
+		var err error
+		var left float32
+		var right float32
+
+		// By starting at chunk.Length we can fill up the remaining space in the chunk.
+		for i := chunk.Length; i < framesPerBuffer; i++ {
+			err, left, right = readFrame(reader)
+
+			if err != nil {
+				break
+			}
+
+			chunk.Left[i] = left
+			chunk.Right[i] = right
+			chunk.Length++
+		}
+
+		chunkChan <- chunk
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return lastChunk
 }
