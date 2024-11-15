@@ -2,7 +2,10 @@ package player2
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
+	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os/exec"
@@ -12,9 +15,11 @@ import (
 	"github.com/gordonklaus/portaudio"
 )
 
-const sampleRate = 44100
-const channels = 2
-const framesPerBuffer = 1024
+const (
+	sampleRate      = 44100
+	channels        = 2
+	framesPerBuffer = 1024
+)
 
 type AudioChunk = struct {
 	Left   []float32
@@ -41,6 +46,9 @@ func Start() {
 
 		for {
 			file := <-files
+
+			duration, _ := GetDurationWithFFProbe(file)
+			log.Printf("Reading file %s. Duration: %vs", file, duration)
 
 			lastAudioChunk = readEntireFile(file, lastAudioChunk, audioChunks)
 
@@ -157,4 +165,34 @@ func readEntireFile(file string, firstChunk *AudioChunk, chunkChan chan AudioChu
 	}
 
 	return lastChunk
+}
+
+// GetDurationWithFFProbe fetches the duration of an audio file in seconds using ffprobe.
+func GetDurationWithFFProbe(filePath string) (float64, error) {
+	// Run ffprobe with JSON output
+	cmd := exec.Command("ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", filePath)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		return 0, fmt.Errorf("failed to run ffprobe: %w", err)
+	}
+
+	// Parse the JSON output
+	var probeResult struct {
+		Format struct {
+			Duration string `json:"duration"`
+		} `json:"format"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &probeResult); err != nil {
+		return 0, fmt.Errorf("failed to parse ffprobe output: %w", err)
+	}
+
+	// Convert duration to a float64
+	duration, err := strconv.ParseFloat(probeResult.Format.Duration, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid duration format: %w", err)
+	}
+
+	return duration, nil
 }
