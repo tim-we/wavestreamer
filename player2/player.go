@@ -1,0 +1,130 @@
+package player2
+
+import (
+	"bufio"
+	"encoding/binary"
+	"io"
+	"log"
+	"os/exec"
+	"strconv"
+	"time"
+
+	"github.com/gordonklaus/portaudio"
+)
+
+const sampleRate = 44100
+const channels = 2
+const framesPerBuffer = 1024 // Setting a specific buffer size
+
+type AudioChunk = struct {
+	Left  []float32
+	Right []float32
+}
+
+func Start() {
+	err := portaudio.Initialize()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer portaudio.Terminate()
+
+	files := make(chan string, 3)
+	files <- "test-audio.ogg"
+	files <- "test-audio.ogg"
+	files <- "test-audio.ogg"
+
+	audioChunks := make(chan AudioChunk, 16)
+
+	go func() {
+		for {
+			file := <-files
+
+			cmd := exec.Command("ffmpeg", "-i", file, "-f", "s16le", "-ac", strconv.Itoa(channels), "-ar", strconv.Itoa(sampleRate), "pipe:1")
+			stdout, err := cmd.StdoutPipe()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if err := cmd.Start(); err != nil {
+				log.Fatal(err)
+			}
+
+			reader := bufio.NewReader(stdout)
+
+			for {
+				chunk := AudioChunk{
+					Left:  make([]float32, framesPerBuffer),
+					Right: make([]float32, framesPerBuffer),
+				}
+
+				var err error
+				var left float32
+				var right float32
+
+				for i := 0; i < framesPerBuffer; i++ {
+					err, left, right = readFrame(reader)
+
+					if err != nil {
+						break
+						// TODO: fill remaining space with samples from next file
+					}
+
+					chunk.Left[i] = left
+					chunk.Right[i] = right
+				}
+
+				audioChunks <- chunk
+
+				if err == io.EOF {
+					break
+				}
+
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+
+			stdout.Close()
+		}
+	}()
+
+	playCallback := func(out [][]float32) {
+		chunk := <-audioChunks
+		copy(out[0], chunk.Left)
+		copy(out[1], chunk.Right)
+	}
+
+	// Set up the PortAudio stream with a fixed buffer size
+	stream, err := portaudio.OpenDefaultStream(0, channels, sampleRate, framesPerBuffer, playCallback)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stream.Close()
+
+	if err := stream.Start(); err != nil {
+		log.Fatal(err)
+	}
+	defer stream.Stop()
+
+	time.Sleep(20 * time.Second)
+}
+
+// readFrame reads two 16-bit samples from the PCM stream
+func readFrame(reader *bufio.Reader) (error, float32, float32) {
+	var left int16
+	var right int16
+
+	err := binary.Read(reader, binary.LittleEndian, &left)
+
+	if err != nil {
+		return err, 0, 0
+	}
+
+	err = binary.Read(reader, binary.LittleEndian, &right)
+
+	if err != nil {
+		return err, 0, 0
+	}
+
+	return nil, float32(left) / 32768.0, float32(right) / 32768.0
+}
