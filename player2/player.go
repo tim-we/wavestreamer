@@ -19,7 +19,7 @@ const framesPerBuffer = 1024
 type AudioChunk = struct {
 	Left   []float32
 	Right  []float32
-	Length int16
+	Length int
 }
 
 func Start() {
@@ -50,10 +50,19 @@ func Start() {
 		}
 	}()
 
+	// playCallback sends audio chunks to the PortAudio stream.
 	playCallback := func(out [][]float32) {
-		chunk := <-audioChunks
-		copy(out[0], chunk.Left)
-		copy(out[1], chunk.Right)
+		select {
+		case chunk := <-audioChunks:
+			copy(out[0], chunk.Left)
+			copy(out[1], chunk.Right)
+		default:
+			// Handle underflow (e.g., fill with silence)
+			for i := range out[0] {
+				out[0][i] = 0
+				out[1][i] = 0
+			}
+		}
 	}
 
 	// Set up the PortAudio stream with a fixed buffer size
@@ -73,21 +82,13 @@ func Start() {
 
 // readFrame reads two 16-bit samples from the PCM stream
 func readFrame(reader *bufio.Reader) (error, float32, float32) {
-	var left int16
-	var right int16
-
-	err := binary.Read(reader, binary.LittleEndian, &left)
-
-	if err != nil {
+	var left, right int16
+	if err := binary.Read(reader, binary.LittleEndian, &left); err != nil {
 		return err, 0, 0
 	}
-
-	err = binary.Read(reader, binary.LittleEndian, &right)
-
-	if err != nil {
+	if err := binary.Read(reader, binary.LittleEndian, &right); err != nil {
 		return err, 0, 0
 	}
-
 	return nil, float32(left) / 32768.0, float32(right) / 32768.0
 }
 
@@ -143,6 +144,10 @@ func readEntireFile(file string, firstChunk *AudioChunk, chunkChan chan AudioChu
 		chunkChan <- chunk
 
 		if err == io.EOF {
+			// Ensure the process is properly waited on before returning
+			if waitErr := cmd.Wait(); waitErr != nil {
+				log.Fatal(waitErr)
+			}
 			break
 		}
 
