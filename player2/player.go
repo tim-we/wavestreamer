@@ -21,12 +21,6 @@ const (
 	framesPerBuffer = 1024
 )
 
-type AudioChunk = struct {
-	Left   []float32
-	Right  []float32
-	Length int
-}
-
 func Start() {
 	err := portaudio.Initialize()
 	if err != nil {
@@ -47,8 +41,11 @@ func Start() {
 		for {
 			file := <-files
 
-			duration, _ := GetDurationWithFFProbe(file)
-			log.Printf("Reading file %s. Duration: %vs", file, duration)
+			metaData, _ := GetFileMetadata(file)
+			log.Printf("Reading file %s. Duration: %vs", file, metaData.Duration)
+			if metaData.Title != nil {
+				log.Printf("File meta data: %s", *metaData.Title)
+			}
 
 			lastAudioChunk = readEntireFile(file, lastAudioChunk, audioChunks)
 
@@ -167,32 +164,77 @@ func readEntireFile(file string, firstChunk *AudioChunk, chunkChan chan AudioChu
 	return lastChunk
 }
 
-// GetDurationWithFFProbe fetches the duration of an audio file in seconds using ffprobe.
-func GetDurationWithFFProbe(filePath string) (float64, error) {
+// GetFileMetadata fetches the duration of an audio file in seconds using ffprobe and, if available, the tracks title, artist and album.
+func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 	// Run ffprobe with JSON output
-	cmd := exec.Command("ffprobe", "-v", "quiet", "-output_format", "json", "-show_format", filePath)
+	cmd := exec.Command(
+		"ffprobe",
+		"-v", "quiet", // Set logging level to avoid ffprobe printing non JSON data
+		"-output_format", "json", // Output format
+		"-show_entries", "format_tags=artist,title,album", // File meta data (ID3)
+		"-show_format", // File format information, includes duration and size
+		filePath,
+	)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	if err := cmd.Run(); err != nil {
-		return 0, fmt.Errorf("failed to run ffprobe: %w", err)
+		return nil, fmt.Errorf("failed to run ffprobe: %w", err)
 	}
 
 	// Parse the JSON output
-	var probeResult struct {
-		Format struct {
-			Duration string `json:"duration"`
-		} `json:"format"`
-	}
+	var probeResult FFProbeOutput
 	if err := json.Unmarshal(out.Bytes(), &probeResult); err != nil {
-		return 0, fmt.Errorf("failed to parse ffprobe output: %w", err)
+		return nil, fmt.Errorf("failed to parse ffprobe output: %w", err)
 	}
 
 	// Convert duration to a float64
 	duration, err := strconv.ParseFloat(probeResult.Format.Duration, 64)
 	if err != nil {
-		return 0, fmt.Errorf("invalid duration format: %w", err)
+		return nil, fmt.Errorf("invalid duration format: %w", err)
 	}
 
-	return duration, nil
+	var title, artist, album *string
+
+	if probeResult.Format.Tags != nil {
+		title = probeResult.Format.Tags.Title
+		artist = probeResult.Format.Tags.Artist
+		album = probeResult.Format.Tags.Album
+	}
+
+	metaData := AudioFileMetaData{
+		Duration: int(duration),
+		Title:    title,
+		Artist:   artist,
+		Album:    album,
+	}
+
+	return &metaData, nil
+}
+
+type AudioChunk = struct {
+	Left   []float32
+	Right  []float32
+	Length int
+}
+
+type FFProbeOutput struct {
+	Format struct {
+		Duration string `json:"duration"`
+		Tags     *struct {
+			Artist *string `json:"artist"`
+			Title  *string `json:"title"`
+			Album  *string `json:"album"`
+		} `json:"tags"`
+	} `json:"format"`
+}
+
+type AudioFileMetaData struct {
+	// Duration in seconds.
+	Duration int
+
+	// Meta tags are optional.
+	Title  *string
+	Artist *string
+	Album  *string
 }
