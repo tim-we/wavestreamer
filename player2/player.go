@@ -170,7 +170,7 @@ func readEntireFile(file string, firstChunk *AudioChunk, chunkChan chan AudioChu
 // GetDurationWithFFProbe fetches the duration of an audio file in seconds using ffprobe.
 func GetDurationWithFFProbe(filePath string) (float64, error) {
 	// Run ffprobe with JSON output
-	cmd := exec.Command("ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", filePath)
+	cmd := exec.Command("ffprobe", "-v", "quiet", "-output_format", "json", "-show_format", filePath)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
