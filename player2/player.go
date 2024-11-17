@@ -10,6 +10,7 @@ import (
 	"log"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gordonklaus/portaudio"
@@ -42,10 +43,8 @@ func Start() {
 			file := <-files
 
 			metaData, _ := GetFileMetadata(file)
-			log.Printf("Reading file %s. Duration: %vs", file, metaData.Duration)
-			if metaData.Title != nil {
-				log.Printf("File meta data: %s", *metaData.Title)
-			}
+			log.Printf("Reading file %s", file)
+			log.Printf("File metadata:\n%+v\n", *metaData)
 
 			lastAudioChunk = readEntireFile(file, lastAudioChunk, audioChunks)
 
@@ -171,7 +170,7 @@ func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 		"ffprobe",
 		"-v", "quiet", // Set logging level to avoid ffprobe printing non JSON data
 		"-output_format", "json", // Output format
-		"-show_entries", "format_tags=artist,title,album", // File meta data (ID3)
+		"-show_entries", "format_tags:stream_tags", // File meta data can be either in the container (format_tags) or stream (stream_tags)
 		"-show_format", // File format information, includes duration and size
 		filePath,
 	)
@@ -194,22 +193,33 @@ func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 		return nil, fmt.Errorf("invalid duration format: %w", err)
 	}
 
-	var title, artist, album *string
+	// Collect metadata
+	metadata := make(map[string]string)
 
+	// Add format tags if available
 	if probeResult.Format.Tags != nil {
-		title = probeResult.Format.Tags.Title
-		artist = probeResult.Format.Tags.Artist
-		album = probeResult.Format.Tags.Album
+		for key, value := range probeResult.Format.Tags {
+			metadata[strings.ToLower(key)] = value
+		}
 	}
 
-	metaData := AudioFileMetaData{
+	// Fallback to stream tags if format tags are missing
+	if len(metadata) == 0 && len(probeResult.Streams) > 0 {
+		for _, stream := range probeResult.Streams {
+			if stream.Tags != nil {
+				for key, value := range stream.Tags {
+					metadata[strings.ToLower(key)] = value
+				}
+			}
+		}
+	}
+
+	return &AudioFileMetaData{
 		Duration: int(duration),
-		Title:    title,
-		Artist:   artist,
-		Album:    album,
-	}
-
-	return &metaData, nil
+		Title:    metadata["title"],
+		Artist:   metadata["artist"],
+		Album:    metadata["album"],
+	}, nil
 }
 
 type AudioChunk = struct {
@@ -220,21 +230,20 @@ type AudioChunk = struct {
 
 type FFProbeOutput struct {
 	Format struct {
-		Duration string `json:"duration"`
-		Tags     *struct {
-			Artist *string `json:"artist"`
-			Title  *string `json:"title"`
-			Album  *string `json:"album"`
-		} `json:"tags"`
+		Duration string            `json:"duration"`
+		Tags     map[string]string `json:"tags"`
 	} `json:"format"`
+	Streams []struct {
+		Tags map[string]string `json:"tags"`
+	} `json:"streams"`
 }
 
 type AudioFileMetaData struct {
 	// Duration in seconds.
 	Duration int
 
-	// Meta tags are optional.
-	Title  *string
-	Artist *string
-	Album  *string
+	// Meta tags are optional. The fallback value is "".
+	Title  string
+	Artist string
+	Album  string
 }
