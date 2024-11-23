@@ -1,0 +1,5 @@
+package player
+
+const SAMPLE_RATE = 44100
+const CHANNELS = 2
+const FRAMES_PER_BUFFER = 1024
