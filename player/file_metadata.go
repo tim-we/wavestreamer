@@ -9,6 +9,16 @@ import (
 	"strings"
 )
 
+type AudioFileMetaData struct {
+	// Duration in seconds.
+	Duration int
+
+	// Meta tags are optional. The fallback value is "".
+	Title  string
+	Artist string
+	Album  string
+}
+
 // GetFileMetadata fetches the duration of an audio file in seconds using ffprobe and, if available, the tracks title, artist and album.
 func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 	// Run ffprobe with JSON output
@@ -66,16 +76,6 @@ func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 		Artist:   metadata["artist"],
 		Album:    metadata["album"],
 	}, nil
-}
-
-type AudioFileMetaData struct {
-	// Duration in seconds.
-	Duration int
-
-	// Meta tags are optional. The fallback value is "".
-	Title  string
-	Artist string
-	Album  string
 }
 
 type FFProbeOutput struct {
