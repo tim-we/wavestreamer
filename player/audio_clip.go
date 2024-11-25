@@ -12,7 +12,6 @@ type AudioClip struct {
 	filepath string
 	decoder  *DecodingProcess
 	meta     *AudioFileMetaData
-	stopped  bool
 	buffer   chan *AudioChunk
 }
 
@@ -25,6 +24,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 	meta, metaErr := GetFileMetadata(filepath)
 
 	if metaErr != nil {
+		decoder.Close()
 		return nil, fmt.Errorf("Failed to get meta data of '%s'.", filepath)
 	}
 
@@ -41,6 +41,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 	}
 
 	go func() {
+		defer close(buffer)
 
 		for {
 			// Create empty chunk.
@@ -53,7 +54,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 
 			// Fill chunk.
 			for i := 0; i < FRAMES_PER_BUFFER; i++ {
-				err, left, right := decoder.ReadFrame()
+				left, right, err := decoder.ReadFrame()
 
 				if err != nil {
 					if err == io.EOF {
@@ -76,7 +77,6 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 			buffer <- &chunk
 
 			if eofReached {
-				close(buffer)
 				break
 			}
 		}
@@ -91,10 +91,6 @@ func (clip *AudioClip) NextChunk() (*AudioChunk, bool) {
 }
 
 func (clip *AudioClip) Stop() {
-	if clip.stopped {
-		return
-	}
-	clip.stopped = true
 	clip.decoder.Close()
 }
 

@@ -3,9 +3,9 @@ package player
 import (
 	"bufio"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"strconv"
 )
@@ -42,7 +42,7 @@ func NewDecodingProcess(filepath string) DecodingProcess {
 
 func (process *DecodingProcess) StartDecoding() {
 	if process.reader != nil {
-		log.Fatal(fmt.Printf("Already started decoding %s.", process.filepath))
+		log.Fatalf("Decoding for %s has already started.", process.filepath)
 	}
 
 	if err := process.cmd.Start(); err != nil {
@@ -54,18 +54,28 @@ func (process *DecodingProcess) StartDecoding() {
 
 func (process *DecodingProcess) Close() {
 	process.stdout.Close()
+
+	if process.cmd.ProcessState == nil || !process.cmd.ProcessState.Exited() {
+		if err := process.cmd.Process.Kill(); err != nil && err != os.ErrProcessDone {
+			log.Printf("Failed to kill process: %v", err)
+		}
+	}
+
+	if waitErr := process.cmd.Wait(); waitErr != nil && waitErr != os.ErrProcessDone {
+		log.Printf("Error while waiting for process to exit: %v", waitErr)
+	}
 }
 
 // readFrame reads two 16-bit samples from the PCM stream
-func (process *DecodingProcess) ReadFrame() (error, float32, float32) {
+func (process *DecodingProcess) ReadFrame() (float32, float32, error) {
 	var left, right int16
 	if err := binary.Read(process.reader, binary.LittleEndian, &left); err != nil {
-		return err, 0, 0
+		return 0, 0, err
 	}
 	if err := binary.Read(process.reader, binary.LittleEndian, &right); err != nil {
-		return err, 0, 0
+		return 0, 0, err
 	}
-	return nil, float32(left) / 32768.0, float32(right) / 32768.0
+	return float32(left) / 32768.0, float32(right) / 32768.0, nil
 }
 
 func (process *DecodingProcess) WaitForExit() {
