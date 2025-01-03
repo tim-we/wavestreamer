@@ -87,6 +87,35 @@ func QueueAudio(filepath string) error {
 	return nil
 }
 
+func QueueAudioNext(filepath string) error {
+	clip, err := NewAudioClip(filepath)
+
+	if err != nil {
+		return err
+	}
+
+	queue = append([]Clip{clip}, clip)
+
+	return nil
+}
+
+func HasFileQueued(filepath string) (bool, *AudioClip) {
+
+	for _, clip := range queue {
+		audioClip, ok := clip.(*AudioClip)
+
+		if !ok {
+			continue
+		}
+
+		if audioClip.filepath == filepath {
+			return true, audioClip
+		}
+	}
+
+	return false, nil
+}
+
 func nextClip() Clip {
 	if len(queue) == 0 {
 		return nil
