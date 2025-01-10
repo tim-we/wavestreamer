@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+	player.QueuePauseNext()
 	player.QueueAudio("test-audio.ogg")
 	player.QueueAudio("test-audio.ogg")
 	player.QueueAudio("test-audio.ogg")

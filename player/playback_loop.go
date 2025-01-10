@@ -94,9 +94,14 @@ func QueueAudioNext(filepath string) error {
 		return err
 	}
 
-	queue = append([]Clip{clip}, clip)
+	queue = append([]Clip{clip}, queue...)
 
 	return nil
+}
+
+func QueuePauseNext() {
+	clip := NewPause()
+	queue = append([]Clip{clip}, queue...)
 }
 
 func HasFileQueued(filepath string) (bool, *AudioClip) {
