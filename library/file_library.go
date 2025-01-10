@@ -2,6 +2,7 @@ package library
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 
@@ -50,6 +51,30 @@ func ScanRootDir(root string) {
 	if unknownFiles > 0 {
 		fmt.Printf("%d files could not be classified.\n", unknownFiles)
 	}
+}
+
+func PickRandomSong() string {
+	if len(songFiles) == 0 {
+		panic("No songs to select from.")
+	}
+
+	return songFiles[rand.Intn(len(songFiles))]
+}
+
+func PickRandomClip() string {
+	if len(clipFiles) == 0 {
+		panic("No clips to select from.")
+	}
+
+	return clipFiles[rand.Intn(len(clipFiles))]
+}
+
+func PickRandomHostClip() string {
+	if len(hostClips) == 0 {
+		panic("No host clips to select from.")
+	}
+
+	return hostClips[rand.Intn(len(hostClips))]
 }
 
 func isHostClip(file string) bool {
