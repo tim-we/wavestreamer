@@ -75,50 +75,16 @@ func Start() {
 	}
 }
 
-func QueueAudio(filepath string) error {
-	clip, err := NewAudioClip(filepath)
-
-	if err != nil {
-		return err
-	}
-
+func QueueClip(clip Clip) {
 	queue = append(queue, clip)
-
-	return nil
 }
 
-func QueueAudioNext(filepath string) error {
-	clip, err := NewAudioClip(filepath)
-
-	if err != nil {
-		return err
-	}
-
-	queue = append([]Clip{clip}, queue...)
-
-	return nil
-}
-
-func QueuePauseNext() {
-	clip := NewPause()
+func QueueClipNext(clip Clip) {
 	queue = append([]Clip{clip}, queue...)
 }
 
-func HasFileQueued(filepath string) (bool, *AudioClip) {
-
-	for _, clip := range queue {
-		audioClip, ok := clip.(*AudioClip)
-
-		if !ok {
-			continue
-		}
-
-		if audioClip.filepath == filepath {
-			return true, audioClip
-		}
-	}
-
-	return false, nil
+func QueueSize() int {
+	return len(queue)
 }
 
 func nextClip() Clip {
