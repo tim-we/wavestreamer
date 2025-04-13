@@ -17,7 +17,7 @@ type AudioClip struct {
 
 func NewAudioClip(filepath string) (*AudioClip, error) {
 	if !fileExists(filepath) {
-		return nil, fmt.Errorf("File '%s' not found.", filepath)
+		return nil, fmt.Errorf("file '%s' not found", filepath)
 	}
 
 	decoder := NewDecodingProcess(filepath)
@@ -25,7 +25,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 
 	if metaErr != nil {
 		decoder.Close()
-		return nil, fmt.Errorf("Failed to get meta data of '%s'.", filepath)
+		return nil, fmt.Errorf("failed to get meta data of '%s'", filepath)
 	}
 
 	// TODO: consider checking for errors instead of panicing
@@ -53,7 +53,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 			eofReached := false
 
 			// Fill chunk.
-			for i := 0; i < FRAMES_PER_BUFFER; i++ {
+			for i := range FRAMES_PER_BUFFER {
 				left, right, err := decoder.ReadFrame()
 
 				if err != nil {

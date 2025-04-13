@@ -8,6 +8,7 @@ import (
 func main() {
 	library.ScanRootDir("../../tmp/pi-music-backup/wc-music")
 
+	player.QueueClip(player.NewFakeTelephoneClip())
 	player.QueueClip(library.PickRandomClip().CreateClip())
 	player.QueueClip(library.PickRandomSong().CreateClip())
 	player.QueueClip(library.PickRandomSong().CreateClip())
