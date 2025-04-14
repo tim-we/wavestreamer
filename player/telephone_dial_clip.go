@@ -1,13 +1,15 @@
 package player
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 )
 
 type TelephoneDialClip struct {
-	buffer   chan *AudioChunk
-	duration int
+	buffer          chan *AudioChunk
+	duration        int
+	telephoneNumber string
 }
 
 // Dual-Tone Multi-Frequency
@@ -49,8 +51,8 @@ const VOLUME = 0.2
 // Roughly a third of a second
 const BEEP_DURATION_IN_CHUNKS = max(1, (SAMPLE_RATE/3)/FRAMES_PER_BUFFER-1)
 
-// Roughly two seconds
-const DIAL_DURATION_IN_CHUNKS = max(1, (2*SAMPLE_RATE)/FRAMES_PER_BUFFER)
+// Roughly 1.5 seconds
+const DIAL_DURATION_IN_CHUNKS = max(1, (3*SAMPLE_RATE/2)/FRAMES_PER_BUFFER)
 
 // Roughly half a second. Pause between beeps and dial sound.
 const PAUSE_DURATION_IN_CHUNKS = max(1, (SAMPLE_RATE/2)/FRAMES_PER_BUFFER)
@@ -68,35 +70,32 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 		defer close(buffer)
 
 		for _, ch := range telNumber {
+			if ch == ' ' || ch == '-' || ch == '/' {
+				for range 3 {
+					chunk := silence()
+					buffer <- &chunk
+				}
+			}
+
 			frequencies, found := frequencyMap[ch]
 			if !found {
 				continue
 			}
 
 			for i := range BEEP_DURATION_IN_CHUNKS {
-				chunk := AudioChunk{
-					Left:  make([]float32, FRAMES_PER_BUFFER),
-					Right: make([]float32, FRAMES_PER_BUFFER),
-				}
-
+				chunk := silence()
 				fillChunkWithFrequencies(chunk, frequencies, i*FRAMES_PER_BUFFER, i == BEEP_DURATION_IN_CHUNKS-1)
 				buffer <- &chunk
 			}
 		}
 
 		for range PAUSE_DURATION_IN_CHUNKS {
-			// Generate empty buffers for the pause.
-			buffer <- &AudioChunk{
-				Left:  make([]float32, FRAMES_PER_BUFFER),
-				Right: make([]float32, FRAMES_PER_BUFFER),
-			}
+			chunk := silence()
+			buffer <- &chunk
 		}
 
 		for i := range DIAL_DURATION_IN_CHUNKS {
-			chunk := AudioChunk{
-				Left:  make([]float32, FRAMES_PER_BUFFER),
-				Right: make([]float32, FRAMES_PER_BUFFER),
-			}
+			chunk := silence()
 
 			fillChunkWithFrequencies(chunk, dialFrequencies, i*FRAMES_PER_BUFFER, i == DIAL_DURATION_IN_CHUNKS-1)
 			buffer <- &chunk
@@ -106,6 +105,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 	return &TelephoneDialClip{
 		buffer,
 		durationInSeconds,
+		telNumber,
 	}
 }
 
@@ -118,7 +118,7 @@ func (clip *TelephoneDialClip) Stop() {
 }
 
 func (clip *TelephoneDialClip) Name() string {
-	return "Telephone Dial (generated)"
+	return fmt.Sprintf("Telephone Dial (%s)", clip.telephoneNumber)
 }
 
 func (clip *TelephoneDialClip) Duration() int {
@@ -136,5 +136,12 @@ func fillChunkWithFrequencies(chunk AudioChunk, pair DTMFFrequencies, timeOffset
 		}
 		chunk.Left[i] = value
 		chunk.Right[i] = value
+	}
+}
+
+func silence() AudioChunk {
+	return AudioChunk{
+		Left:  make([]float32, FRAMES_PER_BUFFER),
+		Right: make([]float32, FRAMES_PER_BUFFER),
 	}
 }
