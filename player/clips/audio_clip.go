@@ -1,4 +1,4 @@
-package player
+package clips
 
 import (
 	"errors"
@@ -6,13 +6,16 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/tim-we/wavestreamer/player"
+	d "github.com/tim-we/wavestreamer/player/decoder"
 )
 
 type AudioClip struct {
 	filepath string
-	decoder  *DecodingProcess
-	meta     *AudioFileMetaData
-	buffer   chan *AudioChunk
+	decoder  *d.DecodingProcess
+	meta     *d.AudioFileMetaData
+	buffer   chan *player.AudioChunk
 }
 
 func NewAudioClip(filepath string) (*AudioClip, error) {
@@ -20,8 +23,8 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 		return nil, fmt.Errorf("file '%s' not found", filepath)
 	}
 
-	decoder := NewDecodingProcess(filepath)
-	meta, metaErr := GetFileMetadata(filepath)
+	decoder := d.NewDecodingProcess(filepath)
+	meta, metaErr := d.GetFileMetadata(filepath)
 
 	if metaErr != nil {
 		decoder.Close()
@@ -31,7 +34,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 	// TODO: consider checking for errors instead of panicing
 	decoder.StartDecoding()
 
-	buffer := make(chan *AudioChunk, 16)
+	buffer := make(chan *player.AudioChunk, 16)
 
 	clip := AudioClip{
 		filepath: filepath,
@@ -45,15 +48,15 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 
 		for {
 			// Create empty chunk.
-			chunk := AudioChunk{
-				Left:  make([]float32, FRAMES_PER_BUFFER),
-				Right: make([]float32, FRAMES_PER_BUFFER),
+			chunk := player.AudioChunk{
+				Left:  make([]float32, player.FRAMES_PER_BUFFER),
+				Right: make([]float32, player.FRAMES_PER_BUFFER),
 			}
 
 			eofReached := false
 
 			// Fill chunk.
-			for i := range FRAMES_PER_BUFFER {
+			for i := range player.FRAMES_PER_BUFFER {
 				left, right, err := decoder.ReadFrame()
 
 				if err != nil {
@@ -85,7 +88,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 	return &clip, nil
 }
 
-func (clip *AudioClip) NextChunk() (*AudioChunk, bool) {
+func (clip *AudioClip) NextChunk() (*player.AudioChunk, bool) {
 	chunk, hasMore := <-clip.buffer
 	return chunk, hasMore
 }

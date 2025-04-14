@@ -1,13 +1,15 @@
-package player
+package clips
 
 import (
 	"fmt"
 	"math"
 	"math/rand"
+
+	"github.com/tim-we/wavestreamer/player"
 )
 
 type TelephoneDialClip struct {
-	buffer          chan *AudioChunk
+	buffer          chan *player.AudioChunk
 	duration        int
 	telephoneNumber string
 }
@@ -49,22 +51,22 @@ var dialFrequencies = DTMFFrequencies{350, 440}
 const VOLUME = 0.2
 
 // Roughly a third of a second
-const BEEP_DURATION_IN_CHUNKS = max(1, (SAMPLE_RATE/3)/FRAMES_PER_BUFFER-1)
+const BEEP_DURATION_IN_CHUNKS = max(1, (player.SAMPLE_RATE/3)/player.FRAMES_PER_BUFFER-1)
 
 // Roughly 1.5 seconds
-const DIAL_DURATION_IN_CHUNKS = max(1, (3*SAMPLE_RATE/2)/FRAMES_PER_BUFFER)
+const DIAL_DURATION_IN_CHUNKS = max(1, (3*player.SAMPLE_RATE/2)/player.FRAMES_PER_BUFFER)
 
 // Roughly half a second. Pause between beeps and dial sound.
-const PAUSE_DURATION_IN_CHUNKS = max(1, (SAMPLE_RATE/2)/FRAMES_PER_BUFFER)
+const PAUSE_DURATION_IN_CHUNKS = max(1, (player.SAMPLE_RATE/2)/player.FRAMES_PER_BUFFER)
 
 func NewFakeTelephoneClip() *TelephoneDialClip {
 	// Pick a random telephone number
 	telNumber := telephoneNumbers[rand.Intn(len(telephoneNumbers))]
 
-	buffer := make(chan *AudioChunk, 8)
+	buffer := make(chan *player.AudioChunk, 8)
 
 	durationInChunks := len(telNumber)*BEEP_DURATION_IN_CHUNKS + PAUSE_DURATION_IN_CHUNKS + DIAL_DURATION_IN_CHUNKS
-	durationInSeconds := (durationInChunks * FRAMES_PER_BUFFER) / SAMPLE_RATE
+	durationInSeconds := (durationInChunks * player.FRAMES_PER_BUFFER) / player.SAMPLE_RATE
 
 	go func() {
 		defer close(buffer)
@@ -84,7 +86,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 
 			for i := range BEEP_DURATION_IN_CHUNKS {
 				chunk := silence()
-				fillChunkWithFrequencies(chunk, frequencies, i*FRAMES_PER_BUFFER, i == BEEP_DURATION_IN_CHUNKS-1)
+				fillChunkWithFrequencies(chunk, frequencies, i*player.FRAMES_PER_BUFFER, i == BEEP_DURATION_IN_CHUNKS-1)
 				buffer <- &chunk
 			}
 		}
@@ -97,7 +99,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 		for i := range DIAL_DURATION_IN_CHUNKS {
 			chunk := silence()
 
-			fillChunkWithFrequencies(chunk, dialFrequencies, i*FRAMES_PER_BUFFER, i == DIAL_DURATION_IN_CHUNKS-1)
+			fillChunkWithFrequencies(chunk, dialFrequencies, i*player.FRAMES_PER_BUFFER, i == DIAL_DURATION_IN_CHUNKS-1)
 			buffer <- &chunk
 		}
 	}()
@@ -109,7 +111,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 	}
 }
 
-func (clip *TelephoneDialClip) NextChunk() (*AudioChunk, bool) {
+func (clip *TelephoneDialClip) NextChunk() (*player.AudioChunk, bool) {
 	chunk, hasMore := <-clip.buffer
 	return chunk, hasMore
 }
@@ -125,23 +127,23 @@ func (clip *TelephoneDialClip) Duration() int {
 	return clip.duration
 }
 
-func fillChunkWithFrequencies(chunk AudioChunk, pair DTMFFrequencies, timeOffset int, fadeOut bool) {
+func fillChunkWithFrequencies(chunk player.AudioChunk, pair DTMFFrequencies, timeOffset int, fadeOut bool) {
 	freqA := float64(pair.Lower)
 	freqB := float64(pair.Higher)
-	for i := range FRAMES_PER_BUFFER {
-		t := 2.0 * math.Pi * float64(timeOffset+i) / SAMPLE_RATE
+	for i := range player.FRAMES_PER_BUFFER {
+		t := 2.0 * math.Pi * float64(timeOffset+i) / player.SAMPLE_RATE
 		value := float32(VOLUME * (math.Sin(t*freqA) + math.Sin(t*freqB)))
 		if fadeOut {
-			value = value * (float32(FRAMES_PER_BUFFER-i) / FRAMES_PER_BUFFER)
+			value = value * (float32(player.FRAMES_PER_BUFFER-i) / player.FRAMES_PER_BUFFER)
 		}
 		chunk.Left[i] = value
 		chunk.Right[i] = value
 	}
 }
 
-func silence() AudioChunk {
-	return AudioChunk{
-		Left:  make([]float32, FRAMES_PER_BUFFER),
-		Right: make([]float32, FRAMES_PER_BUFFER),
+func silence() player.AudioChunk {
+	return player.AudioChunk{
+		Left:  make([]float32, player.FRAMES_PER_BUFFER),
+		Right: make([]float32, player.FRAMES_PER_BUFFER),
 	}
 }

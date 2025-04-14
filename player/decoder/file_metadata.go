@@ -1,4 +1,4 @@
-package player
+package decoder
 
 import (
 	"bytes"

@@ -1,8 +1,10 @@
-package player
+package clips
 
 import (
 	"fmt"
 	"time"
+
+	"github.com/tim-we/wavestreamer/player"
 )
 
 type PauseClip struct {
@@ -10,13 +12,13 @@ type PauseClip struct {
 	progress time.Duration
 }
 
-var emptyChunk = AudioChunk{
-	Left:   make([]float32, FRAMES_PER_BUFFER),
-	Right:  make([]float32, FRAMES_PER_BUFFER),
-	Length: FRAMES_PER_BUFFER,
+var emptyChunk = player.AudioChunk{
+	Left:   make([]float32, player.FRAMES_PER_BUFFER),
+	Right:  make([]float32, player.FRAMES_PER_BUFFER),
+	Length: player.FRAMES_PER_BUFFER,
 }
 
-const emptyChunkDuration = (FRAMES_PER_BUFFER * time.Second) / SAMPLE_RATE
+const emptyChunkDuration = (player.FRAMES_PER_BUFFER * time.Second) / player.SAMPLE_RATE
 
 func NewPause() *PauseClip {
 	clip := PauseClip{
@@ -27,7 +29,7 @@ func NewPause() *PauseClip {
 	return &clip
 }
 
-func (clip *PauseClip) NextChunk() (*AudioChunk, bool) {
+func (clip *PauseClip) NextChunk() (*player.AudioChunk, bool) {
 	clip.progress += emptyChunkDuration
 	return &emptyChunk, clip.progress < clip.duration
 }

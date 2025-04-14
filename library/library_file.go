@@ -6,12 +6,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/tim-we/wavestreamer/player"
+	"github.com/tim-we/wavestreamer/player/clips"
+	"github.com/tim-we/wavestreamer/player/decoder"
 )
 
 type LibraryFile struct {
 	filepath   string
-	meta       *player.AudioFileMetaData
+	meta       *decoder.AudioFileMetaData
 	playCount  int32
 	skipCount  int32
 	lastPlayed *time.Time
@@ -31,11 +32,11 @@ func NewLibraryFile(filepath string) (*LibraryFile, error) {
 	}, nil
 }
 
-func (file *LibraryFile) CreateClip() *player.AudioClip {
+func (file *LibraryFile) CreateClip() *clips.AudioClip {
 	file.playCount += 1
 	now := time.Now()
 	file.lastPlayed = &now
-	clip, _ := player.NewAudioClip(file.filepath)
+	clip, _ := clips.NewAudioClip(file.filepath)
 	// TODO: get meta data
 	return clip
 }

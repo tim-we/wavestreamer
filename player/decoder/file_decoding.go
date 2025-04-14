@@ -1,4 +1,4 @@
-package player
+package decoder
 
 import (
 	"bufio"
@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/tim-we/wavestreamer/player"
 )
 
 type DecodingProcess struct {
@@ -22,8 +24,8 @@ func NewDecodingProcess(filepath string) DecodingProcess {
 		"ffmpeg",
 		"-i", filepath, // input file
 		"-f", "s16le", // output format (signed 16bit integer little endian)
-		"-ac", strconv.Itoa(CHANNELS),
-		"-ar", strconv.Itoa(SAMPLE_RATE),
+		"-ac", strconv.Itoa(player.CHANNELS),
+		"-ar", strconv.Itoa(player.SAMPLE_RATE),
 		"pipe:1", // output to stdout
 	)
 
