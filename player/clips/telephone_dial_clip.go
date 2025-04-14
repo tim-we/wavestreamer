@@ -48,7 +48,7 @@ var dialFrequencies = DTMFFrequencies{350, 440}
 
 // var busyFrequencies = frequencyPair{480, 620}
 
-const VOLUME = 0.2
+const VOLUME = 0.25
 
 // Roughly a third of a second
 const BEEP_DURATION_IN_CHUNKS = max(1, (player.SAMPLE_RATE/3)/player.FRAMES_PER_BUFFER-1)

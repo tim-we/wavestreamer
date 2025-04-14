@@ -20,7 +20,7 @@ type LibraryFile struct {
 
 func NewLibraryFile(filepath string) (*LibraryFile, error) {
 	if !fileExists(filepath) {
-		return nil, fmt.Errorf("File '%s' not found.", filepath)
+		return nil, fmt.Errorf("file '%s' not found", filepath)
 	}
 
 	return &LibraryFile{

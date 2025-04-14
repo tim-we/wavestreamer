@@ -66,7 +66,7 @@ func PickRandomSong() *LibraryFile {
 		panic("No songs to select from.")
 	}
 
-	return songFiles[rand.Intn(len(songFiles))]
+	return pickRandomClipWhichHasNotBeenPlayedInAWhile(songFiles)
 }
 
 func PickRandomClip() *LibraryFile {
@@ -74,7 +74,7 @@ func PickRandomClip() *LibraryFile {
 		panic("No clips to select from.")
 	}
 
-	return clipFiles[rand.Intn(len(clipFiles))]
+	return pickRandomClipWhichHasNotBeenPlayedInAWhile(clipFiles)
 }
 
 func PickRandomHostClip() *LibraryFile {
@@ -82,7 +82,7 @@ func PickRandomHostClip() *LibraryFile {
 		panic("No host clips to select from.")
 	}
 
-	return hostClips[rand.Intn(len(hostClips))]
+	return pickRandomClipWhichHasNotBeenPlayedInAWhile(hostClips)
 }
 
 func isHostClip(file string) bool {
@@ -98,4 +98,29 @@ func isClipFile(file string) bool {
 func isSong(file string) bool {
 	matches, _ := doublestar.Match("**/music/**/*", file)
 	return matches
+}
+
+func pickRandomClipWhichHasNotBeenPlayedInAWhile(clips []*LibraryFile) *LibraryFile {
+	if len(clips) == 0 {
+		return nil
+	}
+
+	var candidate *LibraryFile
+	for range 2 {
+		newCandidate := clips[rand.Intn(len(clips))]
+		if newCandidate.lastPlayed == nil {
+			return newCandidate
+		}
+		if candidate == nil {
+			// No checks required for the first candidate
+			candidate = newCandidate
+			continue
+		}
+		// Update current candidate if the new one has not been played for longer
+		if newCandidate.lastPlayed.Before(*candidate.lastPlayed) {
+			candidate = newCandidate
+		}
+	}
+
+	return candidate
 }
