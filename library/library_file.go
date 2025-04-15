@@ -39,6 +39,12 @@ func (file *LibraryFile) CreateClip() *clips.AudioClip {
 		log.Println(err)
 		return nil
 	}
+	clip.OnStart = func(meta *decoder.AudioFileMetaData) {
+		now := time.Now()
+		file.lastPlayed = &now
+		file.playCount++
+		file.meta = meta
+	}
 	return clip
 }
 

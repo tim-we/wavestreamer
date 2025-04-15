@@ -18,6 +18,8 @@ type AudioClip struct {
 	decoder  *d.DecodingProcess
 	meta     *d.AudioFileMetaData
 	buffer   chan *player.AudioChunk
+	started  bool
+	OnStart  func(meta *d.AudioFileMetaData)
 }
 
 func NewAudioClip(filepath string) (*AudioClip, error) {
@@ -43,6 +45,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 		decoder:  &decoder,
 		meta:     meta,
 		buffer:   buffer,
+		started:  false,
 	}
 
 	go func() {
@@ -91,6 +94,12 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 }
 
 func (clip *AudioClip) NextChunk() (*player.AudioChunk, bool) {
+	if !clip.started {
+		clip.started = true
+		if clip.OnStart != nil {
+			clip.OnStart(clip.meta)
+		}
+	}
 	chunk, hasMore := <-clip.buffer
 	return chunk, hasMore
 }
