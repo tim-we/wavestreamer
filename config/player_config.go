@@ -1,4 +1,4 @@
-package player
+package config
 
 const SAMPLE_RATE = 44100
 const CHANNELS = 2

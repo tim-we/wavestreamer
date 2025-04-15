@@ -4,11 +4,22 @@ import (
 	"log"
 
 	"github.com/gordonklaus/portaudio"
+	"github.com/tim-we/wavestreamer/config"
 )
 
-var queue = make([]Clip, 0, 12)
+var userQueue = make([]Clip, 0, 12)
 
-func Start() {
+func Start(clipProvider func() Clip) {
+	nextClip := func() Clip {
+		if len(userQueue) == 0 {
+			return clipProvider()
+		}
+
+		clip := userQueue[0]
+		userQueue = userQueue[1:]
+		return clip
+	}
+
 	err := portaudio.Initialize()
 	if err != nil {
 		log.Fatal(err)
@@ -33,11 +44,11 @@ func Start() {
 
 	// Set up the PortAudio stream with a fixed buffer size
 	stream, err := portaudio.OpenDefaultStream(
-		0,                 // not reading any inputs (microphones)
-		CHANNELS,          // output channels
-		SAMPLE_RATE,       // output sample rate
-		FRAMES_PER_BUFFER, // output buffer size
-		playCallback,      // output buffer filling callback
+		0,                        // not reading any inputs (microphones)
+		config.CHANNELS,          // output channels
+		config.SAMPLE_RATE,       // output sample rate
+		config.FRAMES_PER_BUFFER, // output buffer size
+		playCallback,             // output buffer filling callback
 	)
 
 	if err != nil {
@@ -76,23 +87,13 @@ func Start() {
 }
 
 func QueueClip(clip Clip) {
-	queue = append(queue, clip)
+	userQueue = append(userQueue, clip)
 }
 
 func QueueClipNext(clip Clip) {
-	queue = append([]Clip{clip}, queue...)
+	userQueue = append([]Clip{clip}, userQueue...)
 }
 
 func QueueSize() int {
-	return len(queue)
-}
-
-func nextClip() Clip {
-	if len(queue) == 0 {
-		return nil
-	}
-
-	clip := queue[0]
-	queue = queue[1:]
-	return clip
+	return len(userQueue)
 }

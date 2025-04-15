@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/tim-we/wavestreamer/config"
 	"github.com/tim-we/wavestreamer/player"
 	d "github.com/tim-we/wavestreamer/player/decoder"
 )
@@ -49,14 +50,14 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 		for {
 			// Create empty chunk.
 			chunk := player.AudioChunk{
-				Left:  make([]float32, player.FRAMES_PER_BUFFER),
-				Right: make([]float32, player.FRAMES_PER_BUFFER),
+				Left:  make([]float32, config.FRAMES_PER_BUFFER),
+				Right: make([]float32, config.FRAMES_PER_BUFFER),
 			}
 
 			eofReached := false
 
 			// Fill chunk.
-			for i := range player.FRAMES_PER_BUFFER {
+			for i := range config.FRAMES_PER_BUFFER {
 				left, right, err := decoder.ReadFrame()
 
 				if err != nil {

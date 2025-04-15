@@ -62,26 +62,14 @@ func ScanRootDir(root string) {
 }
 
 func PickRandomSong() *LibraryFile {
-	if len(songFiles) == 0 {
-		panic("No songs to select from.")
-	}
-
 	return pickRandomClipWhichHasNotBeenPlayedInAWhile(songFiles)
 }
 
 func PickRandomClip() *LibraryFile {
-	if len(clipFiles) == 0 {
-		panic("No clips to select from.")
-	}
-
 	return pickRandomClipWhichHasNotBeenPlayedInAWhile(clipFiles)
 }
 
 func PickRandomHostClip() *LibraryFile {
-	if len(hostClips) == 0 {
-		panic("No host clips to select from.")
-	}
-
 	return pickRandomClipWhichHasNotBeenPlayedInAWhile(hostClips)
 }
 

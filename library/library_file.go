@@ -3,6 +3,7 @@ package library
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -33,11 +34,11 @@ func NewLibraryFile(filepath string) (*LibraryFile, error) {
 }
 
 func (file *LibraryFile) CreateClip() *clips.AudioClip {
-	file.playCount += 1
-	now := time.Now()
-	file.lastPlayed = &now
-	clip, _ := clips.NewAudioClip(file.filepath)
-	// TODO: get meta data
+	clip, err := clips.NewAudioClip(file.filepath)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
 	return clip
 }
 

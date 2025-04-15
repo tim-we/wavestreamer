@@ -4,6 +4,7 @@ import (
 	"github.com/tim-we/wavestreamer/library"
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
+	"github.com/tim-we/wavestreamer/scheduler"
 )
 
 func main() {
@@ -11,8 +12,7 @@ func main() {
 
 	player.QueueClip(clips.NewFakeTelephoneClip())
 	player.QueueClip(library.PickRandomClip().CreateClip())
-	player.QueueClip(library.PickRandomSong().CreateClip())
-	player.QueueClip(library.PickRandomSong().CreateClip())
 
-	player.Start()
+	scheduler.Start()
+	player.Start(scheduler.GetNextClip)
 }
