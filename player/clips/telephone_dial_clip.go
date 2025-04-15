@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/tim-we/wavestreamer/config"
 	"github.com/tim-we/wavestreamer/player"
@@ -11,7 +12,7 @@ import (
 
 type TelephoneDialClip struct {
 	buffer          chan *player.AudioChunk
-	duration        int
+	duration        time.Duration
 	telephoneNumber string
 }
 
@@ -107,7 +108,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 
 	return &TelephoneDialClip{
 		buffer,
-		durationInSeconds,
+		time.Duration(durationInSeconds) * time.Second,
 		telNumber,
 	}
 }
@@ -124,7 +125,7 @@ func (clip *TelephoneDialClip) Name() string {
 	return fmt.Sprintf("Telephone Dial (%s)", clip.telephoneNumber)
 }
 
-func (clip *TelephoneDialClip) Duration() int {
+func (clip *TelephoneDialClip) Duration() time.Duration {
 	return clip.duration
 }
 

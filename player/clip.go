@@ -1,5 +1,7 @@
 package player
 
+import "time"
+
 // Clip defines an interface for audio playback sources.
 type Clip interface {
 	// NextChunk retrieves the next audio chunk for playback.
@@ -12,8 +14,8 @@ type Clip interface {
 	// A string representation of the clip, for audio clips something like: [Artist] - [Title]
 	Name() string
 
-	// Duration of the clip in seconds.
-	Duration() int
+	// Duration of the clip.
+	Duration() time.Duration
 }
 
 type AudioChunk = struct {

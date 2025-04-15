@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/tim-we/wavestreamer/config"
 	"github.com/tim-we/wavestreamer/player"
@@ -108,7 +109,7 @@ func (clip *AudioClip) Name() string {
 	return fmt.Sprintf("%s - %s", clip.meta.Artist, clip.meta.Title)
 }
 
-func (clip *AudioClip) Duration() int {
+func (clip *AudioClip) Duration() time.Duration {
 	return clip.meta.Duration
 }
 

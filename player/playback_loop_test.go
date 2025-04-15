@@ -1,6 +1,9 @@
 package player
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestAddToQueue(t *testing.T) {
 	if QueueSize() != 0 {
@@ -22,4 +25,4 @@ func (clip *testClip) Stop() {}
 
 func (clip *testClip) Name() string { return "Test Clip" }
 
-func (clip *testClip) Duration() int { return 0 }
+func (clip *testClip) Duration() time.Duration { return 0 }

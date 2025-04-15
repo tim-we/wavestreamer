@@ -60,5 +60,5 @@ func enqueueFile(file *library.LibraryFile) time.Duration {
 
 	schedulerQueue <- clip
 
-	return time.Duration(clip.Duration() * int(time.Second)) // TODO switch from int to Duration
+	return clip.Duration()
 }

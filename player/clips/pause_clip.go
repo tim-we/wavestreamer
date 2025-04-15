@@ -43,6 +43,6 @@ func (clip *PauseClip) Name() string {
 	return fmt.Sprintf("Pause %v", clip.duration)
 }
 
-func (clip *PauseClip) Duration() int {
-	return int(clip.duration.Seconds())
+func (clip *PauseClip) Duration() time.Duration {
+	return clip.duration
 }

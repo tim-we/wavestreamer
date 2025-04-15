@@ -7,11 +7,11 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type AudioFileMetaData struct {
-	// Duration in seconds.
-	Duration int
+	Duration time.Duration
 
 	// Meta tags are optional. The fallback value is "".
 	Title  string
@@ -43,7 +43,7 @@ func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 		return nil, fmt.Errorf("failed to parse ffprobe output: %w", err)
 	}
 
-	// Convert duration to a float64
+	// Convert duration to a float64 (representing seconds)
 	duration, err := strconv.ParseFloat(probeResult.Format.Duration, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid duration format: %w", err)
@@ -71,7 +71,7 @@ func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 	}
 
 	return &AudioFileMetaData{
-		Duration: int(duration),
+		Duration: time.Duration(duration * float64(time.Second)),
 		Title:    metadata["title"],
 		Artist:   metadata["artist"],
 		Album:    metadata["album"],
