@@ -24,6 +24,11 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install PortAudio (required for build)
+        run: |
+          sudo apt update
+          sudo apt install -y libportaudio2 libportaudio-dev
+
       - name: Build for Linux x86_64
         run: |
           mkdir -p bin
