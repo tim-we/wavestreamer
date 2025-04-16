@@ -1,0 +1,40 @@
+name: Build Go binaries
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read # access to check out code and install dependencies
+
+jobs:
+  build:
+    name: Build for Linux and Raspberry Pi
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go from go.mod
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build for Linux x86_64
+        run: |
+          mkdir -p bin
+          GOOS=linux GOARCH=amd64 go build -o bin/wavestreamer-linux-amd64
+
+      - name: Build for Raspberry Pi (ARMv7)
+        run: |
+          GOOS=linux GOARCH=arm GOARM=7 go build -o bin/wavestreamer-linux-armv7
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-binaries
+          path: bin/
