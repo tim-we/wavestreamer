@@ -8,39 +8,39 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read # access to check out code and install dependencies
+  contents: read
 
 jobs:
   build-pi:
-    name: Build for Raspberry Pi (ARMv7)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+
+    container: debian:bullseye
 
     steps:
+      - name: Enable armhf and install dependencies
+        run: |
+          dpkg --add-architecture armhf
+          apt-get update
+          apt-get install -y \
+            gcc-arm-linux-gnueabihf \
+            pkg-config \
+            libportaudio2:armhf \
+            libportaudio-dev:armhf \
+            libasound2-dev:armhf \
+            libasound2:armhf \
+            golang-go ca-certificates curl git
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go from go.mod
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Install cross compiler and ARM PortAudio + ALSA
-        run: |
-          sudo dpkg --add-architecture armhf
-          sudo apt update
-          sudo apt install -y \
-            gcc-arm-linux-gnueabihf \
-            libportaudio2:armhf \
-            libportaudio-dev:armhf \
-            libasound2-dev:armhf
-
-      - name: Cross compile with cgo for ARMv7
+      - name: Build for Raspberry Pi
         env:
           GOOS: linux
           GOARCH: arm
           GOARM: 7
           CGO_ENABLED: 1
           CC: arm-linux-gnueabihf-gcc
+          GO111MODULE: on
         run: |
           mkdir -p bin
           go build -o bin/wavestreamer-linux-armv7
