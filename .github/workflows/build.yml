@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-pi:
     name: Build for Raspberry Pi (ARMv7)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
