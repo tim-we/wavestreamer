@@ -27,7 +27,7 @@ jobs:
       - name: Install PortAudio (required for build)
         run: |
           sudo apt update
-          sudo apt install -y libportaudio2 libportaudio-dev
+          sudo apt install -y portaudio19-dev
 
       - name: Build for Linux x86_64
         run: |
