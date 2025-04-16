@@ -24,10 +24,15 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Install cross compiler and PortAudio
+      - name: Install cross compiler and ARM PortAudio + ALSA
         run: |
+          sudo dpkg --add-architecture armhf
           sudo apt update
-          sudo apt install -y gcc-arm-linux-gnueabihf portaudio19-dev
+          sudo apt install -y \
+            gcc-arm-linux-gnueabihf \
+            libportaudio2:armhf \
+            libportaudio-dev:armhf \
+            libasound2-dev:armhf
 
       - name: Cross compile with cgo for ARMv7
         env:
