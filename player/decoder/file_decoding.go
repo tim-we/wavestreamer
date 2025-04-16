@@ -58,7 +58,10 @@ func (process *DecodingProcess) Close() {
 	process.stdout.Close()
 
 	if process.cmd.ProcessState == nil || !process.cmd.ProcessState.Exited() {
-		if err := process.cmd.Process.Kill(); err != nil && err != os.ErrProcessDone {
+		if process.cmd.Process == nil {
+			// On the Pi, for some reason, there is no process...
+			log.Printf("No OS process on %v", process.cmd)
+		} else if err := process.cmd.Process.Kill(); err != nil && err != os.ErrProcessDone {
 			log.Printf("Failed to kill process: %v", err)
 		}
 	}
