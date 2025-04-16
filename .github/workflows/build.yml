@@ -1,4 +1,4 @@
-name: Build Go binaries
+name: Cross-compile for Raspberry Pi (ARMv7)
 
 on:
   push:
@@ -11,8 +11,8 @@ permissions:
   contents: read # access to check out code and install dependencies
 
 jobs:
-  build:
-    name: Build for Linux and Raspberry Pi
+  build-pi:
+    name: Build for Raspberry Pi (ARMv7)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,22 +24,24 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Install PortAudio (required for build)
+      - name: Install cross compiler and PortAudio
         run: |
           sudo apt update
-          sudo apt install -y portaudio19-dev
+          sudo apt install -y gcc-arm-linux-gnueabihf portaudio19-dev
 
-      - name: Build for Linux x86_64
+      - name: Cross compile with cgo for ARMv7
+        env:
+          GOOS: linux
+          GOARCH: arm
+          GOARM: 7
+          CGO_ENABLED: 1
+          CC: arm-linux-gnueabihf-gcc
         run: |
           mkdir -p bin
-          GOOS=linux GOARCH=amd64 go build -o bin/wavestreamer-linux-amd64
+          go build -o bin/wavestreamer-linux-armv7
 
-      - name: Build for Raspberry Pi (ARMv7)
-        run: |
-          GOOS=linux GOARCH=arm GOARM=7 go build -o bin/wavestreamer-linux-armv7
-
-      - name: Upload binaries
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: compiled-binaries
-          path: bin/
+          name: wavestreamer-linux-armv7
+          path: bin/wavestreamer-linux-armv7
