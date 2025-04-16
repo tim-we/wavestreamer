@@ -25,7 +25,7 @@ jobs:
             gcc-arm-linux-gnueabihf \
             pkg-config \
             libportaudio2:armhf \
-            libportaudio-dev:armhf \
+            libportaudio-dev \
             libasound2-dev:armhf \
             libasound2:armhf \
             golang-go ca-certificates curl git
