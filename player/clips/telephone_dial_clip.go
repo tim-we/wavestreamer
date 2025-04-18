@@ -65,7 +65,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 	// Pick a random telephone number
 	telNumber := telephoneNumbers[rand.Intn(len(telephoneNumbers))]
 
-	buffer := make(chan *player.AudioChunk, 8)
+	buffer := make(chan *player.AudioChunk, 16)
 
 	durationInChunks := len(telNumber)*BEEP_DURATION_IN_CHUNKS + PAUSE_DURATION_IN_CHUNKS + DIAL_DURATION_IN_CHUNKS
 	durationInSeconds := (durationInChunks * config.FRAMES_PER_BUFFER) / config.SAMPLE_RATE
