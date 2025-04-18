@@ -26,7 +26,8 @@ jobs:
             pkg-config \
             autoconf \
             libtool \
-            wget
+            wget \
+            gcc-aarch64-linux-gnu
 
       - name: Cross-compile PortAudio for aarch64
         run: |
