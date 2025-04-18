@@ -1,0 +1,22 @@
+FROM arm64v8/debian:bookworm
+
+# Install Go and build dependencies
+RUN apt-get update && apt-get install -y \
+    golang \
+    pkg-config \
+    libportaudio-dev \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy repo contents into the container
+COPY . .
+
+# Set Go environment
+ENV GO111MODULE=on
+ENV CGO_ENABLED=1
+ENV GOOS=linux
+ENV GOARCH=arm64
+
+# Build the binary from wavestreamer.go
+RUN go build -v -o wavestreamer ./wavestreamer.go
