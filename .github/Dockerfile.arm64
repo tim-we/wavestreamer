@@ -1,8 +1,6 @@
-FROM raspbian/stretch
+FROM raspbian/bullseye
 
-# Install Go manually (Raspbian doesn't package it reliably, claims ChatGPT)
-ENV GOLANG_VERSION 1.24.2
-
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -11,15 +9,20 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Go manually
+# Install Go manually (see go.mod for version)
+ENV GOLANG_VERSION 1.24.2
+
 RUN curl -L https://golang.org/dl/go${GOLANG_VERSION}.linux-arm64.tar.gz | tar -C /usr/local -xz
 ENV PATH="/usr/local/go/bin:$PATH"
 
+# Copy project files
 COPY . .
 
+# Set Go environment
 ENV GO111MODULE=on
 ENV CGO_ENABLED=1
 ENV GOOS=linux
 ENV GOARCH=arm64
 
+# Build binary
 RUN go build -v -o wavestreamer ./wavestreamer.go
