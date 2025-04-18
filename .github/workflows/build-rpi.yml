@@ -1,34 +1,56 @@
-name: Build for Raspberry Pi 3B+ (64-bit)
+name: Build for Raspberry Pi 3B+
 
 on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
 
 jobs:
   build:
-    name: Build in ARM64 container
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build binary in arm64 container
-        uses: docker/build-push-action@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          context: .
-          platforms: linux/arm64
-          outputs: type=local,dest=./output
-          file: .github/Dockerfile.arm64
+          go-version-file: 'go.mod'
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            pkg-config \
+            autoconf \
+            libtool \
+            wget
+
+      - name: Cross-compile PortAudio for aarch64
+        run: |
+          mkdir -p build/portaudio
+          cd build
+          wget http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
+          tar xzf pa_stable_v190700_20210406.tgz
+          cd portaudio
+          ./configure --host=aarch64-linux-gnu --prefix=$PWD/../portaudio-install --disable-shared
+          make -j$(nproc)
+          make install
+
+      - name: Build Go binary for arm64
+        env:
+          CGO_ENABLED: 1
+          GOOS: linux
+          GOARCH: arm64
+          CC: aarch64-linux-gnu-gcc
+          PKG_CONFIG_PATH: ${{ github.workspace }}/build/portaudio-install/lib/pkgconfig
+        run: |
+          go build -v -o wavestreamer ./wavestreamer.go
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: wavestreamer-arm64
+          path: wavestreamer
