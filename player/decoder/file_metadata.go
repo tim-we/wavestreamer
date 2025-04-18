@@ -24,7 +24,7 @@ func GetFileMetadata(filePath string) (*AudioFileMetaData, error) {
 	// Run ffprobe with JSON output
 	cmd := exec.Command(
 		"ffprobe",
-		"-v", "quiet", // Set logging level to avoid ffprobe printing non JSON data
+		"-v", "quiet", // Set logging level to prevent ffprobe printing non JSON data
 		"-output_format", "json", // Output format
 		"-show_entries", "format_tags:stream_tags", // File meta data can be either in the container (format_tags) or stream (stream_tags)
 		"-show_format", // File format information, includes duration and size

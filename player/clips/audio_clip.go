@@ -31,6 +31,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 	meta, metaErr := d.GetFileMetadata(filepath)
 
 	if metaErr != nil {
+		fmt.Println(metaErr) // TODO remove
 		decoder.Close()
 		return nil, fmt.Errorf("failed to get meta data of '%s'", filepath)
 	}
