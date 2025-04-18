@@ -1,5 +1,10 @@
 package player
 
+/*
+#cgo linux,arm64 LDFLAGS: -lportaudio
+*/
+import "C"
+
 import (
 	"log"
 
