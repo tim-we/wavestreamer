@@ -2,6 +2,7 @@ package library
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -14,6 +15,10 @@ var songFiles = make([]*LibraryFile, 0, 512)
 var clipFiles = make([]*LibraryFile, 0, 256)
 
 func ScanRootDir(root string) {
+	if !folderExists(root) {
+		log.Fatalf("Folder '%s' does not exist.", root)
+	}
+
 	fmt.Printf("Searching for files in %s...\n", root)
 	unknownFiles := 0
 
@@ -111,4 +116,21 @@ func pickRandomClipWhichHasNotBeenPlayedInAWhile(clips []*LibraryFile) *LibraryF
 	}
 
 	return candidate
+}
+
+func folderExists(folder string) bool {
+	info, err := os.Stat(folder)
+
+	if os.IsNotExist(err) {
+		// Does not exist
+		return false
+	} else if err != nil {
+		// Unknown error
+		return false
+	} else if !info.IsDir() {
+		// Not a folder
+		return false
+	}
+
+	return true
 }

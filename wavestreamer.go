@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("Using music directory:", *musicDir)
-	library.ScanRootDir(*musicDir) // TODO check for existence
+	library.ScanRootDir(*musicDir)
 
 	player.QueueClip(clips.NewFakeTelephoneClip())
 	player.QueueClip(library.PickRandomClip().CreateClip())
