@@ -18,16 +18,17 @@ func main() {
 	fmt.Println("Using music directory:", *musicDir)
 	library.ScanRootDir(*musicDir)
 
-	player.QueueClip(clips.NewPause(2 * time.Second))
+	// Give PortAudio/ALSA/The audio system some time to start.
+	// Otherwise we get stutters in the beginning.
+	player.QueueClip(clips.NewPause(1 * time.Second))
 	player.QueueClip(clips.NewFakeTelephoneClip())
 	player.QueueClip(library.PickRandomClip().CreateClip())
 
-	fmt.Println("Start playback loop...")
-	player.Start(scheduler.GetNextClip)
-	// Give PortAudio/ALSA/The audio system some time to start.
-	// Otherwise we get stutters in the beginning.
-	time.Sleep(1 * time.Second)
-
 	fmt.Println("Starting scheduler...")
 	scheduler.Start()
+
+	fmt.Println("Start playback loop...")
+	player.Start(scheduler.GetNextClip)
+
+	fmt.Println("Player stopped.")
 }
