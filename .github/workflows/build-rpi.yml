@@ -20,7 +20,6 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          sudo dpkg --add-architecture arm64
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
