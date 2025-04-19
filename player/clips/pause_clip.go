@@ -21,9 +21,9 @@ var emptyChunk = player.AudioChunk{
 
 const emptyChunkDuration = (config.FRAMES_PER_BUFFER * time.Second) / config.SAMPLE_RATE
 
-func NewPause() *PauseClip {
+func NewPause(duration time.Duration) *PauseClip {
 	clip := PauseClip{
-		duration: 10 * time.Second,
+		duration: duration,
 		progress: 0,
 	}
 

@@ -16,13 +16,16 @@ var userQueue = make([]Clip, 0, 12)
 
 func Start(clipProvider func() Clip) {
 	nextClip := func() Clip {
-		if len(userQueue) == 0 {
-			return clipProvider()
+		if len(userQueue) > 0 {
+			clip := userQueue[0]
+			userQueue = userQueue[1:]
+			return clip
 		}
-
-		clip := userQueue[0]
-		userQueue = userQueue[1:]
-		return clip
+		if clip := clipProvider(); clip != nil {
+			return clip
+		}
+		// TODO: what do we do now?
+		return nil
 	}
 
 	if err := portaudio.Initialize(); err != nil {

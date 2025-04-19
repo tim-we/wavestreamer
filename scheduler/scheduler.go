@@ -43,8 +43,14 @@ func Start() {
 	}()
 }
 
+// GetNextClip returns a Clip or nil. It does not block.
 func GetNextClip() player.Clip {
-	return <-schedulerQueue
+	select {
+	case clip := <-schedulerQueue:
+		return clip
+	default:
+		return nil
+	}
 }
 
 func enqueueFile(file *library.LibraryFile) time.Duration {
