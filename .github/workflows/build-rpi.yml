@@ -37,9 +37,10 @@ jobs:
           wget https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.10.tar.bz2
           tar xjf alsa-lib-1.2.10.tar.bz2
           cd alsa-lib-1.2.10
-          ./configure --host=aarch64-linux-gnu --prefix=$PWD/../alsa-install
+          ./configure --host=aarch64-linux-gnu --prefix=$PWD/../alsa-install --enable-shared --disable-static
           make -j$(nproc)
           make install
+          ls -l ${{ github.workspace }}/build/alsa-install/lib/libasound.so*
 
       # ... and PortAudio for arm64
       - name: Download and build PortAudio with ALSA support for aarch64
@@ -72,7 +73,6 @@ jobs:
           PA_LIB: ${{ github.workspace }}/build/portaudio-install/lib
           CGO_LDFLAGS: "-L${{ env.PA_LIB }} -L${{ env.ALSA_LIB }} -lportaudio -lasound"
         run: |
-          ls -l ${{ github.workspace }}/build/alsa-install/lib/libasound.so*
           go build -v -o wavestreamer ./wavestreamer.go
 
       - name: Upload binary
