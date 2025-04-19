@@ -27,12 +27,14 @@ jobs:
             autoconf \
             libtool \
             wget \
+            libasound2-dev:arm64 \
             gcc-aarch64-linux-gnu
 
       - name: Cross-compile PortAudio for aarch64
         run: |
           mkdir -p build/portaudio
           cd build
+          # As of April 2025 this is the latest stable version of port audio
           wget http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
           tar xzf pa_stable_v190700_20210406.tgz
           cd portaudio
@@ -51,12 +53,6 @@ jobs:
           CGO_LDFLAGS: -L${{ github.workspace }}/build/portaudio-install/lib -lportaudio
         run: |
           go build -v -o wavestreamer ./wavestreamer.go
-
-      - name: Verify linkage
-        run: |
-          file wavestreamer
-          ldd wavestreamer || true
-          strings wavestreamer | grep -i portaudio || true
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
