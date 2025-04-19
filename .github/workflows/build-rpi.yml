@@ -39,12 +39,8 @@ jobs:
           cd alsa-lib-1.2.10
           ./configure --host=aarch64-linux-gnu --prefix=$PWD/../alsa-install --enable-shared --disable-static
           make -j$(nproc) || { echo "Make failed"; exit 1; }
-          echo "Debug Marker1"
+          echo "Find lib files "
           find . -name 'libasound.so*'
-          echo "Debug Marker2"
-          make install || { echo "Install failed"; exit 1; }
-          find build/alsa-install/lib || { echo "Lib folder not found"; exit 1; }
-          ls -l ../alsa-install/lib/libasound.so*
 
       # ... and PortAudio for arm64
       - name: Download and build PortAudio with ALSA support for aarch64
@@ -59,8 +55,8 @@ jobs:
             --with-alsa \
             --enable-shared \
             --disable-static \
-            CFLAGS="-I$PWD/../alsa-install/include" \
-            LDFLAGS="-L$PWD/../alsa-install/lib"
+            CFLAGS="-I$PWD/../alsa/alsa-lib-1.2.10/include" \
+            LDFLAGS="-L$PWD/../alsa/alsa-lib-1.2.10/src/.libs"
           make -j$(nproc)
           make install
 
@@ -72,10 +68,8 @@ jobs:
           CC: aarch64-linux-gnu-gcc
           PKG_CONFIG_PATH: ${{ github.workspace }}/build/portaudio-install/lib/pkgconfig
           LD_LIBRARY_PATH: ${{ github.workspace }}/build/portaudio-install/lib
-          CGO_CFLAGS: -I${{ github.workspace }}/build/portaudio-install/include
-          ALSA_LIB: ${{ github.workspace }}/build/alsa-install/lib
-          PA_LIB: ${{ github.workspace }}/build/portaudio-install/lib
-          CGO_LDFLAGS: "-L${{ env.PA_LIB }} -L${{ env.ALSA_LIB }} -lportaudio -lasound"
+          CGO_CFLAGS: -I${{ github.workspace }}/build/portaudio-install/include -I${{ github.workspace }}/build/alsa/alsa-lib-1.2.10/include
+          CGO_LDFLAGS: "-L${{ github.workspace }}/build/portaudio-install/lib -L${{ github.workspace }}/build/alsa/alsa-lib-1.2.10/src/.libs -lportaudio -lasound"
         run: |
           go build -v -o wavestreamer ./wavestreamer.go
 
