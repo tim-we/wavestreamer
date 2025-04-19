@@ -47,8 +47,16 @@ jobs:
           GOARCH: arm64
           CC: aarch64-linux-gnu-gcc
           PKG_CONFIG_PATH: ${{ github.workspace }}/build/portaudio-install/lib/pkgconfig
+          CGO_CFLAGS: -I${{ github.workspace }}/build/portaudio-install/include
+          CGO_LDFLAGS: -L${{ github.workspace }}/build/portaudio-install/lib -lportaudio
         run: |
           go build -v -o wavestreamer ./wavestreamer.go
+
+      - name: Verify linkage
+        run: |
+          file wavestreamer
+          ldd wavestreamer || true
+          strings wavestreamer | grep -i portaudio || true
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
