@@ -68,8 +68,11 @@ jobs:
           PKG_CONFIG_PATH: ${{ github.workspace }}/build/portaudio-install/lib/pkgconfig
           LD_LIBRARY_PATH: ${{ github.workspace }}/build/portaudio-install/lib
           CGO_CFLAGS: -I${{ github.workspace }}/build/portaudio-install/include
-          CGO_LDFLAGS: "-L${{ github.workspace }}/build/portaudio-install/lib -lportaudio -lasound"
+          ALSA_LIB: ${{ github.workspace }}/build/alsa-install/lib
+          PA_LIB: ${{ github.workspace }}/build/portaudio-install/lib
+          CGO_LDFLAGS: "-L${{ env.PA_LIB }} -L${{ env.ALSA_LIB }} -lportaudio -lasound"
         run: |
+          ls -l ${{ github.workspace }}/build/alsa-install/lib/libasound.so*
           go build -v -o wavestreamer ./wavestreamer.go
 
       - name: Upload binary
