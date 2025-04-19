@@ -38,12 +38,12 @@ jobs:
           tar xjf alsa-lib-1.2.10.tar.bz2
           cd alsa-lib-1.2.10
           ./configure --host=aarch64-linux-gnu --prefix=$PWD/../alsa-install --enable-shared --disable-static
-          make -j$(nproc)
-          echo "---Marker1---"
+          make -j$(nproc) || { echo "Make failed"; exit 1; }
+          echo "Debug Marker1"
           find . -name 'libasound.so*'
-          echo "---Marker2---"
-          make install
-          find build/alsa-install/lib
+          echo "Debug Marker2"
+          make install || { echo "Install failed"; exit 1; }
+          find build/alsa-install/lib || { echo "Lib folder not found"; exit 1; }
           ls -l ../alsa-install/lib/libasound.so*
 
       # ... and PortAudio for arm64
