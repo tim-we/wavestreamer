@@ -1,0 +1,13 @@
+[Unit]
+Description=Wavestreamer Start Service
+After=network.target sound.target
+
+[Service]
+Type=oneshot
+User=pi
+ExecStart=/home/pi/start-radio.sh
+WorkingDirectory=/home/pi
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
