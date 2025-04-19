@@ -38,7 +38,10 @@ jobs:
           wget http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
           tar xzf pa_stable_v190700_20210406.tgz
           cd portaudio
-          ./configure --host=aarch64-linux-gnu --prefix=$PWD/../portaudio-install --disable-shared
+          ./configure --host=aarch64-linux-gnu \
+            --prefix=$PWD/../portaudio-install \
+            --enable-shared --disable-static \
+            --with-alsa
           make -j$(nproc)
           make install
 
