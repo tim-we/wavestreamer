@@ -39,6 +39,7 @@ jobs:
           cd alsa-lib-1.2.10
           ./configure --host=aarch64-linux-gnu --prefix=$PWD/../alsa-install --enable-shared --disable-static
           make -j$(nproc)
+          find . -name 'libasound.so*'
           make install
           find build/alsa-install/lib
           ls -l ../alsa-install/lib/libasound.so*
