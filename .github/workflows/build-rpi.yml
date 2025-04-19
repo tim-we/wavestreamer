@@ -40,7 +40,8 @@ jobs:
           ./configure --host=aarch64-linux-gnu --prefix=$PWD/../alsa-install --enable-shared --disable-static
           make -j$(nproc)
           make install
-          ls -l ${{ github.workspace }}/build/alsa-install/lib/libasound.so*
+          find build/alsa-install/lib
+          ls -l ../alsa-install/lib/libasound.so*
 
       # ... and PortAudio for arm64
       - name: Download and build PortAudio with ALSA support for aarch64
