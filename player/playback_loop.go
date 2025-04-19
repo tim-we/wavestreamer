@@ -6,7 +6,6 @@ package player
 import "C"
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gordonklaus/portaudio"
@@ -36,11 +35,8 @@ func Start(clipProvider func() Clip) {
 		log.Fatal(dev_err)
 	}
 
-	for _, dev := range devices {
-		fmt.Printf("Name: %s\n", dev.Name)
-		fmt.Printf("MaxOutputChannels: %d\n", dev.MaxOutputChannels)
-		fmt.Printf("HostApi: %s\n", dev.HostApi.Name)
-		fmt.Println("-----------")
+	if len(devices) == 0 {
+		log.Fatal("No audio devices found.")
 	}
 
 	nextAudioChunk := make(chan *AudioChunk, 1)
