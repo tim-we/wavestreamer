@@ -135,7 +135,7 @@ func StartTagesschau() {
 			if err != nil {
 				log.Printf("Failed to create Tagesschau clip:\n%v\n", err)
 			}
-			// TODO: enhance clip with custom meta data
+			clip.SetMetaData(episode.PubDate.Format("02.01.06 - 15:00"), "Tagesschau in 100s", "")
 			player.QueueClipNext(clip)
 
 			// TODO: remove temporary file

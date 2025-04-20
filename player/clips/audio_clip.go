@@ -122,6 +122,18 @@ func (clip *AudioClip) Duration() time.Duration {
 	return clip.meta.Duration
 }
 
+func (clip *AudioClip) SetMetaData(title, artist, album string) {
+	if title != "" {
+		clip.meta.Title = title
+	}
+	if artist != "" {
+		clip.meta.Artist = artist
+	}
+	if album != "" {
+		clip.meta.Album = album
+	}
+}
+
 func fileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	return !errors.Is(err, os.ErrNotExist)
