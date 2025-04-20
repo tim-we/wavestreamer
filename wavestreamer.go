@@ -13,6 +13,7 @@ import (
 
 func main() {
 	musicDir := flag.String("d", "./music", "Path to directory containing music files")
+	news := flag.Bool("news", false, "Enable hourly news (Tagesschau in 100s)")
 	flag.Parse()
 
 	fmt.Println("Using music directory:", *musicDir)
@@ -26,6 +27,11 @@ func main() {
 
 	fmt.Println("Starting scheduler...")
 	scheduler.Start()
+
+	if *news {
+		fmt.Println("Starting Tagesschau loop...")
+		scheduler.StartTagesschau()
+	}
 
 	fmt.Println("Start playback loop...")
 	player.Start(scheduler.GetNextClip)
