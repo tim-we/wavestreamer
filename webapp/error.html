@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wavestreamer Error</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+        }
+
+        #message-box {
+            border-top: 10px solid rgba(255,42,0, 0.75);
+            border-bottom: 10px solid rgba(255,42,0, 0.75);
+            
+            min-width: 100vw;
+            padding: 15px 0;
+            
+            display: grid;
+            place-items: center;
+        }
+
+        #message {
+            font-size: 1.5em;
+            background-color: white;
+            padding: 20px 30px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div id="message-box">
+        <div id="message">
+            Oh no, something went wrong...<br>
+            This page does not exist.
+            <ul>
+                <li>
+                    back to the <a href="/">web interface</a>
+                </li>
+                <li>
+                    <a href="https://github.com/tim-we/wavestreamer/issues">
+                        create an issue
+                    </a>
+                    on GitHub
+                </li>
+            </ul>    
+        </div>
+    </div>
+</body>
+</html>

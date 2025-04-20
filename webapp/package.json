@@ -1,0 +1,20 @@
+{
+  "name": "wavestreamer-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "author": "tim-we",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "preact": "^10.26.5"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.2"
+  }
+}
