@@ -3,6 +3,7 @@ package webapp
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 //go:embed dist/*
 var content embed.FS
 
-func StartServer() {
+func StartServer(port int) {
 	// Strip the "dist" prefix so files are served at root (/)
 	staticFiles, err := fs.Sub(content, "dist")
 	if err != nil {
@@ -44,8 +45,8 @@ func StartServer() {
 
 	// Start server
 	go func() {
-		log.Println("Serving on http://localhost:8080")
-		log.Fatal(http.ListenAndServe(":8080", nil))
+		log.Printf("Serving on http://localhost:%d\n", port)
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 	}()
 }
 

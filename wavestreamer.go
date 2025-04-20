@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -14,9 +15,10 @@ import (
 )
 
 type Options struct {
-	MusicDir string `short:"d" long:"music-dir" description:"Path to directory containing music files"`
-	News     bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
-	WebApp   bool   `short:"w" long:"webapp" description:"Enable web app" `
+	MusicDir   string `short:"d" long:"music-dir" description:"Path to directory containing music files"`
+	News       bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
+	WebApp     bool   `short:"w" long:"webapp" description:"Enable web app" `
+	WebAppPort int    `short:"p" long:"port" description:"Web App Port" default:"6969"`
 }
 
 func main() {
@@ -45,10 +47,13 @@ func main() {
 
 	if opts.WebApp {
 		fmt.Println("Starting web server...")
-		webapp.StartServer()
+		if opts.WebAppPort < 1024 {
+			log.Println("Warning: Ports below 1024 require root access.")
+		}
+		webapp.StartServer(opts.WebAppPort)
 	}
 
-	fmt.Println("Start playback loop...")
+	fmt.Println("Starting playback loop...")
 	player.Start(scheduler.GetNextClip)
 
 	fmt.Println("Player stopped.")
