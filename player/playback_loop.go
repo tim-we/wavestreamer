@@ -16,6 +16,8 @@ var userQueue = make([]Clip, 0, 12)
 
 var currentlyPlaying string = "?"
 
+var skipSignal = make(chan struct{}, 1)
+
 func Start(clipProvider func() Clip) {
 	nextClip := func() Clip {
 		if len(userQueue) > 0 {
@@ -91,6 +93,11 @@ func Start(clipProvider func() Clip) {
 		currentlyPlaying = clip.Name()
 
 		for {
+			if shouldSkipCurrentClip() {
+				clip.Stop()
+				break
+			}
+
 			chunk, hasMore := clip.NextChunk()
 
 			if chunk != nil {
@@ -121,4 +128,17 @@ func QueueSize() int {
 
 func GetCurrentlyPlaying() string {
 	return currentlyPlaying
+}
+
+func SkipCurrent() {
+	skipSignal <- struct{}{}
+}
+
+func shouldSkipCurrentClip() bool {
+	select {
+	case <-skipSignal:
+		return true
+	default:
+		return false
+	}
 }

@@ -113,6 +113,10 @@ func (clip *AudioClip) NextChunk() (*player.AudioChunk, bool) {
 
 func (clip *AudioClip) Stop() {
 	clip.decoder.Close()
+	if !clip.stopped && clip.OnStop != nil {
+		clip.OnStop()
+	}
+	clip.stopped = true
 }
 
 func (clip *AudioClip) Name() string {

@@ -23,7 +23,7 @@ func StartServer() {
 	// Serve static (embedded) files
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
 
-	// API endpoint
+	// API /now endpoint
 	http.HandleFunc("/api/v1.0/now", func(w http.ResponseWriter, r *http.Request) {
 		response := ApiNowResponse{
 			Status:      "ok",
@@ -33,6 +33,13 @@ func StartServer() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
+	})
+
+	// API /skip endpoint
+	http.HandleFunc("/api/v1.0/skip", func(w http.ResponseWriter, r *http.Request) {
+		player.SkipCurrent()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
 
 	// Start server
@@ -54,4 +61,8 @@ type ApiNowLibraryInfo struct {
 	Hosts int `json:"hosts"`
 	Other int `json:"other"`
 	Night int `json:"night"`
+}
+
+type ApiOkResponse struct {
+	Status string `json:"status"`
 }
