@@ -100,10 +100,12 @@ func timeUntilNextShow(last time.Time) time.Duration {
 	return nextShow.Sub(now)
 }
 
-func StartTagesschau() {
+func StartTagesschauScheduler() {
 	go func() {
 		for {
 			delay := timeUntilNextShow(time.Now())
+
+			// Wait for next opportunity to play
 			select {
 			case <-userSignal:
 				log.Println("Tagesschau scheduled by user.")
@@ -111,6 +113,7 @@ func StartTagesschau() {
 				log.Println("Tagesschau automatically scheduled.")
 			}
 
+			// Fetch latest episode
 			rssDataRaw, rssDownloadError := utils.DownloadToMemory(PODCAST_FEED)
 			if rssDownloadError != nil {
 				log.Printf("Error downloading Tagesschau RSS:\n%v\n", rssDownloadError)
@@ -133,17 +136,21 @@ func StartTagesschau() {
 			}
 			tmpFile.Close()
 
+			// Create clip with custom meta data
 			clip, err := clips.NewAudioClip(tmpFile.Name())
 			if err != nil {
 				log.Printf("Failed to create Tagesschau clip:\n%v\n", err)
 			}
 			clip.SetMetaData(episode.PubDate.Format("02.01.06 - 15:00"), "Tagesschau in 100s", "")
 
+			// Cleanup
 			clip.OnStop = func() {
 				if err := os.Remove(tmpFile.Name()); err != nil {
 					log.Printf("Failed to remove temporary file %s.\n", err)
 				}
 			}
+
+			// And finally... schedule the clip
 			player.QueueClip(clip)
 		}
 	}()

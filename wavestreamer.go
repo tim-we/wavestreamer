@@ -30,7 +30,7 @@ func main() {
 
 	if *news {
 		fmt.Println("Starting Tagesschau loop...")
-		scheduler.StartTagesschau()
+		scheduler.StartTagesschauScheduler()
 	}
 
 	fmt.Println("Start playback loop...")
