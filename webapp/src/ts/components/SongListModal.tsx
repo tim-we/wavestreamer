@@ -1,6 +1,6 @@
 import { render, Component, createRef } from "preact";
 import PyRadio from "../wavestreamer";
-import { unmountComponentAtNode } from "preact/compat";
+import { unmountComponentAtNode, type MouseEvent } from "preact/compat";
 
 const portal = document.getElementById("modal-portal")!;
 
@@ -121,7 +121,7 @@ type ClipProps = {
     clip: string;
     radio: PyRadio;
     expanded: boolean;
-    onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onClick: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
 type ClipState = {

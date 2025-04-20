@@ -10,11 +10,13 @@ import (
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
 	"github.com/tim-we/wavestreamer/scheduler"
+	"github.com/tim-we/wavestreamer/webapp"
 )
 
 type Options struct {
 	MusicDir string `short:"d" long:"music-dir" description:"Path to directory containing music files"`
 	News     bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
+	WebApp   bool   `short:"w" long:"webapp" description:"Enable web app" `
 }
 
 func main() {
@@ -39,6 +41,11 @@ func main() {
 	if opts.News {
 		fmt.Println("Starting Tagesschau loop...")
 		scheduler.StartTagesschauScheduler()
+	}
+
+	if opts.WebApp {
+		fmt.Println("Starting web server...")
+		webapp.StartServer()
 	}
 
 	fmt.Println("Start playback loop...")
