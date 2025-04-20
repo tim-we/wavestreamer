@@ -2,10 +2,22 @@ import { Component } from "preact";
 import PyRadio from "../wavestreamer";
 import * as SongListModal from "./SongListModal";
 
+import pauseIcon from "../../img/pause.svg";
+import repeatIcon from "../../img/repeat.svg";
+import skipIcon from "../../img/skip.svg";
+import listIcon from "../../img/list.svg";
+
 type ControlsProps = {
     radio: PyRadio;
     extensions: { name: string; command: string }[];
 };
+
+const SVG_ICONS = {
+    pause: pauseIcon,
+    repeat: repeatIcon,
+    skip: skipIcon,
+    list: listIcon,
+} as const;
 
 export default class Controls extends Component<ControlsProps> {
     public render() {
@@ -95,6 +107,8 @@ class Button extends Component<ButtonProps, ButtonState> {
 
         const tooltip = state.active ? "" : props.tooltip;
 
+        const icon = props.icon ?? props.id;
+
         return (
             <button
                 id={props.id}
@@ -106,7 +120,7 @@ class Button extends Component<ButtonProps, ButtonState> {
                 {props.children ? (
                     props.children
                 ) : (
-                    <img src={`/static/img/${props.icon || props.id}.svg`} />
+                    <img src={SVG_ICONS[icon]} />
                 )}
             </button>
         );
