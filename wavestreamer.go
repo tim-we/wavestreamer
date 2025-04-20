@@ -1,23 +1,31 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/jessevdk/go-flags"
 	"github.com/tim-we/wavestreamer/library"
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
 	"github.com/tim-we/wavestreamer/scheduler"
 )
 
-func main() {
-	musicDir := flag.String("d", "./music", "Path to directory containing music files")
-	news := flag.Bool("news", false, "Enable hourly news (Tagesschau in 100s)")
-	flag.Parse()
+type Options struct {
+	MusicDir string `short:"d" long:"music-dir" description:"Path to directory containing music files"`
+	News     bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
+}
 
-	fmt.Println("Using music directory:", *musicDir)
-	library.ScanRootDir(*musicDir)
+func main() {
+	var opts Options
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	fmt.Println("Using music directory:", opts.MusicDir)
+	library.ScanRootDir(opts.MusicDir)
 
 	// Give PortAudio/ALSA/The audio system some time to start.
 	// Otherwise we get stutters in the beginning.
@@ -28,7 +36,7 @@ func main() {
 	fmt.Println("Starting scheduler...")
 	scheduler.Start()
 
-	if *news {
+	if opts.News {
 		fmt.Println("Starting Tagesschau loop...")
 		scheduler.StartTagesschauScheduler()
 	}
