@@ -19,7 +19,9 @@ type AudioClip struct {
 	meta     *d.AudioFileMetaData
 	buffer   chan *player.AudioChunk
 	started  bool
+	stopped  bool
 	OnStart  func(meta *d.AudioFileMetaData)
+	OnStop   func()
 }
 
 func NewAudioClip(filepath string) (*AudioClip, error) {
@@ -101,6 +103,11 @@ func (clip *AudioClip) NextChunk() (*player.AudioChunk, bool) {
 		}
 	}
 	chunk, hasMore := <-clip.buffer
+	if !hasMore && !clip.stopped && clip.OnStop != nil {
+		clip.stopped = true
+		clip.OnStop()
+
+	}
 	return chunk, hasMore
 }
 

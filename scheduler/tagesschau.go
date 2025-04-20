@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -130,15 +131,20 @@ func StartTagesschau() {
 				// Lets try again later
 				continue
 			}
+			tmpFile.Close()
 
 			clip, err := clips.NewAudioClip(tmpFile.Name())
 			if err != nil {
 				log.Printf("Failed to create Tagesschau clip:\n%v\n", err)
 			}
 			clip.SetMetaData(episode.PubDate.Format("02.01.06 - 15:00"), "Tagesschau in 100s", "")
-			player.QueueClipNext(clip)
 
-			// TODO: remove temporary file
+			clip.OnStop = func() {
+				if err := os.Remove(tmpFile.Name()); err != nil {
+					log.Printf("Failed to remove temporary file %s.\n", err)
+				}
+			}
+			player.QueueClip(clip)
 		}
 	}()
 }
