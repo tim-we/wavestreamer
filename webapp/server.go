@@ -2,9 +2,12 @@ package webapp
 
 import (
 	"embed"
+	"encoding/json"
 	"io/fs"
 	"log"
 	"net/http"
+
+	"github.com/tim-we/wavestreamer/player"
 )
 
 //go:embed dist/*
@@ -17,12 +20,38 @@ func StartServer() {
 		log.Fatal(err)
 	}
 
-	// Serve embedded files
+	// Serve static (embedded) files
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
+
+	// API endpoint
+	http.HandleFunc("/api/v1.0/now", func(w http.ResponseWriter, r *http.Request) {
+		response := ApiNowResponse{
+			Status:      "ok",
+			Current:     player.GetCurrentlyPlaying(),
+			History:     []string{},
+			LibraryInfo: ApiNowLibraryInfo{},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	})
 
 	// Start server
 	go func() {
 		log.Println("Serving on http://localhost:8080")
 		log.Fatal(http.ListenAndServe(":8080", nil))
 	}()
+}
+
+type ApiNowResponse struct {
+	Status      string            `json:"status"`
+	Current     string            `json:"current"`
+	History     []string          `json:"history"`
+	LibraryInfo ApiNowLibraryInfo `json:"library"`
+}
+
+type ApiNowLibraryInfo struct {
+	Music int `json:"music"`
+	Hosts int `json:"hosts"`
+	Other int `json:"other"`
+	Night int `json:"night"`
 }

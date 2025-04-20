@@ -14,6 +14,8 @@ import (
 
 var userQueue = make([]Clip, 0, 12)
 
+var currentlyPlaying string = "?"
+
 func Start(clipProvider func() Clip) {
 	nextClip := func() Clip {
 		if len(userQueue) > 0 {
@@ -86,6 +88,7 @@ func Start(clipProvider func() Clip) {
 		}
 
 		log.Printf("Now playing %s", clip.Name())
+		currentlyPlaying = clip.Name()
 
 		for {
 			chunk, hasMore := clip.NextChunk()
@@ -98,6 +101,8 @@ func Start(clipProvider func() Clip) {
 				break
 			}
 		}
+
+		currentlyPlaying = "-"
 
 	}
 }
@@ -112,4 +117,8 @@ func QueueClipNext(clip Clip) {
 
 func QueueSize() int {
 	return len(userQueue)
+}
+
+func GetCurrentlyPlaying() string {
+	return currentlyPlaying
 }
