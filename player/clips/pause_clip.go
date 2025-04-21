@@ -40,9 +40,24 @@ func (clip *PauseClip) Stop() {
 }
 
 func (clip *PauseClip) Name() string {
-	return fmt.Sprintf("Pause %v", clip.duration)
+	return fmt.Sprintf("Pause %s", formatDuration(clip.duration))
 }
 
 func (clip *PauseClip) Duration() time.Duration {
 	return clip.duration
+}
+
+func formatDuration(d time.Duration) string {
+	minutes := int(d.Minutes())
+	seconds := int(d.Seconds()) % 60
+
+	if minutes == 0 {
+		return fmt.Sprintf("%ds", seconds)
+	}
+
+	if seconds == 0 {
+		return fmt.Sprintf("%dmin", minutes)
+	}
+
+	return fmt.Sprintf("%dmin %ds", minutes, seconds)
 }
