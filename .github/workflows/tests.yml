@@ -22,5 +22,10 @@ jobs:
           sudo apt update
           sudo apt install -y libportaudio2 portaudio19-dev
 
+      - name: Fake NPM build
+        run: |
+          mkdir webapp/dist
+          touch webapp/dist/index.html
+
       - name: Run tests
         run: go test -v ./...
