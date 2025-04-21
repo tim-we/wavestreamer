@@ -40,7 +40,7 @@ export default class App extends Component<AppProps, AppState> {
                         extensions={state.extensions}
                     />
                     <History data={state.now ? state.now.history : []} />
-                    <div id="stats"></div>
+                    <section id="stats"/>
                 </div>
                 <About />
             </>

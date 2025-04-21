@@ -1,47 +1,32 @@
-import { Component } from "preact";
-import { HistoryEntry } from "../wavestreamer";
+import type { FunctionComponent } from "preact";
+import type { HistoryEntry } from "../wavestreamer";
 
 type HistoryProps = {
     data: HistoryEntry[];
 };
 
-export default class History extends Component<HistoryProps> {
-    public render() {
-        const history = this.props.data.slice().reverse();
-        return (
-            <div id="history">
-                <div className="title">Recent history:</div>
-                <div id="history-clips">
-                    {history.map((clip) => {
-                        const content = (
-                            <>
-                                {`${dateToLocalTime(clip.start)} `}
-                                {clip.userScheduled ? (
-                                    <i>{clip.title}</i>
-                                ) : (
-                                    clip.title
-                                )}
-                            </>
-                        );
+const History: FunctionComponent<HistoryProps> = function History({data}) {
+    const history = data.slice().reverse();
 
-                        return (
-                            <div
-                                className={"clip"}
-                                key={clip.start + clip.title}
-                            >
-                                {clip.skipped ? (
-                                    <s title="skipped">{content}</s>
-                                ) : (
-                                    content
-                                )}
-                            </div>
-                        );
+    return (
+        <section id="history">
+            <div class="title">Recent history:</div>
+            <table id="history-clips">
+                <tbody>
+                    {history.map((entry) => {
+                        const title = entry.userScheduled ? (<i>{entry.title}</i>) : entry.title;
+                        return (<tr key={entry.start + entry.title} class="clip">
+                            <td>{dateToLocalTime(entry.start)}</td>
+                            <td>{entry.skipped ? (<s title="skipped">{title}</s>) : title}</td>
+                        </tr>);
                     })}
-                </div>
-            </div>
-        );
-    }
-}
+                </tbody>
+            </table>
+        </section>
+    );
+};
+
+export default History;
 
 function dateToLocalTime(time: string | undefined): string {
     if (!time) {

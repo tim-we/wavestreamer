@@ -24,7 +24,7 @@ export default class Controls extends Component<ControlsProps> {
         const radio = this.props.radio;
 
         return (
-            <div id="controls">
+            <section id="controls">
                 {this.props.extensions.map((ext) => (
                     <Button
                         key={ext.command}
@@ -63,7 +63,7 @@ export default class Controls extends Component<ControlsProps> {
                         return Promise.resolve();
                     }}
                 />
-            </div>
+            </section>
         );
     }
 }

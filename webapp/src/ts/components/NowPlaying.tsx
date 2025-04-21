@@ -9,10 +9,10 @@ export default class NowPlaying extends Component<NPProps> {
         const clip = this.props.clip;
 
         return (
-            <div id="now">
-                <div className="title">Now playing:</div>
+            <section id="now">
+                <div class="title">Now playing:</div>
                 <div id="current-clip">{clip ? clip : "-"}</div>
-            </div>
+            </section>
         );
     }
 }

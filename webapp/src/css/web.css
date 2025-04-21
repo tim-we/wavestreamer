@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     margin: 0px;
     padding: 0px;
     font-family: sans-serif;
@@ -18,138 +19,147 @@ body {
     background-color: var(--bg-color);
 }
 
-#header {
+header {
     display: flex;
     justify-content: center;
     height: 80px;
 
-    background-image: linear-gradient(#1e415e 10%,#2b5b84 90%);
+    background-image: linear-gradient(#1e415e 10%, #2b5b84 90%);
     color: white;
+
+    img {
+        margin-right: 14px;
+        max-height: 70px;
+        position: relative;
+        top: 5px;
+    }
+
+    h1 {
+        margin: 0px;
+        padding: 0px;
+        font-size: 32px;
+        font-weight: bold;
+        line-height: 80px;
+    }
 }
 
-#header img {
-    margin-right: 14px;
-    max-height: 70px;
-    position: relative;
-    top: 5px;
-}
+section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-#header span {
-    margin: 0px;
-    padding: 0px;
-    font-size: 32px;
-    font-weight: bold;
-    line-height: 80px;
-}
-
-#content > div {
     box-sizing: border-box;
     width: 100%;
     margin-top: 10px;
     padding: 5px 10px;
+
+    &>.title {
+        align-self: start;
+    }
 }
 
 #now {
     background-color: #ffd343;
-    color: rgb(90,90,90);
-}
+    color: rgb(90, 90, 90);
 
-.section > .title {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-#now > #current-clip {
-    color: rgb(64,64,64);
-    text-align: center;
-    font-size: 1.2em;
-    margin-top: 3px;
+    #current-clip {
+        color: rgb(64, 64, 64);
+        text-align: center;
+        font-size: 1.2em;
+        margin-top: 3px;
+    }
 }
 
 #history {
-    background-color: rgb(200,200,200);
-    color: rgb(42,42,42);
-}
+    background-color: rgb(200, 200, 200);
+    color: rgb(42, 42, 42);
 
-#history .title {
-    color: rgb(80,80,80);
-}
+    .title {
+        color: rgb(80, 80, 80);
+    }
 
-#history .clip {
-    margin-bottom: 4px;
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
+    .clip {
+        margin-bottom: 4px;
+        padding-top: 3px;
+        padding-bottom: 3px;
 
-#history .clip:hover {
-    background-color: rgba(16,16,16,0.1);
-}
+        &:hover {
+            background-color: rgba(16, 16, 16, 0.1);
+        }
+    }
 
-#history-clips {
-    text-align: center;
+    #history-clips {
+        text-align: center;
+
+        td:first-child {
+            padding-inline-end: 1em;
+            opacity: 0.85;
+            font-family: monospace;
+        }
+    }
 }
 
 #controls {
     display: flex;
     flex-wrap: wrap;
+    flex-direction: row;
     justify-content: center;
     margin-bottom: -6px;
-}
 
-#controls button {
-    display: inline-grid;
-    place-items: center;
-    box-sizing: border-box;
-    height: 42px;
-    min-width: 42px;
-    max-width: 150px;
-    flex-basis: max-content;
-    flex-grow: 1;
-    margin-bottom: 6px;
+    button {
+        display: inline-grid;
+        place-items: center;
+        box-sizing: border-box;
+        height: 42px;
+        min-width: 42px;
+        max-width: 150px;
+        flex-basis: max-content;
+        flex-grow: 1;
+        margin-bottom: 6px;
 
-    font-size: 20px;
-    color: #e6e8ea;
-    background-color: #2b5b84;
-    background-image: linear-gradient(#3776ab 10%,#2b5b84 90%);
-    border-top: 1px solid #3d83be;
-    border-right: 1px solid #3776ab;
-    border-bottom: 1px solid #3776ab;
-    border-left: 1px solid #3d83be;
-    box-shadow: inset 0 0 5px rgba(55,118,171,0.2);
-    text-align: center;
-    white-space: nowrap;
-    cursor: pointer;
-    border-radius: 5px;
-}
+        font-size: 20px;
+        color: #e6e8ea;
+        background-color: #2b5b84;
+        background-image: linear-gradient(#3776ab 10%, #2b5b84 90%);
+        border-top: 1px solid #3d83be;
+        border-right: 1px solid #3776ab;
+        border-bottom: 1px solid #3776ab;
+        border-left: 1px solid #3d83be;
+        box-shadow: inset 0 0 5px rgba(55, 118, 171, 0.2);
+        text-align: center;
+        white-space: nowrap;
+        cursor: pointer;
+        border-radius: 5px;
 
-#controls button:not(:first-of-type) {
-    margin-left: 6px;
-}
+        &:not(:first-of-type) {
+            margin-left: 6px;
+        }
 
-#controls button > img {
-    opacity: 0.9;
-}
+        &:not(.active):hover {
+            color: white;
+            box-shadow: inset 0 0 6px rgba(100, 200, 255, 0.25);
+        }
 
-#controls button:not(.active):hover {
-    color: white;
-    box-shadow: inset 0 0 6px rgba(100,200,255,0.25);
-}
+        &:not(.active):hover>img {
+            opacity: 1;
+        }
 
-#controls button:not(.active):hover > img {
-    opacity: 1;
-}
+        &>img {
+            opacity: 0.9;
+        }
 
-#controls button.active {
-    color: rgb(182,182,182);
-    box-shadow: inset 0 0 7px rgba(55,118,171,0.75);
-    opacity: 0.75;
+        button.active {
+            color: rgb(182, 182, 182);
+            box-shadow: inset 0 0 7px rgba(55, 118, 171, 0.75);
+            opacity: 0.75;
+        }
+    }
 }
 
 #about {
     margin-top: 10px;
     padding: 10px 0px;
-    color: rgb(100,100,100);
+    color: rgb(100, 100, 100);
     font-size: 14px;
     text-align: center;
     background-color: var(--bg-color);
@@ -161,7 +171,7 @@ body {
     left: 0px;
     right: 0px;
     bottom: 0px;
-    background-color: rgba(16,16,16,0.42);
+    background-color: rgba(16, 16, 16, 0.42);
     display: none;
 }
 
@@ -179,13 +189,13 @@ body {
     background-color: white;
     display: grid;
     grid-template-rows: auto 1fr;
-    box-shadow: 0px 0px 20px 1px rgba(0,0,0,0.25);
+    box-shadow: 0px 0px 20px 1px rgba(0, 0, 0, 0.25);
 }
 
 #song-list-controls {
     display: grid;
     grid-template-columns: 1fr auto;
-    border-bottom: 2px solid rgb(16,16,16);
+    border-bottom: 2px solid rgb(16, 16, 16);
 }
 
 #song-filter {
@@ -216,11 +226,11 @@ body {
 }
 
 #song-list .song:nth-of-type(even) {
-    background-color: rgb(240,240,240);
+    background-color: rgb(240, 240, 240);
 }
 
 #song-list .song .folder {
-    color: rgb(64,64,64);
+    color: rgb(64, 64, 64);
     font-size: 0.8em;
     margin-right: 2px;
 }
@@ -237,7 +247,7 @@ body {
 }
 
 #song-list .song:not(.expanded):hover {
-    box-shadow: inset 0px -2px 3px 0px rgba(16,16,16,0.05);
+    box-shadow: inset 0px -2px 3px 0px rgba(16, 16, 16, 0.05);
 }
 
 #song-list .song .buttons a::before {
@@ -270,7 +280,7 @@ body {
 
 @media (prefers-color-scheme: dark) {
     body {
-        --bg-color: rgb(32,32,32);
+        --bg-color: rgb(32, 32, 32);
     }
 
     #about {
