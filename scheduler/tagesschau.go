@@ -128,6 +128,12 @@ func StartTagesschauScheduler() {
 				continue
 			}
 
+			if time.Now().Sub(episode.PubDate) > (24 * time.Hour) {
+				log.Printf("No recent Tagesschau episode available (%v)\n", episode.PubDate)
+				// Lets try again later
+				continue
+			}
+
 			tmpFile, downloadErr := utils.DownloadToTempFile(episode.URL)
 			if downloadErr != nil {
 				log.Printf("Error downloading Tagesschau episode:\n%v\n", downloadErr)
