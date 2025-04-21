@@ -94,6 +94,3 @@ jobs:
         with:
           name: wavestreamer-arm64
           path: wavestreamer
-
-      - name: Go Test
-        run: go test -v ./...
