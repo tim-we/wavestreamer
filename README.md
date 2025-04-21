@@ -50,6 +50,11 @@ You can access the running program on the Pi with `screen -R radio`.
 ### Initial Setup
 
 To build this program yourself you need go (check the version in `go.mod`) and node.js (check the version in `webapp/package.json#engines.node`).
+Besides the dependencies that are also required for the Pi you need to install
+```bash
+sudo apt install portaudio19-dev
+```
+After that:
 
 1. Check out this repo locally.
 2. Change into the `webapp` directory (`cd webapp`).
