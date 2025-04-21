@@ -23,7 +23,7 @@ export default class App extends Component<AppProps, AppState> {
         const radio = props.radio;
 
         radio.on("update", (now) => this.setState({ now }));
-        radio.extensions().then((extensions) => this.setState({ extensions }));
+        //radio.extensions().then((extensions) => this.setState({ extensions }));
     }
 
     public render() {

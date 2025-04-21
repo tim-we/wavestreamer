@@ -91,10 +91,7 @@ export default class Wavestreamer {
     }
 
     public async schedule(clip: string): Promise<void> {
-        const form = new FormData();
-        form.append("file", clip);
-        // @ts-ignore
-        await this.api_request("/schedule", "POST", new URLSearchParams(form));
+        await this.api_request("/schedule", "POST", new URLSearchParams({file: clip}));
     }
 
     public download_url(clip: string): string {
