@@ -172,9 +172,9 @@ type NowData = {
 
 export type HistoryEntry = {
     start: string;
-        title: string;
-        skipped: boolean;
-        userScheduled: boolean;
+    title: string;
+    skipped: boolean;
+    userScheduled: boolean;
 }
 
 type UpdateEventListener = (data: NowData) => any;

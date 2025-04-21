@@ -91,6 +91,7 @@ func Start(clipProvider func() Clip) {
 
 		log.Printf("Now playing %s", clip.Name())
 		currentlyPlaying = clip.Name()
+		addClipToHistory(clip)
 
 		for {
 			if shouldSkipCurrentClip() {

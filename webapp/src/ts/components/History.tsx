@@ -15,7 +15,7 @@ export default class History extends Component<HistoryProps> {
                     {history.map((clip) => {
                         const content = (
                             <>
-                                {`${clip.start} `}
+                                {`${dateToLocalTime(clip.start)} `}
                                 {clip.userScheduled ? (
                                     <i>{clip.title}</i>
                                 ) : (
@@ -41,4 +41,19 @@ export default class History extends Component<HistoryProps> {
             </div>
         );
     }
+}
+
+function dateToLocalTime(time: string | undefined): string {
+    if (!time) {
+        return "";
+    }
+
+    // Example: 2025-04-21T10:41:00.236652254+02:00
+    // Remove nanoseconds (not supported by JS Date)
+    const date = new Date(time.replace(/\.\d+/, ""));
+
+    return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 }

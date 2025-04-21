@@ -29,7 +29,7 @@ func StartServer(port int) {
 		response := ApiNowResponse{
 			Status:      "ok",
 			Current:     player.GetCurrentlyPlaying(),
-			History:     []string{},
+			History:     player.GetHistory(),
 			LibraryInfo: ApiNowLibraryInfo{},
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -51,10 +51,10 @@ func StartServer(port int) {
 }
 
 type ApiNowResponse struct {
-	Status      string            `json:"status"`
-	Current     string            `json:"current"`
-	History     []string          `json:"history"`
-	LibraryInfo ApiNowLibraryInfo `json:"library"`
+	Status      string                `json:"status"`
+	Current     string                `json:"current"`
+	History     []player.HistoryEntry `json:"history"`
+	LibraryInfo ApiNowLibraryInfo     `json:"library"`
 }
 
 type ApiNowLibraryInfo struct {
