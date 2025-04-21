@@ -43,6 +43,25 @@ it just automatically starts the program after the Pi boots.
     - `sudo systemctl enable radio.service`
     - `sudo systemctl start radio.service`
 
-## Debugging
+You can access the running program on the Pi with `screen -R radio`.
 
-You can access the running program with `screen -R radio`.
+## Development
+
+### Initial Setup
+
+To build this program yourself you need go (check the version in `go.mod`) and node.js (check the version in `webapp/package.json#engines.node`).
+
+1. Check out this repo locally.
+2. Change into the `webapp` directory (`cd webapp`).
+3. Run `npm install` (this has to be done only once)
+4. Run `npm run build` (this has to done at least once and for every webapp change).
+
+Now the `webapp/dist` folder should be populated with files.
+We are now ready to run the player.
+
+### Running / Building
+
+You can start the program locally with 
+```bash
+go run wavestreamer.go --help
+```
