@@ -1,8 +1,12 @@
 ## wavestreamer
 
+[![Build for Raspberry Pi](https://github.com/tim-we/wavestreamer/actions/workflows/build-rpi.yml/badge.svg)](https://github.com/tim-we/wavestreamer/actions/workflows/build-rpi.yml)
+
 **wavestreamer** is a lightweight music playback system written in Go, designed to run continuously on a Raspberry Pi.
 
-It is the spiritual successor to *py-radio*, rewritten from scratch for better performance, maintainability, and flexibility.
+It is the spiritual successor to [py-radio](https://github.com/tim-we/py-radio/), rewritten from scratch for better performance, maintainability, and flexibility.
+
+A binary for AArch64 architecture (Raspberry Pi) is build by a GitHub Actions workflow.
 
 ### Features
 
@@ -15,8 +19,8 @@ It is the spiritual successor to *py-radio*, rewritten from scratch for better p
 ## Installation on a Raspberry Pi
 
 We assume the 64bit version of Raspberry Pi OS.
-Setting up the service is optional.
-It just starts the program after the Pi boots automatically.
+Setting up the service is optional, 
+it just automatically starts the program after the Pi boots.
 
 1. For wavestreamer to run on a Raspberry Pi we need to install the following dependencies: 
 
