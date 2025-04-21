@@ -19,6 +19,7 @@ type Options struct {
 	News       bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
 	WebApp     bool   `short:"w" long:"webapp" description:"Enable web app" `
 	WebAppPort int    `short:"p" long:"port" description:"Web App Port" default:"6969"`
+	GPIO       bool   `short:"i" long:"gpio" description:"Enable GPIO controls"`
 }
 
 func main() {
