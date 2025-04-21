@@ -86,7 +86,7 @@ func extractLatestMP3URL(xmlContent []byte) (*EpisodeInfo, error) {
 		return nil, fmt.Errorf("no valid MP3 entries found")
 	}
 
-	return &EpisodeInfo{latestURL, latestTime}, nil
+	return &EpisodeInfo{latestURL, latestTime.In(time.Local)}, nil
 }
 
 func timeUntilNextShow(last time.Time) time.Duration {
