@@ -19,8 +19,8 @@ jobs:
 
       - name: Install PortAudio
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libportaudio2 libportaudio-dev
+          sudo apt update
+          sudo apt install -y libportaudio2 portaudio19-dev
 
       - name: Run tests
         run: go test -v ./...
