@@ -69,7 +69,10 @@ func (process *DecodingProcess) Close() {
 	}
 
 	if waitErr := process.cmd.Wait(); waitErr != nil && waitErr != os.ErrProcessDone {
-		log.Printf("Error while waiting for process to exit: %v", waitErr)
+		// Only log unexpected errors (e.g. not "signal: killed")
+		if exitErr, ok := waitErr.(*exec.ExitError); ok && exitErr.ExitCode() != -1 {
+			log.Printf("Process exited with error: %v", waitErr)
+		}
 	}
 }
 
