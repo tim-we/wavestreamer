@@ -147,7 +147,7 @@ func StartTagesschauScheduler() {
 			if err != nil {
 				log.Printf("Failed to create Tagesschau clip:\n%v\n", err)
 			}
-			clip.SetMetaData(episode.PubDate.Format("02.01.06 - 15:00"), "Tagesschau in 100s", "")
+			clip.SetMetaData(episode.PubDate.Format("02.01.06 - 15:04"), "Tagesschau in 100s", "")
 
 			// Cleanup
 			clip.OnStop = func() {
