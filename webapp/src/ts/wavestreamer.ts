@@ -165,6 +165,7 @@ type NowData = {
     current: string;
     history: HistoryEntry[];
     library: { hosts: number; music: number; other: number };
+    uptime: string;
 };
 
 export type HistoryEntry = {

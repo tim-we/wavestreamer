@@ -11,10 +11,13 @@ import (
 
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
+	"github.com/tim-we/wavestreamer/utils"
 )
 
 //go:embed dist/*
 var content embed.FS
+
+var startTime = time.Now()
 
 func StartServer(port int) {
 	// Strip the "dist" prefix so files are served at root (/)
@@ -33,6 +36,7 @@ func StartServer(port int) {
 			Current:     player.GetCurrentlyPlaying(),
 			History:     player.GetHistory(),
 			LibraryInfo: ApiNowLibraryInfo{},
+			Uptime:      utils.PrettyDuration(time.Now().Sub(startTime), ""),
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
@@ -65,6 +69,7 @@ type ApiNowResponse struct {
 	Current     string                `json:"current"`
 	History     []player.HistoryEntry `json:"history"`
 	LibraryInfo ApiNowLibraryInfo     `json:"library"`
+	Uptime      string                `json:"uptime"`
 }
 
 type ApiNowLibraryInfo struct {
