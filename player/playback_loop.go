@@ -81,6 +81,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 	}
 	defer stream.Stop()
 
+	var loudness float32
+
 	for {
 		clip := nextClip()
 
@@ -102,6 +104,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 			chunk, hasMore := clip.NextChunk()
 
 			if chunk != nil {
+				loudness = 0.9*loudness + 0.1*chunk.RMS
+				// TODO #5: adjust chunk volume
 				nextAudioChunk <- chunk
 			}
 
