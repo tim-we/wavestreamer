@@ -15,11 +15,12 @@ import (
 )
 
 type Options struct {
-	MusicDir   string `short:"d" long:"music-dir" description:"Path to directory containing music files"`
-	News       bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
-	WebApp     bool   `short:"w" long:"webapp" description:"Enable web app" `
-	WebAppPort int    `short:"p" long:"port" description:"Web App Port" default:"6969"`
-	GPIO       bool   `short:"i" long:"gpio" description:"Enable GPIO controls"`
+	MusicDir    string `short:"d" long:"music-dir" description:"Path to directory containing music files"`
+	News        bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
+	WebApp      bool   `short:"w" long:"webapp" description:"Enable web app" `
+	WebAppPort  int    `short:"p" long:"port" description:"Web App Port" default:"6969"`
+	GPIO        bool   `short:"i" long:"gpio" description:"Enable GPIO controls"`
+	NoNormalize bool   `long:"no-normalize" description:"Disable automatic loudness normalization"`
 }
 
 func main() {
@@ -54,8 +55,11 @@ func main() {
 		webapp.StartServer(opts.WebAppPort)
 	}
 
+	if !opts.NoNormalize {
+		fmt.Println("Loudness normalization is enabled (default).")
+	}
 	fmt.Println("Starting playback loop...")
-	player.Start(scheduler.GetNextClip)
+	player.Start(scheduler.GetNextClip, !opts.NoNormalize)
 
 	fmt.Println("Player stopped.")
 }

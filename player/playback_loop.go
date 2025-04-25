@@ -18,7 +18,7 @@ var currentlyPlaying string = "?"
 
 var skipSignal = make(chan struct{}, 1)
 
-func Start(clipProvider func() Clip) {
+func Start(clipProvider func() Clip, normalize bool) {
 	nextClip := func() Clip {
 		if len(userQueue) > 0 {
 			clip := userQueue[0]
