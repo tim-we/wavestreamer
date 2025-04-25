@@ -46,7 +46,7 @@ func Start(clipProvider func() Clip, normalize bool) {
 		log.Fatal("No audio devices found.")
 	}
 
-	nextAudioChunk := make(chan *AudioChunk, 1)
+	nextAudioChunk := make(chan *AudioChunk, 2)
 
 	playCallback := func(out [][]float32) {
 		select {
