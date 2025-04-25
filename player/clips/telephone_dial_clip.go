@@ -88,7 +88,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 
 			for i := range BEEP_DURATION_IN_CHUNKS {
 				chunk := silence()
-				fillChunkWithFrequencies(chunk, frequencies, i*config.FRAMES_PER_BUFFER, i == BEEP_DURATION_IN_CHUNKS-1)
+				fillChunkWithFrequencies(&chunk, frequencies, i*config.FRAMES_PER_BUFFER, i == BEEP_DURATION_IN_CHUNKS-1)
 				buffer <- &chunk
 			}
 		}
@@ -101,7 +101,7 @@ func NewFakeTelephoneClip() *TelephoneDialClip {
 		for i := range DIAL_DURATION_IN_CHUNKS {
 			chunk := silence()
 
-			fillChunkWithFrequencies(chunk, dialFrequencies, i*config.FRAMES_PER_BUFFER, i == DIAL_DURATION_IN_CHUNKS-1)
+			fillChunkWithFrequencies(&chunk, dialFrequencies, i*config.FRAMES_PER_BUFFER, i == DIAL_DURATION_IN_CHUNKS-1)
 			buffer <- &chunk
 		}
 	}()
@@ -129,7 +129,7 @@ func (clip *TelephoneDialClip) Duration() time.Duration {
 	return clip.duration
 }
 
-func fillChunkWithFrequencies(chunk player.AudioChunk, pair DTMFFrequencies, timeOffset int, fadeOut bool) {
+func fillChunkWithFrequencies(chunk *player.AudioChunk, pair DTMFFrequencies, timeOffset int, fadeOut bool) {
 	freqA := float64(pair.Lower)
 	freqB := float64(pair.Higher)
 	for i := range config.FRAMES_PER_BUFFER {
@@ -141,6 +141,8 @@ func fillChunkWithFrequencies(chunk player.AudioChunk, pair DTMFFrequencies, tim
 		chunk.Left[i] = value
 		chunk.Right[i] = value
 	}
+	chunk.Peak = 2 * VOLUME
+	chunk.RMS = 0.707106781 * VOLUME // 1/sqrt(2)
 }
 
 func silence() player.AudioChunk {

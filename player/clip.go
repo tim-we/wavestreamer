@@ -27,4 +27,10 @@ type AudioChunk = struct {
 
 	// Number of samples in this chunk (up to FRAMES_PER_BUFFER).
 	Length int
+
+	// Root mean square of this chunk's audio (stereo average).
+	RMS float32
+
+	// Maximum absolute sample value across both channels.
+	Peak float32
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"time"
@@ -61,8 +62,10 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 			}
 
 			eofReached := false
+			var peak float32 = 0.0
+			var rmsAcc float64 = 0.0
 
-			// Fill chunk.
+			// Fill chunk and analyze data.
 			for i := range config.FRAMES_PER_BUFFER {
 				left, right, err := decoder.ReadFrame()
 
@@ -78,10 +81,16 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 					break
 				}
 
+				peak = maxf32(peak, maxf32(absf32(left), absf32(right)))
+				rmsAcc += float64(left*left + right*right)
+
 				chunk.Left[i] = left
 				chunk.Right[i] = right
 				chunk.Length++
 			}
+
+			chunk.Peak = peak
+			chunk.RMS = float32(math.Sqrt(0.5 * rmsAcc))
 
 			// Send chunk to buffer.
 			buffer <- &chunk
@@ -148,4 +157,18 @@ func (clip *AudioClip) SetMetaData(title, artist, album string) {
 func fileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	return !errors.Is(err, os.ErrNotExist)
+}
+
+func maxf32(a, b float32) float32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func absf32(x float32) float32 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
