@@ -44,7 +44,7 @@ func SoftLimit(x, xThreshold, gain, alpha float32) float32 {
 
 // SoftLimitParameters computes the xThreshold and alpha parameters for SoftLimit.
 func SoftLimitParameters(gain float32) (float32, float32) {
-	if gain < 1 {
+	if gain <= 1 {
 		// We only support gain >= 1, for gain < 1 no soft limiting is required.
 		// xThreshold = 1 means SoftLimit becomes the identity function.
 		// alpha = 0 means the constant 1 function but is not relevant here.
@@ -55,9 +55,9 @@ func SoftLimitParameters(gain float32) (float32, float32) {
 	var xThreshold float32 = 1 / (2*gain - 1)
 	var yThreshold float32 = gain * xThreshold
 
-	if yThreshold < 0.7 {
+	if yThreshold < 0.5 {
 		// If the threshold is too low we ignore the smoothness requirement
-		yThreshold = 0.7
+		yThreshold = 0.5
 		xThreshold = yThreshold / gain
 	}
 
@@ -67,8 +67,8 @@ func SoftLimitParameters(gain float32) (float32, float32) {
 	//  	SoftLimit(xThreshold) = yThreshold
 	//		SoftLimit(1) = 1
 	//		SoftLimit'(1) = 0
-	tmp := xThreshold - 1
-	var alpha float32 = (yThreshold - 1) / (tmp * tmp)
+	tmp := 1 - xThreshold
+	var alpha float32 = (yThreshold - 1) / max(0.001, tmp*tmp)
 
 	return xThreshold, alpha
 }
