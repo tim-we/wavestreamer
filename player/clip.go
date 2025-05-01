@@ -17,20 +17,3 @@ type Clip interface {
 	// Duration of the clip.
 	Duration() time.Duration
 }
-
-type AudioChunk = struct {
-	// Left channel samples.
-	Left []float32
-
-	// Right channel samples.
-	Right []float32
-
-	// Number of samples in this chunk (up to FRAMES_PER_BUFFER).
-	Length int
-
-	// Root mean square of this chunk's audio (stereo average).
-	RMS float32
-
-	// Maximum absolute sample value across both channels.
-	Peak float32
-}
