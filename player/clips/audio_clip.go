@@ -90,7 +90,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 			}
 
 			chunk.Peak = peak
-			chunk.RMS = float32(math.Sqrt(0.5 * rmsAcc))
+			chunk.RMS = float32(math.Sqrt(rmsAcc / float64(config.CHANNELS*config.FRAMES_PER_BUFFER)))
 
 			// Send chunk to buffer.
 			buffer <- &chunk
