@@ -161,11 +161,17 @@ func computeTargetGain(chunk *AudioChunk, inputLoudness float32) float32 {
 		return 1
 	}
 
+	maxGain := utils.Clamp[float32](
+		1, // no gain
+		config.MAX_AMPLIFICATION,
+		2, // implementation limit
+	)
+
 	// The gain is basically the ratio between current loudness and target loudness.
 	gain := utils.Clamp(
 		1.0, // minimum
 		config.TARGET_MIN_RMS/max(0.01, inputLoudness), // ratio but protected against division by 0
-		2.0, // maximum (implementation limit)
+		maxGain,
 	)
 
 	if chunk.RMS > config.TARGET_MIN_RMS {
