@@ -15,6 +15,7 @@ A binary for AArch64 architecture (Raspberry Pi) is build by a GitHub Actions wo
 ### Features
 
 - 🎵 Plays music from a local library (any format ffmpeg can handle)
+- 🔊 Dynamically adjusts volume to keep audio levels consistent (can be disabled)
 - 🌐 Optional web app to control playback (skip, pause, repeat, schedule)
 - 🕒 Plays hourly news (currently supports [Tagesschau in 100 Sekunden](https://www.tagesschau.de/multimedia/sendung/tagesschau_in_100_sekunden))
 - 🧠 Simple, reliable, and built for 24/7 use on low-powered devices
