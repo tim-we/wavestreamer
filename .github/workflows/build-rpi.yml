@@ -87,7 +87,9 @@ jobs:
           CGO_CFLAGS: -I${{ github.workspace }}/build/portaudio-install/include -I${{ github.workspace }}/build/alsa/alsa-lib-1.2.10/include
           CGO_LDFLAGS: "-L${{ github.workspace }}/build/portaudio-install/lib -L${{ github.workspace }}/build/alsa/alsa-lib-1.2.10/src/.libs -lportaudio -lasound"
         run: |
-          go build -v -o wavestreamer ./wavestreamer.go
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          COMMIT=$(git rev-parse --short HEAD)
+          go build -v -ldflags "-X main.GitCommit=$COMMIT -X main.BuildTime=$BUILD_TIME" -o wavestreamer ./wavestreamer.go
 
       - name: Upload binary
         uses: actions/upload-artifact@v4

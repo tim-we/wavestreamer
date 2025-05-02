@@ -21,13 +21,25 @@ type Options struct {
 	WebAppPort  int    `short:"p" long:"port" description:"Web App Port" default:"6969"`
 	GPIO        bool   `short:"i" long:"gpio" description:"Enable GPIO controls"`
 	NoNormalize bool   `long:"no-normalize" description:"Disable automatic loudness normalization"`
+	Version     bool   `short:"v" long:"version" description:"Display version & build information"`
 }
+
+// These will be replaced in the GitHub Actions workflow
+var GitCommit string = "dev"
+var BuildTime string = "unknown"
 
 func main() {
 	var opts Options
 	_, err := flags.Parse(&opts)
 	if err != nil {
 		os.Exit(1)
+	}
+
+	if opts.Version {
+		fmt.Println("wavestreamer (github.com/tim-we/wavestreamer)")
+		fmt.Printf("Commit: %s\n", GitCommit)
+		fmt.Printf("Build time: %s\n", BuildTime)
+		return
 	}
 
 	fmt.Println("Using music directory:", opts.MusicDir)
