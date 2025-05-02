@@ -136,8 +136,6 @@ func (clip *AudioClip) Name() string {
 
 	filename := removeAudioExtension(filepath.Base(clip.filepath))
 
-	// TODO: Guess title and artist based on filename (if it includes -)
-
 	return filename
 }
 
