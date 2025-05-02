@@ -3,6 +3,7 @@ package decoder
 import (
 	"bufio"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -42,16 +43,18 @@ func NewDecodingProcess(filepath string) DecodingProcess {
 	}
 }
 
-func (process *DecodingProcess) StartDecoding() {
+func (process *DecodingProcess) StartDecoding() error {
 	if process.reader != nil {
-		log.Fatalf("Decoding for %s has already started.", process.filepath)
+		return fmt.Errorf("Decoding for %s has already started.", process.filepath)
 	}
 
 	if err := process.cmd.Start(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	process.reader = bufio.NewReader(process.stdout)
+
+	return nil
 }
 
 func (process *DecodingProcess) Close() {

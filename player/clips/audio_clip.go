@@ -39,8 +39,9 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 		return nil, fmt.Errorf("failed to get meta data of '%s'", filepath)
 	}
 
-	// TODO: consider checking for errors instead of panicing
-	decoder.StartDecoding()
+	if err := decoder.StartDecoding(); err != nil {
+		return nil, fmt.Errorf("failed to start the decoding process of '%s'", filepath)
+	}
 
 	buffer := make(chan *player.AudioChunk, 16)
 
