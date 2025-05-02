@@ -18,4 +18,4 @@ const TARGET_MIN_RMS = 0.25
 // When the signal is low and normalization is enabled (default) we will boost it
 // by basically scaling it with a factor (its a bit more complicated but thats the rough idea).
 // The maximum of this factor can be controlled here.
-const MAX_AMPLIFICATION = 1.75
+const MAX_AMPLIFICATION = 1.82
