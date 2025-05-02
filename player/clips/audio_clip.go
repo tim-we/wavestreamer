@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/tim-we/wavestreamer/config"
@@ -81,7 +82,7 @@ func NewAudioClip(filepath string) (*AudioClip, error) {
 					break
 				}
 
-				peak = maxf32(peak, maxf32(absf32(left), absf32(right)))
+				peak = max(peak, max(absf32(left), absf32(right)))
 				rmsAcc += float64(left*left + right*right)
 
 				chunk.Left[i] = left
@@ -129,13 +130,15 @@ func (clip *AudioClip) Stop() {
 }
 
 func (clip *AudioClip) Name() string {
-	if clip.meta.Artist == "" || clip.meta.Title == "" {
-		return filepath.Base(clip.filepath)
+	if clip.meta.Artist != "" && clip.meta.Title != "" {
+		return fmt.Sprintf("%s - %s", clip.meta.Artist, clip.meta.Title)
 	}
+
+	filename := removeAudioExtension(filepath.Base(clip.filepath))
 
 	// TODO: Guess title and artist based on filename (if it includes -)
 
-	return fmt.Sprintf("%s - %s", clip.meta.Artist, clip.meta.Title)
+	return filename
 }
 
 func (clip *AudioClip) Duration() time.Duration {
@@ -159,16 +162,21 @@ func fileExists(filename string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-func maxf32(a, b float32) float32 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func absf32(x float32) float32 {
 	if x < 0 {
 		return -x
 	}
 	return x
+}
+
+func removeAudioExtension(filename string) string {
+	ext := filepath.Ext(filename)
+	switch strings.ToLower(ext) {
+	case ".mp3", ".ogg", ".flac", ".wav", ".aac", ".m4a", ".opus":
+		// Remove known audio extensions.
+		return strings.TrimSuffix(filename, ext)
+	default:
+		// Unknown extension, return unchanged.
+		return filename
+	}
 }
