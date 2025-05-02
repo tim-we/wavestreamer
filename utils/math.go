@@ -1,79 +1,59 @@
 package utils
 
-// SoftLimit applies a soft limiting function to an audio sample `x`.
-//
-// This function scales the input linearly by `gain` as long as the absolute
-// value of the sample is below the `xThreshold`. Beyond this threshold, it
-// smoothly bends the output using a quadratic curve to avoid hard clipping,
-// ensuring a continuous and differentiable transition.
+// SoftLimitGain applies a gain to an audio sample `x`.
+// For gains > 1 a soft limiting function is applied to avoid sharp clipping.
 //
 // Parameters:
-//   - x: The input audio sample (typically in the range [-1, 1]).
-//   - xThreshold: The input threshold beyond which the soft limiting begins.
-//     This is usually derived from a desired output threshold.
-//   - gain: The linear gain applied below the threshold. Must be ≥ 1.
-//   - alpha: A precomputed shaping parameter that controls the curvature
-//     of the limiting section. It ensures that SoftLimit(1, ...) == 1
-//     and that the function's derivative at x == 1 is zero.
-//
-// Optimal values for xThreshold and alpha can be computed with SoftLimitParameters.
-//
-// Returns:
-//   - A softly limited version of `x`, preserving signal dynamics below
-//     the threshold and avoiding sharp clipping above it.
-func SoftLimit(x, xThreshold, gain, alpha float32) float32 {
+//   - x: The input audio sample in the range [-1, 1].
+//   - gain: The gain applied to the signal. Must be 0 ≤ gain ≤ 2.
+func SoftLimitGain(x, gain float32) float32 {
 	if gain < 1 {
 		return gain * x
 	}
 
-	absX := f32abs(x)
-	if absX < xThreshold {
-		return gain * x
-	}
-
-	var sign float32 = 1.0
+	absX := abs(x)
+	var sign float32 = 1
 	if x < 0 {
-		sign = -1.0
+		sign = -1
 	}
 
-	y := x - 1
-	y = alpha*y*y + 1 // alpha * (x-1)² + 1
+	// Blend between the identity function and f(x) = x*(2-x), which has the following properties:
+	// 	f(x) ∈ [0,1] for x ∈ [0,1]
+	// 	f(0) = 0 and f(1) = 1
+	//  f(x) > x for x ∈ [0,1] (amplification)
+	// 	f is a strictly monotonic function
+	//  f'(1) = 0 (soft top)
+	f := absX * (2 - absX)
 
-	return sign * y
+	// The blending factor will be in [0,1].
+	blend := min(2.0, gain) - 1
+
+	// The blended function g will have the following property: g'(0) = gain
+	return sign * Lerp(absX, f, blend)
 }
 
-// SoftLimitParameters computes the xThreshold and alpha parameters for SoftLimit.
-func SoftLimitParameters(gain float32) (float32, float32) {
-	if gain <= 1 {
-		// We only support gain >= 1, for gain < 1 no soft limiting is required.
-		// xThreshold = 1 means SoftLimit becomes the identity function.
-		// alpha = 0 means the constant 1 function but is not relevant here.
-		return 1, 0
-	}
-
-	// Compute xThreshold s.t. there is smooth transition from the linear to quadratic piece
-	var xThreshold float32 = 1 / (2*gain - 1)
-	var yThreshold float32 = gain * xThreshold
-
-	if yThreshold < 0.5 {
-		// If the threshold is too low we ignore the smoothness requirement
-		yThreshold = 0.5
-		xThreshold = yThreshold / gain
-	}
-
-	// Compute alpha = (yThreshold - 1) / (xThreshold -1)²
-	// SoftLimit(x) = alpha * (x-1)² + 1 for x >= xThreshold
-	// The formula has been derived from
-	//  	SoftLimit(xThreshold) = yThreshold
-	//		SoftLimit(1) = 1
-	//		SoftLimit'(1) = 0
-	tmp := 1 - xThreshold
-	var alpha float32 = (yThreshold - 1) / max(0.001, tmp*tmp)
-
-	return xThreshold, alpha
+type Float interface {
+	~float32 | ~float64
 }
 
-func f32abs(x float32) float32 {
+func Clamp[T Float](minimum, value, maximum T) T {
+	if value < minimum {
+		return minimum
+	}
+
+	if value > maximum {
+		return maximum
+	}
+
+	return value
+}
+
+func Lerp[T Float](a, b, s T) T {
+	d := b - a
+	return a + s*d
+}
+
+func abs[T Float](x T) T {
 	if x < 0 {
 		return -x
 	}

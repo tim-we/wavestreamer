@@ -8,12 +8,11 @@ import (
 
 func TestSoftLimitNoGain(t *testing.T) {
 	gain := float32(1.0)
-	xThreshold, alpha := SoftLimitParameters(gain)
 
 	for i := range 100 {
 		x := float32(i) / 100
 
-		y := SoftLimit(x, xThreshold, gain, alpha)
+		y := SoftLimitGain(x, gain)
 
 		if math.IsNaN(float64(y)) {
 			t.Errorf("Unexpected NaN for x=%v", x)
@@ -31,13 +30,12 @@ func TestSoftLimitMonotonicity(t *testing.T) {
 
 	for range 42 {
 		gain := rng.Float32() + 0.5
-		xThreshold, alpha := SoftLimitParameters(gain)
 
 		var lastY float32 = -0.1337
 
 		for i := range 100 {
 			x := float32(i) / 100
-			y := SoftLimit(x, xThreshold, gain, alpha)
+			y := SoftLimitGain(x, gain)
 
 			if y <= lastY {
 				t.Errorf("Expected SoftLimit to be strictly monotonic but its not for gain %v", gain)
@@ -52,20 +50,18 @@ func TestSoftLimitOutputRange(t *testing.T) {
 	seed := int64(13)
 	rng := rand.New(rand.NewSource(seed))
 
-	for range 42 {
-		gain := rng.Float32() + 0.5
-		if rng.Intn(13) < 2 {
-			gain = 1.0
-		}
-		xThreshold, alpha := SoftLimitParameters(gain)
+	gains := make([]float32, 42)
 
-		if gain > 1 && alpha > 0 {
-			t.Errorf("Expected to alpha to be negative for gain %v but was: %v", gain, alpha)
-		}
+	for i := range len(gains) {
+		gains[i] = rng.Float32() + 0.5
+	}
 
+	gains[0] = 1
+
+	for _, gain := range gains {
 		for i := range 100 {
 			x := float32(i) / 100
-			y := SoftLimit(x, xThreshold, gain, alpha)
+			y := SoftLimitGain(x, gain)
 
 			if y < 0 || y > 1 {
 				t.Errorf("Incorrect output range (got %v)", y)
@@ -75,10 +71,18 @@ func TestSoftLimitOutputRange(t *testing.T) {
 				t.Errorf("Unexpected NaN for gain=%v and x=%v", gain, x)
 			}
 		}
+
+		if !isApproxEqual(0, SoftLimitGain(0, gain), 1e-6) {
+			t.Errorf("SoftLimitGain(0) = %v but should have been 0", SoftLimitGain(0, gain))
+		}
+
+		if gain > 1 && !isApproxEqual(1, SoftLimitGain(1, gain), 1e-6) {
+			t.Errorf("SoftLimitGain(1) = %v but should have been 1", SoftLimitGain(1, gain))
+		}
 	}
 }
 
 func isApproxEqual(a, b, delta float32) bool {
-	d := f32abs(a - b)
+	d := abs(a - b)
 	return d <= delta
 }

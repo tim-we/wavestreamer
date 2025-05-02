@@ -1,6 +1,8 @@
 package player
 
-import "github.com/tim-we/wavestreamer/utils"
+import (
+	"github.com/tim-we/wavestreamer/utils"
+)
 
 type AudioChunk struct {
 	// Left channel samples.
@@ -20,18 +22,18 @@ type AudioChunk struct {
 }
 
 func (chunk *AudioChunk) ApplyGain(startGain, endGain float32) {
+	if startGain == 1 && endGain == 1 {
+		// Nothing to do.
+		return
+	}
+
 	a := startGain
 	b := (endGain - startGain) / float32(max(1, chunk.Length))
 
-	// Its not safe to just multiply by gain, it would cause clipping.
-	// To avoid clipping we use a soft limiting function.
-	// For optimization purposes we precompute some parameters:
-	xThreshold, alpha := utils.SoftLimitParameters(0.5 * (startGain + endGain))
-
-	// Apply soft limit with the computed parameters:
+	// Linearly interpolate gain and apply gain with soft limit:
 	for i := range chunk.Length {
 		gain := a + float32(i)*b
-		chunk.Left[i] = utils.SoftLimit(chunk.Left[i], xThreshold, gain, alpha)
-		chunk.Right[i] = utils.SoftLimit(chunk.Right[i], xThreshold, gain, alpha)
+		chunk.Left[i] = utils.SoftLimitGain(chunk.Left[i], gain)
+		chunk.Right[i] = utils.SoftLimitGain(chunk.Right[i], gain)
 	}
 }

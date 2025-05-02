@@ -10,6 +10,7 @@ import (
 
 	"github.com/gordonklaus/portaudio"
 	"github.com/tim-we/wavestreamer/config"
+	"github.com/tim-we/wavestreamer/utils"
 )
 
 var userQueue = make([]Clip, 0, 12)
@@ -82,6 +83,7 @@ func Start(clipProvider func() Clip, normalize bool) {
 	defer stream.Stop()
 
 	var loudness float32
+	var lastGain float32 = 1.0
 
 	for {
 		clip := nextClip()
@@ -95,6 +97,9 @@ func Start(clipProvider func() Clip, normalize bool) {
 		currentlyPlaying = clip.Name()
 		addClipToHistory(clip)
 
+		// Reset measured loudness for new clip
+		loudness = config.TARGET_MIN_RMS
+
 		for {
 			if shouldSkipCurrentClip() {
 				clip.Stop()
@@ -104,8 +109,10 @@ func Start(clipProvider func() Clip, normalize bool) {
 			chunk, hasMore := clip.NextChunk()
 
 			if chunk != nil {
-				loudness = 0.9*loudness + 0.1*chunk.RMS
-				// TODO #5: adjust chunk volume
+				loudness = 0.975*loudness + 0.025*chunk.RMS
+				gain := computeTargetGain(chunk, loudness)
+				chunk.ApplyGain(lastGain, gain)
+				lastGain = gain
 				nextAudioChunk <- chunk
 			}
 
@@ -146,4 +153,32 @@ func shouldSkipCurrentClip() bool {
 	default:
 		return false
 	}
+}
+
+func computeTargetGain(chunk *AudioChunk, inputLoudness float32) float32 {
+	// We don't want to boost already loud signals or signals which are very quiet.
+	if inputLoudness >= config.TARGET_MIN_RMS || inputLoudness < 0.001 {
+		return 1
+	}
+
+	// The gain is basically the ratio between current loudness and target loudness.
+	gain := utils.Clamp(
+		1.0, // minimum
+		config.TARGET_MIN_RMS/max(0.01, inputLoudness), // ratio but protected against division by 0
+		2.0, // maximum (implementation limit)
+	)
+
+	// TODO
+	if chunk.RMS > config.TARGET_MIN_RMS {
+		rel := utils.Clamp(0, 2*(chunk.RMS-config.TARGET_MIN_RMS)/config.TARGET_MIN_RMS, 1)
+		// bring gain closer to 1
+		gain = rel*gain + (1-rel)*1
+	}
+
+	if chunk.Peak*gain > 1 {
+		// Lower target gain to avoid over amplification
+		gain = min(1, 1/chunk.Peak)
+	}
+
+	return gain
 }
