@@ -111,7 +111,9 @@ func Start(clipProvider func() Clip, normalize bool) {
 			if chunk != nil {
 				loudness = 0.975*loudness + 0.025*chunk.RMS
 				gain := computeTargetGain(chunk, loudness)
-				chunk.ApplyGain(lastGain, gain)
+				if normalize {
+					chunk.ApplyGain(lastGain, gain)
+				}
 				lastGain = gain
 				nextAudioChunk <- chunk
 			}
