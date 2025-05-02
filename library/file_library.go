@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
 )
@@ -76,6 +77,32 @@ func PickRandomClip() *LibraryFile {
 
 func PickRandomHostClip() *LibraryFile {
 	return pickRandomClipWhichHasNotBeenPlayedInAWhile(hostClips)
+}
+
+func Search(query string) []*LibraryFile {
+	parts := strings.Split(strings.ToLower(query), " ")
+	// TODO: consider additional filtering
+	results := append(search(songFiles, parts), search(clipFiles, parts)...)
+	results = append(results, search(hostClips, parts)...)
+
+	return results
+}
+
+func search(clips []*LibraryFile, queryParts []string) []*LibraryFile {
+	results := make([]*LibraryFile, 0, 16)
+
+clipLoop:
+	for _, clip := range clips {
+		// All parts must match.
+		for _, part := range queryParts {
+			if !clip.Matches(part) {
+				continue clipLoop
+			}
+		}
+		results = append(results, clip)
+	}
+
+	return results
 }
 
 func isHostClip(file string) bool {
