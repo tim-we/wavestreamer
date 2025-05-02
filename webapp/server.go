@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/tim-we/wavestreamer/library"
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
 	"github.com/tim-we/wavestreamer/utils"
@@ -57,11 +58,28 @@ func StartServer(port int) {
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
 
+	http.HandleFunc("/api/v1.0/library/search", func(w http.ResponseWriter, r *http.Request) {
+		// Parse query parameters and get the value of `query`
+		query := r.URL.Query().Get("query")
+		// Collect results
+		results := searchResultsAsStrings(library.Search(query))
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApiSearchResponse{"ok", results})
+	})
+
 	// Start server
 	go func() {
 		log.Printf("Serving on http://localhost:%d\n", port)
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 	}()
+}
+
+func searchResultsAsStrings(results []*library.LibraryFile) []string {
+	stringResults := make([]string, len(results))
+	for i, file := range results {
+		stringResults[i] = file.Name()
+	}
+	return stringResults
 }
 
 type ApiNowResponse struct {
@@ -81,4 +99,9 @@ type ApiNowLibraryInfo struct {
 
 type ApiOkResponse struct {
 	Status string `json:"status"`
+}
+
+type ApiSearchResponse struct {
+	Status  string   `json:"status"`
+	Results []string `json:"results"`
 }

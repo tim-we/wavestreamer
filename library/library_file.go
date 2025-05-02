@@ -53,6 +53,11 @@ func (file *LibraryFile) CreateClip() *clips.AudioClip {
 	return clip
 }
 
+func (file *LibraryFile) Name() string {
+	// TODO: Share implementation with AudioClip
+	return fp.Base(file.filepath)
+}
+
 func (file *LibraryFile) Matches(query string) bool {
 	return strings.Contains(file.searchData, query)
 }
