@@ -36,6 +36,7 @@ type Float interface {
 	~float32 | ~float64
 }
 
+// Clamp returns value clamped between minimum and maximum.
 func Clamp[T Float](minimum, value, maximum T) T {
 	if value < minimum {
 		return minimum
@@ -48,6 +49,7 @@ func Clamp[T Float](minimum, value, maximum T) T {
 	return value
 }
 
+// Lerp performs linear interpolation between a and b using parameter s in [0, 1].
 func Lerp[T Float](a, b, s T) T {
 	d := b - a
 	return a + s*d

@@ -82,9 +82,6 @@ func Start(clipProvider func() Clip, normalize bool) {
 	}
 	defer stream.Stop()
 
-	var loudness float32
-	var lastGain float32 = 1.0
-
 	for {
 		clip := nextClip()
 
@@ -98,7 +95,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 		addClipToHistory(clip)
 
 		// Reset measured loudness for new clip
-		loudness = config.TARGET_MIN_RMS
+		var inputLoudness float32 = config.TARGET_MIN_RMS
+		var lastGain float32 = 1.0
 
 		for {
 			if shouldSkipCurrentClip() {
@@ -109,8 +107,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 			chunk, hasMore := clip.NextChunk()
 
 			if chunk != nil {
-				loudness = 0.975*loudness + 0.025*chunk.RMS
-				gain := computeTargetGain(chunk, loudness)
+				inputLoudness = computeCurrentLoudness(inputLoudness, chunk)
+				gain := computeTargetGain(chunk, inputLoudness)
 				if normalize {
 					chunk.ApplyGain(lastGain, gain)
 				}
@@ -183,4 +181,15 @@ func computeTargetGain(chunk *AudioChunk, inputLoudness float32) float32 {
 	}
 
 	return gain
+}
+
+func computeCurrentLoudness(previousLoudness float32, chunk *AudioChunk) float32 {
+	// 0.35 can be quite loud already
+	const maxInfluenceLevel = max(config.TARGET_MIN_RMS, 0.35)
+
+	// Louder chunks should have a faster impact, for quiet chunks the loudness should decay slower.
+	factor := utils.Lerp(0.01, 0.25, min(chunk.RMS, maxInfluenceLevel)/maxInfluenceLevel)
+
+	// Interpolate previous loudness value with current chunks loudness (RMS)
+	return utils.Lerp(previousLoudness, chunk.RMS, factor)
 }
