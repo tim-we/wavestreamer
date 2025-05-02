@@ -168,11 +168,11 @@ func computeTargetGain(chunk *AudioChunk, inputLoudness float32) float32 {
 		2.0, // maximum (implementation limit)
 	)
 
-	// TODO
 	if chunk.RMS > config.TARGET_MIN_RMS {
-		rel := utils.Clamp(0, 2*(chunk.RMS-config.TARGET_MIN_RMS)/config.TARGET_MIN_RMS, 1)
-		// bring gain closer to 1
-		gain = rel*gain + (1-rel)*1
+		// Measure how much we are currently overshooting the target value
+		over := utils.Clamp(0, (gain*chunk.RMS-config.TARGET_MIN_RMS)/config.TARGET_MIN_RMS, 1)
+		// Lower the gain
+		gain = utils.Lerp(gain, 1, over)
 	}
 
 	if chunk.Peak*gain > 1 {
