@@ -80,7 +80,14 @@ func PickRandomHostClip() *LibraryFile {
 }
 
 func Search(query string) []*LibraryFile {
-	parts := strings.Split(strings.ToLower(query), " ")
+	modifiedQuery := strings.Trim(strings.ToLower(query), " ")
+
+	if len(modifiedQuery) == 0 {
+		return []*LibraryFile{}
+	}
+
+	parts := strings.Split(modifiedQuery, " ")
+
 	// TODO: consider additional filtering
 	results := append(search(songFiles, parts), search(clipFiles, parts)...)
 	results = append(results, search(hostClips, parts)...)
