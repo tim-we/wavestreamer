@@ -43,7 +43,7 @@ func main() {
 	}
 
 	fmt.Println("Using music directory:", opts.MusicDir)
-	library.ScanRootDir(opts.MusicDir)
+	library.WatchRootDir(opts.MusicDir)
 
 	// Give PortAudio/ALSA/The audio system some time to start.
 	// Otherwise we get stutters in the beginning.

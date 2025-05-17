@@ -39,14 +39,17 @@ func (ls *LibrarySet) AddOrUpdate(path string) error {
 }
 
 // Remove deletes the file entry.
-func (ls *LibrarySet) Remove(path string) {
+func (ls *LibrarySet) Remove(path string) bool {
 	ls.mu.Lock()
 	defer ls.mu.Unlock()
 
 	if _, ok := ls.files[path]; ok {
 		delete(ls.files, path)
 		ls.dirty = true
+		return true
 	}
+
+	return false
 }
 
 // Rename changes the key and preserves the file object and metadata.
