@@ -3,7 +3,6 @@ package library
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,9 +10,9 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 )
 
-var hostClips = make([]*LibraryFile, 0, 128)
-var songFiles = make([]*LibraryFile, 0, 512)
-var clipFiles = make([]*LibraryFile, 0, 256)
+var hostClips = NewLibrarySet(128)
+var songFiles = NewLibrarySet(512)
+var clipFiles = NewLibrarySet(256)
 
 func ScanRootDir(root string) {
 	if !folderExists(root) {
@@ -32,20 +31,20 @@ func ScanRootDir(root string) {
 			return nil
 		}
 
-		file, err2 := NewLibraryFile(path)
+		var err2 error
+
+		if isSong(path) {
+			err2 = songFiles.AddOrUpdate(path)
+		} else if isClipFile(path) {
+			err2 = clipFiles.AddOrUpdate(path)
+		} else if isHostClip(path) {
+			err2 = hostClips.AddOrUpdate(path)
+		} else {
+			unknownFiles++
+		}
 
 		if err2 != nil {
 			return err2
-		}
-
-		if isSong(path) {
-			songFiles = append(songFiles, file)
-		} else if isClipFile(path) {
-			clipFiles = append(clipFiles, file)
-		} else if isHostClip(path) {
-			hostClips = append(hostClips, file)
-		} else {
-			unknownFiles++
 		}
 
 		return nil
@@ -57,9 +56,9 @@ func ScanRootDir(root string) {
 
 	fmt.Printf(
 		"Scanning complete. Found:\n - %d songs\n - %d clips\n - %d host/dj clips\n",
-		len(songFiles),
-		len(clipFiles),
-		len(hostClips),
+		songFiles.Size(),
+		clipFiles.Size(),
+		hostClips.Size(),
 	)
 
 	if unknownFiles > 0 {
@@ -89,25 +88,8 @@ func Search(query string) []*LibraryFile {
 	parts := strings.Split(modifiedQuery, " ")
 
 	// TODO: consider additional filtering
-	results := append(search(songFiles, parts), search(clipFiles, parts)...)
-	results = append(results, search(hostClips, parts)...)
-
-	return results
-}
-
-func search(clips []*LibraryFile, queryParts []string) []*LibraryFile {
-	results := make([]*LibraryFile, 0, 16)
-
-clipLoop:
-	for _, clip := range clips {
-		// All parts must match.
-		for _, part := range queryParts {
-			if !clip.Matches(part) {
-				continue clipLoop
-			}
-		}
-		results = append(results, clip)
-	}
+	results := append(songFiles.search(parts), clipFiles.search(parts)...)
+	results = append(results, hostClips.search(parts)...)
 
 	return results
 }
@@ -127,14 +109,14 @@ func isSong(file string) bool {
 	return matches
 }
 
-func pickRandomClipWhichHasNotBeenPlayedInAWhile(clips []*LibraryFile) *LibraryFile {
-	if len(clips) == 0 {
+func pickRandomClipWhichHasNotBeenPlayedInAWhile(clips *LibrarySet) *LibraryFile {
+	if clips.Size() == 0 {
 		return nil
 	}
 
 	var candidate *LibraryFile
 	for range 2 {
-		newCandidate := clips[rand.Intn(len(clips))]
+		newCandidate := clips.GetRandom()
 		if newCandidate.lastPlayed == nil {
 			return newCandidate
 		}
