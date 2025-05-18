@@ -137,7 +137,7 @@ func watchFoldersForChanges(folders []string) {
 				}
 			case event.Op&fsnotify.Rename != 0:
 				// Treat as remove for now (can't get the new name)
-				// FIXME: Get the new name or trigger rescan
+				// FIXME #9: Get the new name or trigger rescan
 				fallthrough
 			case event.Op&fsnotify.Remove != 0:
 				removed := songFiles.Remove(path)
