@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 type LibrarySet struct {
-	files map[string]*LibraryFile // holds the data (ground truth)
-	list  []*LibraryFile          // for random access (derived from `files`)
-	dirty bool                    // dirty=true implies the list is outdated and must be regenerated
-	mu    sync.RWMutex            // different threads/goroutines access this struct
+	files map[string]*LibraryFile    // holds the data (ground truth)
+	idmap map[uuid.UUID]*LibraryFile // helper for fast lookup via id
+	list  []*LibraryFile             // for random access (derived from `files`)
+	dirty bool                       // dirty=true implies the list is outdated and must be regenerated
+	mu    sync.RWMutex               // different threads/goroutines access this struct
 }
 
 func NewLibrarySet(initialCapacity int) *LibrarySet {
@@ -34,6 +37,7 @@ func (ls *LibrarySet) AddOrUpdate(path string) error {
 
 	ls.files[path] = file
 	ls.dirty = true
+	ls.idmap[file.Id] = file
 
 	return nil
 }
@@ -43,8 +47,9 @@ func (ls *LibrarySet) Remove(path string) bool {
 	ls.mu.Lock()
 	defer ls.mu.Unlock()
 
-	if _, ok := ls.files[path]; ok {
+	if file, ok := ls.files[path]; ok {
 		delete(ls.files, path)
+		delete(ls.idmap, file.Id)
 		ls.dirty = true
 		return true
 	}
@@ -65,6 +70,7 @@ func (ls *LibrarySet) Rename(oldPath, newPath string) {
 		delete(ls.files, oldPath)
 		file.filepath = newPath
 		ls.files[newPath] = file
+		// idmap does not have to be updated here
 		ls.dirty = true
 	}
 }

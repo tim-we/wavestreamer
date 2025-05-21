@@ -11,9 +11,12 @@ import (
 
 	"github.com/tim-we/wavestreamer/player/clips"
 	"github.com/tim-we/wavestreamer/player/decoder"
+
+	"github.com/google/uuid"
 )
 
 type LibraryFile struct {
+	Id         uuid.UUID
 	filepath   string
 	searchData string
 	meta       *decoder.AudioFileMetaData
@@ -28,6 +31,7 @@ func NewLibraryFile(filepath string) (*LibraryFile, error) {
 	}
 
 	return &LibraryFile{
+		Id:         uuid.New(),
 		filepath:   filepath,
 		searchData: createSearchData(filepath, nil),
 		meta:       nil,

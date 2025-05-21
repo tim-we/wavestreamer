@@ -9,4 +9,7 @@ require (
 	github.com/jessevdk/go-flags v1.6.1
 )
 
-require golang.org/x/sys v0.33.0 // indirect
+require (
+	github.com/google/uuid v1.6.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+)
