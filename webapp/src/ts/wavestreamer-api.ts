@@ -72,11 +72,6 @@ export default class WavestreamerApi {
         await this.api_request("/repeat", "PUT");
     }
 
-    public async extensions() {
-        const obj = await this.api_request<APIExtensionResponse>("/extensions");
-        return obj.extensions;
-    }
-
     public async search(query: string): Promise<string[]> {
         const nice_query = encodeURIComponent(query.trim());
 

@@ -9,7 +9,6 @@ import listIcon from "../../img/list.svg";
 
 type ControlsProps = {
     radio: WavestreamerApi;
-    extensions: { name: string; command: string }[];
 };
 
 const SVG_ICONS = {
@@ -25,20 +24,6 @@ export default class Controls extends Component<ControlsProps> {
 
         return (
             <section id="controls">
-                {this.props.extensions.map((ext) => (
-                    <Button
-                        key={ext.command}
-                        tooltip={ext.name}
-                        onClick={() =>
-                            radio.api_request(
-                                `/extensions/${ext.command}/schedule`,
-                                "PUT"
-                            )
-                        }
-                    >
-                        {ext.command}
-                    </Button>
-                ))}
                 <Button
                     id="pause"
                     tooltip="toggle pause"
@@ -60,6 +45,14 @@ export default class Controls extends Component<ControlsProps> {
                     icon="list"
                     onClick={() => {
                         SongListModal.show(radio);
+                        return Promise.resolve();
+                    }}
+                />
+                <Button
+                    id="news"
+                    tooltip="Tagesschau in 100s"
+                    onClick={() => {
+                        // TODO
                         return Promise.resolve();
                     }}
                 />

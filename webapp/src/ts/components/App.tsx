@@ -12,18 +12,15 @@ type AppProps = {
 
 type AppState = {
     now?: { current: string; history: HistoryEntry[] };
-    extensions: { name: string; command: string }[];
 };
 
 export default class App extends Component<AppProps, AppState> {
     public constructor(props: AppProps) {
         super(props);
-        this.state = { extensions: [] };
 
         const radio = props.radio;
 
         radio.on("update", (now) => this.setState({ now }));
-        //radio.extensions().then((extensions) => this.setState({ extensions }));
     }
 
     public render() {
@@ -35,10 +32,7 @@ export default class App extends Component<AppProps, AppState> {
                 <Header />
                 <div id="content">
                     <NowPlaying clip={state.now?.current} />
-                    <Controls
-                        radio={props.radio}
-                        extensions={state.extensions}
-                    />
+                    <Controls radio={props.radio} />
                     <History data={state.now ? state.now.history : []} />
                     <section id="stats"/>
                 </div>
