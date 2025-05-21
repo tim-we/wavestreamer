@@ -1,5 +1,5 @@
 import type { FunctionComponent } from "preact";
-import type { HistoryEntry } from "../wavestreamer";
+import type { HistoryEntry } from "../wavestreamer-api";
 
 type HistoryProps = {
     data: HistoryEntry[];

@@ -1,5 +1,5 @@
 import { Component } from "preact";
-import PyRadio, { HistoryEntry } from "../wavestreamer";
+import WavestreamerApi, { HistoryEntry } from "../wavestreamer-api";
 import About from "./About";
 import Controls from "./Controls";
 import Header from "./Header";
@@ -7,7 +7,7 @@ import History from "./History";
 import NowPlaying from "./NowPlaying";
 
 type AppProps = {
-    radio: PyRadio;
+    radio: WavestreamerApi;
 };
 
 type AppState = {

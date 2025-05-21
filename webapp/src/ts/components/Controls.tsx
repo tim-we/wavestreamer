@@ -1,5 +1,5 @@
 import { Component } from "preact";
-import PyRadio from "../wavestreamer";
+import WavestreamerApi from "../wavestreamer-api";
 import * as SongListModal from "./SongListModal";
 
 import pauseIcon from "../../img/pause.svg";
@@ -8,7 +8,7 @@ import skipIcon from "../../img/skip.svg";
 import listIcon from "../../img/list.svg";
 
 type ControlsProps = {
-    radio: PyRadio;
+    radio: WavestreamerApi;
     extensions: { name: string; command: string }[];
 };
 

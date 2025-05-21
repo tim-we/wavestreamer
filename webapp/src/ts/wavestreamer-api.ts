@@ -1,6 +1,6 @@
 const DEFAULT_HOST: string = window.location.host;
 
-export default class Wavestreamer {
+export default class WavestreamerApi {
     public readonly host: string;
     private eventListeners: Map<RadioEvent, UpdateEventListener[]> = new Map();
     private timeouts: Map<RadioEvent, number> = new Map();
@@ -30,7 +30,7 @@ export default class Wavestreamer {
         listeners.push(listener);
     }
 
-    public async api_request<T extends APIBaseResponse>(
+    public async api_request<T extends ApiBaseResponse>(
         path: string,
         method: HTTPMethod = "GET",
         data: any = null
@@ -143,13 +143,13 @@ type RequestInitData = RequestInit & { follow: "error" };
 
 type APIErrorResponse = { status: "error"; message: string };
 
-type APIBaseResponse = {
+type ApiBaseResponse = {
     status: "ok";
 };
 
-type APIResponse = APIBaseResponse | APIErrorResponse;
+type APIResponse = ApiBaseResponse | APIErrorResponse;
 
-type APINowResponse = APIBaseResponse & NowData;
+type APINowResponse = ApiBaseResponse & NowData;
 
 type APIExtensionResponse = {
     status: "ok";

@@ -1,15 +1,15 @@
 import { render, Component, createRef } from "preact";
-import PyRadio from "../wavestreamer";
+import WavestreamerApi from "../wavestreamer-api";
 import { unmountComponentAtNode, type MouseEvent } from "preact/compat";
 
 const portal = document.getElementById("modal-portal")!;
 
-export function show(radio: PyRadio) {
+export function show(radio: WavestreamerApi) {
     render(<SongListModal radio={radio} />, portal);
 }
 
 type SLMProps = {
-    radio: PyRadio;
+    radio: WavestreamerApi;
 };
 
 type SLMState = {
@@ -119,7 +119,7 @@ class SongListModal extends Component<SLMProps, SLMState> {
 
 type ClipProps = {
     clip: string;
-    radio: PyRadio;
+    radio: WavestreamerApi;
     expanded: boolean;
     onClick: (e: MouseEvent<HTMLDivElement>) => void;
 };
