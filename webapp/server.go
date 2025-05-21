@@ -31,7 +31,7 @@ func StartServer(port int) {
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
 
 	// API: /now endpoint
-	http.HandleFunc("/api/v1.0/now", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/now", func(w http.ResponseWriter, r *http.Request) {
 		response := ApiNowResponse{
 			Status:      "ok",
 			Current:     player.GetCurrentlyPlaying(),
@@ -44,21 +44,21 @@ func StartServer(port int) {
 	})
 
 	// API: /skip endpoint
-	http.HandleFunc("/api/v1.0/skip", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/skip", func(w http.ResponseWriter, r *http.Request) {
 		player.SkipCurrent()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
 
 	// API: /pause endpoint
-	http.HandleFunc("/api/v1.0/pause", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/pause", func(w http.ResponseWriter, r *http.Request) {
 		player.QueueClip(clips.NewPause(10 * time.Minute))
 		player.SkipCurrent()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
 
-	http.HandleFunc("/api/v1.0/library/search", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/library/search", func(w http.ResponseWriter, r *http.Request) {
 		// Parse query parameters and get the value of `query`
 		query := r.URL.Query().Get("query")
 		// Collect results

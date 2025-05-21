@@ -1,5 +1,5 @@
 import { render, Component, createRef } from "preact";
-import WavestreamerApi from "../wavestreamer-api";
+import WavestreamerApi, { SearchResultEntry } from "../wavestreamer-api";
 import { unmountComponentAtNode, type MouseEvent } from "preact/compat";
 
 const portal = document.getElementById("modal-portal")!;
@@ -13,8 +13,8 @@ type SLMProps = {
 };
 
 type SLMState = {
-    clips: string[];
-    expandedClip?: string;
+    clips: SearchResultEntry[];
+    expandedClipId?: string;
 };
 
 class SongListModal extends Component<SLMProps, SLMState> {
@@ -58,7 +58,7 @@ class SongListModal extends Component<SLMProps, SLMState> {
                                 key={clip}
                                 radio={radio}
                                 clip={clip}
-                                expanded={this.state.expandedClip === clip}
+                                expanded={this.state.expandedClipId === clip.id}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     let selection = window.getSelection();
@@ -66,7 +66,7 @@ class SongListModal extends Component<SLMProps, SLMState> {
                                         selection === null ||
                                         selection.type !== "Range"
                                     ) {
-                                        this.setState({ expandedClip: clip });
+                                        this.setState({ expandedClipId: clip.id });
                                     }
                                 }}
                             />
@@ -118,30 +118,20 @@ class SongListModal extends Component<SLMProps, SLMState> {
 }
 
 type ClipProps = {
-    clip: string;
+    clip: SearchResultEntry;
     radio: WavestreamerApi;
     expanded: boolean;
     onClick: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
-type ClipState = {
-    folder: string;
-    filename: string;
-};
-
-class Clip extends Component<ClipProps, ClipState> {
-    constructor(props: ClipProps) {
-        super(props);
-        let compontents = props.clip.split("/");
-        let folder = compontents.slice(0, compontents.length - 1).join("/");
-        let filename = compontents[compontents.length - 1];
-        this.state = { folder, filename };
-    }
-
+class Clip extends Component<ClipProps> {
     public render() {
         const props = this.props;
-        const state = this.state;
         const radio = props.radio;
+
+        const compontents = props.clip.name.split("/");
+        const folder = compontents.slice(0, compontents.length - 1).join("/");
+        const filename = compontents[compontents.length - 1];
 
         return (
             <div
@@ -149,10 +139,10 @@ class Clip extends Component<ClipProps, ClipState> {
                 onClick={props.onClick}
             >
                 <div className="main">
-                    {state.folder.length > 0 ? (
-                        <span className="folder">{state.folder + "/"}</span>
+                    {folder.length > 0 ? (
+                        <span className="folder">{folder + "/"}</span>
                     ) : null}
-                    <span className="file">{state.filename}</span>
+                    <span className="file">{filename}</span>
                 </div>
                 <div className="buttons">
                     <a
@@ -161,18 +151,18 @@ class Clip extends Component<ClipProps, ClipState> {
                         onClick={async (e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            await radio.schedule(props.clip);
-                            alert(state.filename + " added to queue.");
+                            await radio.schedule(props.clip.id);
+                            alert(filename + " added to queue.");
                         }}
                     >
                         add to queue
                     </a>
                     <a
                         className="download"
-                        download={state.filename}
-                        title={"download " + state.filename}
+                        download={filename}
+                        title={"download " + filename}
                         onClick={(e) => e.stopPropagation()}
-                        href={radio.download_url(props.clip)}
+                        href={radio.getDownloadUrl(props.clip.id)}
                     >
                         download
                     </a>

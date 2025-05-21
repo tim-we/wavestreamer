@@ -18,7 +18,7 @@ export default class WavestreamerApi {
     }
 
     public get base_url(): string {
-        return `http://${this.host}/api/v1.0`;
+        return `http://${this.host}/api`;
     }
 
     public on(type: RadioEvent, listener: UpdateEventListener): void {
@@ -30,7 +30,7 @@ export default class WavestreamerApi {
         listeners.push(listener);
     }
 
-    public async api_request<T extends ApiBaseResponse>(
+    private async request<T extends ApiBaseResponse>(
         path: string,
         method: HTTPMethod = "GET",
         data: any = null
@@ -47,49 +47,49 @@ export default class WavestreamerApi {
         }
 
         let response = await fetch(this.base_url + path, init);
-        let obj = (await response.json()) as APIResponse;
+        let obj = (await response.json()) as ApiResponse;
 
         return obj.status === "ok"
             ? Promise.resolve(obj as T)
-            : Promise.reject(obj as APIErrorResponse);
+            : Promise.reject(obj as ApiErrorResponse);
     }
 
-    public now(): Promise<APINowResponse> {
-        return this.api_request("/now");
+    public now(): Promise<ApiNowResponse> {
+        return this.request("/now");
     }
 
     public async skip(): Promise<void> {
-        await this.api_request("/skip", "PUT");
+        await this.request("/skip", "PUT");
         this.scheduleUpdate();
     }
 
     public async pause(): Promise<void> {
-        await this.api_request("/pause", "POST");
+        await this.request("/pause", "POST");
         this.scheduleUpdate();
     }
 
     public async repeat(): Promise<void> {
-        await this.api_request("/repeat", "PUT");
+        await this.request("/repeat", "PUT");
     }
 
-    public async search(query: string): Promise<string[]> {
+    public async search(query: string): Promise<ApiSearchResponse["results"]> {
         const nice_query = encodeURIComponent(query.trim());
 
         if (nice_query === "") {
             return Promise.resolve([]);
         }
 
-        const response = await this.api_request<APISearchResponse>(
+        const response = await this.request<ApiSearchResponse>(
             "/library/search?query=" + nice_query
         );
         return response.results;
     }
 
-    public async schedule(clip: string): Promise<void> {
-        await this.api_request("/schedule", "POST", new URLSearchParams({file: clip}));
+    public async schedule(clip: SearchResultEntry["id"]): Promise<void> {
+        await this.request("/schedule", "POST", new URLSearchParams({file: clip}));
     }
 
-    public download_url(clip: string): string {
+    public getDownloadUrl(clip: SearchResultEntry["id"]): string {
         return `${this.base_url}/library/download?file=${encodeURIComponent(
             clip
         )}`;
@@ -136,24 +136,19 @@ type RadioEvent = "update";
 
 type RequestInitData = RequestInit & { follow: "error" };
 
-type APIErrorResponse = { status: "error"; message: string };
+type ApiErrorResponse = { status: "error"; message: string };
 
 type ApiBaseResponse = {
     status: "ok";
 };
 
-type APIResponse = ApiBaseResponse | APIErrorResponse;
+type ApiResponse = ApiBaseResponse | ApiErrorResponse;
 
-type APINowResponse = ApiBaseResponse & NowData;
+type ApiNowResponse = ApiBaseResponse & NowData;
 
-type APIExtensionResponse = {
+type ApiSearchResponse = {
     status: "ok";
-    extensions: { name: string; command: string }[];
-};
-
-type APISearchResponse = {
-    status: "ok";
-    results: string[];
+    results: SearchResultEntry[];
 };
 
 type NowData = {
@@ -171,3 +166,8 @@ export type HistoryEntry = {
 }
 
 type UpdateEventListener = (data: NowData) => any;
+
+export type SearchResultEntry = {
+    id: string;
+    name: string;
+}
