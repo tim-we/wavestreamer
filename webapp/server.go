@@ -62,7 +62,7 @@ func StartServer(port int) {
 		// Parse query parameters and get the value of `query`
 		query := r.URL.Query().Get("query")
 		// Collect results
-		results := searchResultsAsStrings(library.Search(query))
+		results := searchResultsAsDTOs(library.Search(query))
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiSearchResponse{"ok", results})
 	})
@@ -74,10 +74,13 @@ func StartServer(port int) {
 	}()
 }
 
-func searchResultsAsStrings(results []*library.LibraryFile) []string {
-	stringResults := make([]string, len(results))
+func searchResultsAsDTOs(results []*library.LibraryFile) []SearchResultEntry {
+	stringResults := make([]SearchResultEntry, len(results))
 	for i, file := range results {
-		stringResults[i] = file.Name()
+		stringResults[i] = SearchResultEntry{
+			Id:   file.Id.String(),
+			Name: file.Name(),
+		}
 	}
 	return stringResults
 }
@@ -102,6 +105,11 @@ type ApiOkResponse struct {
 }
 
 type ApiSearchResponse struct {
-	Status  string   `json:"status"`
-	Results []string `json:"results"`
+	Status  string              `json:"status"`
+	Results []SearchResultEntry `json:"results"`
+}
+
+type SearchResultEntry struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }

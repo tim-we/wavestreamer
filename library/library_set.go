@@ -18,7 +18,8 @@ type LibrarySet struct {
 
 func NewLibrarySet(initialCapacity int) *LibrarySet {
 	return &LibrarySet{
-		files: make(map[string]*LibraryFile),
+		files: make(map[string]*LibraryFile, initialCapacity),
+		idmap: make(map[uuid.UUID]*LibraryFile, initialCapacity),
 		list:  make([]*LibraryFile, initialCapacity),
 		dirty: false,
 	}
