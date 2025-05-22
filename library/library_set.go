@@ -127,6 +127,14 @@ func (ls *LibrarySet) Size() int {
 func (ls *LibrarySet) search(queryParts []string) []*LibraryFile {
 	results := make([]*LibraryFile, 0, 16)
 
+	ls.mu.RLock()
+	defer ls.mu.RUnlock()
+
+	if ls.dirty {
+		// List is outdated so we need to regenerate it.
+		ls.regenerateList()
+	}
+
 clipLoop:
 	for _, clip := range ls.list {
 		// All parts must match.

@@ -63,6 +63,9 @@ func (file *LibraryFile) Name() string {
 }
 
 func (file *LibraryFile) Matches(query string) bool {
+	if file == nil {
+		return false
+	}
 	return strings.Contains(file.searchData, query)
 }
 
