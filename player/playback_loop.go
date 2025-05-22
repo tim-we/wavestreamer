@@ -194,7 +194,7 @@ func computeCurrentLoudness(previousLoudness float32, chunk *AudioChunk) float32
 	const maxInfluenceLevel = max(config.TARGET_MIN_RMS, 0.35)
 
 	// Louder chunks should have a faster impact, for quiet chunks the loudness should decay slower.
-	factor := utils.Lerp(0.01, 0.25, min(chunk.RMS, maxInfluenceLevel)/maxInfluenceLevel)
+	factor := utils.Lerp(0.001, 0.2, min(chunk.RMS, maxInfluenceLevel)/maxInfluenceLevel)
 
 	// Interpolate previous loudness value with current chunks loudness (RMS)
 	return utils.Lerp(previousLoudness, chunk.RMS, factor)
