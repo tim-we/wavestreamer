@@ -55,7 +55,7 @@ export default class Controls extends Component<ControlsProps> {
                         // TODO
                         return Promise.resolve();
                     }}
-                >News</Button>
+                >🗞️</Button>
             </section>
         );
     }
