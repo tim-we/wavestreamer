@@ -111,6 +111,14 @@ func (ls *LibrarySet) GetRandom() *LibraryFile {
 	return ls.list[rand.Intn(len(ls.list))]
 }
 
+// GetById returns a file with the given id if it exists, nil otherwise.
+func (ls *LibrarySet) GetById(clipId uuid.UUID) *LibraryFile {
+	ls.mu.RLock()
+	defer ls.mu.RUnlock()
+
+	return ls.idmap[clipId]
+}
+
 // Size returns the number of files in this set.
 func (ls *LibrarySet) Size() int {
 	return len(ls.files)

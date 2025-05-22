@@ -33,7 +33,7 @@ export default class WavestreamerApi {
     private async request<T extends ApiBaseResponse>(
         path: string,
         method: HTTPMethod = "GET",
-        data: any = null
+        data?: FormData
     ): Promise<T> {
         let init: RequestInitData = {
             method: method,
@@ -85,8 +85,10 @@ export default class WavestreamerApi {
         return response.results;
     }
 
-    public async schedule(clip: SearchResultEntry["id"]): Promise<void> {
-        await this.request("/schedule", "POST", new URLSearchParams({file: clip}));
+    public async schedule(fileId: SearchResultEntry["id"]): Promise<void> {
+        const data = new FormData();
+        data.append("file", fileId);
+        await this.request("/schedule", "POST", data);
     }
 
     public getDownloadUrl(clip: SearchResultEntry["id"]): string {

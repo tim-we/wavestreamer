@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/tim-we/wavestreamer/library"
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
@@ -67,6 +68,32 @@ func StartServer(port int) {
 		json.NewEncoder(w).Encode(ApiSearchResponse{"ok", results})
 	})
 
+	http.HandleFunc("/api/schedule", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		encoder := json.NewEncoder(w)
+		if err := r.ParseForm(); err != nil {
+			encoder.Encode(ApiErrorResponse{"error", fmt.Sprintf("%v", err)})
+			return
+		}
+		if !r.Form.Has("file") {
+			encoder.Encode(ApiErrorResponse{"error", "File field not set."})
+			return
+		}
+		rawClipId := r.Form.Get("file")
+		fileId, parseErr := uuid.Parse(rawClipId)
+		if parseErr != nil {
+			encoder.Encode(ApiErrorResponse{"error", "Invalid id value."})
+			return
+		}
+		file := library.GetFileById(fileId)
+		if file == nil {
+			encoder.Encode(ApiErrorResponse{"error", "File not found."})
+			return
+		}
+		player.QueueClip(file.CreateClip())
+		encoder.Encode(ApiOkResponse{"ok"})
+	})
+
 	// Start server
 	go func() {
 		log.Printf("Serving on http://localhost:%d\n", port)
@@ -102,6 +129,11 @@ type ApiNowLibraryInfo struct {
 
 type ApiOkResponse struct {
 	Status string `json:"status"`
+}
+
+type ApiErrorResponse struct {
+	Status  string `json:"error"`
+	Message string `json:"message"`
 }
 
 type ApiSearchResponse struct {

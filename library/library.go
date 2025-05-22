@@ -10,6 +10,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/fsnotify/fsnotify"
+	"github.com/google/uuid"
 )
 
 var hostClips = NewLibrarySet(128)
@@ -201,6 +202,16 @@ func Search(query string) []*LibraryFile {
 	results = append(results, hostClips.search(parts)...)
 
 	return results
+}
+
+func GetFileById(clipId uuid.UUID) *LibraryFile {
+	if clip := songFiles.GetById(clipId); clip != nil {
+		return clip
+	}
+	if clip := clipFiles.GetById(clipId); clip != nil {
+		return clip
+	}
+	return hostClips.GetById(clipId)
 }
 
 func getLibrarySetForFile(file string) *LibrarySet {
