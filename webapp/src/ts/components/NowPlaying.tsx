@@ -1,18 +1,12 @@
-import { Component } from "preact";
+import type { FunctionComponent } from "preact";
 
 type NPProps = {
     clip?: string;
 };
 
-export default class NowPlaying extends Component<NPProps> {
-    public render() {
-        const clip = this.props.clip;
+const NowPlaying: FunctionComponent<NPProps> = ({ clip }) => (<section id="now">
+    <div class="title">Now playing:</div>
+    <div id="current-clip">{clip ? clip : "-"}</div>
+</section>);
 
-        return (
-            <section id="now">
-                <div class="title">Now playing:</div>
-                <div id="current-clip">{clip ? clip : "-"}</div>
-            </section>
-        );
-    }
-}
+export default NowPlaying;

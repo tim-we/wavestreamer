@@ -1,15 +1,10 @@
-import { Component } from "preact";
+import type { FunctionComponent } from "preact";
 
-export default class About extends Component {
-    public render() {
-        return (
-            <footer id="about">
-                The code for this project is&nbsp;
-                <a href="https://github.com/tim-we/wavestreamer">
-                    available on GitHub
-                </a>
-                .
-            </footer>
-        );
-    }
-}
+const About: FunctionComponent = () => (<footer id="about">
+    The code for this project is&nbsp;
+    <a href="https://github.com/tim-we/wavestreamer">
+        available on GitHub
+    </a>
+    .
+</footer>);
+export default About;
