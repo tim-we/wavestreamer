@@ -6,7 +6,9 @@
   "scripts": {
     "build": "vite build",
     "preview": "vite preview",
-    "format": "biome format --write src"
+    "format": "biome format --write src",
+    "lint": "biome lint src",
+    "lint:fix": "biome lint --write src"
   },
   "author": "tim-we",
   "license": "MIT",

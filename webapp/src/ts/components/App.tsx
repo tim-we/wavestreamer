@@ -1,5 +1,6 @@
 import type { FunctionComponent } from "preact";
-import WavestreamerApi, { HistoryEntry } from "../wavestreamer-api";
+import type WavestreamerApi from "../wavestreamer-api";
+import type { HistoryEntry } from "../wavestreamer-api";
 import About from "./About";
 import Controls from "./Controls";
 import Header from "./Header";

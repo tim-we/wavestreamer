@@ -35,7 +35,7 @@ export default class WavestreamerApi {
     method: HTTPMethod = "GET",
     data?: URLSearchParams | FormData,
   ): Promise<T> {
-    let init: RequestInitData = {
+    const init: RequestInitData = {
       method: method,
       cache: "no-store",
       follow: "error",
@@ -46,8 +46,8 @@ export default class WavestreamerApi {
       delete init.body;
     }
 
-    let response = await fetch(this.base_url + path, init);
-    let obj = (await response.json()) as ApiResponse;
+    const response = await fetch(this.base_url + path, init);
+    const obj = (await response.json()) as ApiResponse;
 
     return obj.status === "ok"
       ? Promise.resolve(obj as T)
@@ -80,7 +80,7 @@ export default class WavestreamerApi {
     }
 
     const response = await this.request<ApiSearchResponse>(
-      "/library/search?query=" + nice_query,
+      `/library/search?query=${nice_query}`,
     );
     return response.results;
   }
@@ -105,7 +105,7 @@ export default class WavestreamerApi {
     }
 
     // update
-    let data = await this.now();
+    const data = await this.now();
 
     // notify listeners
     if (this.eventListeners.has("update")) {
@@ -165,7 +165,7 @@ export type HistoryEntry = {
   userScheduled: boolean;
 };
 
-type UpdateEventListener = (data: NowData) => any;
+type UpdateEventListener = (data: NowData) => unknown;
 
 export type SearchResultEntry = {
   id: string;

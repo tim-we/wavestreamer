@@ -1,5 +1,5 @@
 import { Component } from "preact";
-import WavestreamerApi from "../wavestreamer-api";
+import type WavestreamerApi from "../wavestreamer-api";
 import * as SongListModal from "./SongListModal";
 
 import pauseIcon from "../../img/pause.svg";
@@ -67,7 +67,7 @@ type ButtonProps = {
   id?: string;
   tooltip: string;
   icon?: "pause" | "repeat" | "skip" | "list";
-  onClick: () => Promise<any>;
+  onClick: () => Promise<unknown>;
 };
 
 type ButtonState = {

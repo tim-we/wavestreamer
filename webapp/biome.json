@@ -19,7 +19,16 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off"
+			},
+			"complexity": {
+				"noForEach": "warn"
+			},
+			"performance": {
+				"noDelete": "warn"
+			}
 		}
 	},
 	"javascript": {

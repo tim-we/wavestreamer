@@ -1,5 +1,6 @@
 import { render, Component, createRef } from "preact";
-import WavestreamerApi, { SearchResultEntry } from "../wavestreamer-api";
+import type WavestreamerApi from "../wavestreamer-api";
+import type { SearchResultEntry } from "../wavestreamer-api";
 import { unmountComponentAtNode, type MouseEvent } from "preact/compat";
 
 const portal = document.getElementById("modal-portal")!;
@@ -50,7 +51,7 @@ class SongListModal extends Component<SLMProps, SLMState> {
               id="song-list-close"
               type="button"
               onClick={() => this.close()}
-            ></button>
+            />
           </div>
           <div id="song-list">
             {this.state.clips.map((clip) => (
@@ -61,7 +62,7 @@ class SongListModal extends Component<SLMProps, SLMState> {
                 expanded={this.state.expandedClipId === clip.id}
                 onClick={(e) => {
                   e.stopPropagation();
-                  let selection = window.getSelection();
+                  const selection = window.getSelection();
                   if (selection === null || selection.type !== "Range") {
                     this.setState({ expandedClipId: clip.id });
                   }
@@ -79,7 +80,7 @@ class SongListModal extends Component<SLMProps, SLMState> {
     const radio = this.props.radio;
 
     input.addEventListener("input", async () => {
-      let filter = input.value.trim();
+      const filter = input.value.trim();
       if (filter === "") {
         this.clearResults();
       } else if (filter.length > 1) {
@@ -137,7 +138,7 @@ class Clip extends Component<ClipProps> {
       >
         <div className="main">
           {folder.length > 0 ? (
-            <span className="folder">{folder + "/"}</span>
+            <span className="folder">{`${folder}/`}</span>
           ) : null}
           <span className="file">{filename}</span>
         </div>
@@ -149,7 +150,7 @@ class Clip extends Component<ClipProps> {
               e.preventDefault();
               e.stopPropagation();
               await radio.schedule(props.clip.id);
-              alert(filename + " added to queue.");
+              alert(`${filename} added to queue.`);
             }}
           >
             add to queue
@@ -157,7 +158,7 @@ class Clip extends Component<ClipProps> {
           <a
             className="download"
             download={filename}
-            title={"download " + filename}
+            title={`download ${filename}`}
             onClick={(e) => e.stopPropagation()}
             href={radio.getDownloadUrl(props.clip.id)}
           >
