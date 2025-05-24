@@ -13,6 +13,7 @@ import (
 	"github.com/tim-we/wavestreamer/library"
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
+	"github.com/tim-we/wavestreamer/scheduler"
 	"github.com/tim-we/wavestreamer/utils"
 )
 
@@ -92,6 +93,12 @@ func StartServer(port int) {
 		}
 		player.QueueClip(file.CreateClip())
 		encoder.Encode(ApiOkResponse{"ok"})
+	})
+
+	http.HandleFunc("/api/schedule/news", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		scheduler.ScheduleTagesschauNow()
+		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
 
 	// Start server

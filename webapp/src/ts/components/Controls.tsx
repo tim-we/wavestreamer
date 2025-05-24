@@ -51,10 +51,7 @@ export default class Controls extends Component<ControlsProps> {
         <Button
           id="news"
           tooltip="Tagesschau in 100s"
-          onClick={() => {
-            // TODO
-            return Promise.resolve();
-          }}
+          onClick={() => radio.news()}
         >
           🗞️
         </Button>

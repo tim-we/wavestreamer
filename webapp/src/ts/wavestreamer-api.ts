@@ -93,6 +93,13 @@ export default class WavestreamerApi {
     );
   }
 
+  public async news(): Promise<void> {
+    await this.request(
+        "/schedule/news",
+        "POST"
+    );
+  }
+
   public getDownloadUrl(clip: SearchResultEntry["id"]): string {
     return `${this.base_url}/library/download?file=${encodeURIComponent(clip)}`;
   }
