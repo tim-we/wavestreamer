@@ -1,298 +1,298 @@
 html,
 body {
-    margin: 0px;
-    padding: 0px;
-    font-family: sans-serif;
-    text-rendering: optimizeLegibility;
-    --bg-color: white;
+  margin: 0px;
+  padding: 0px;
+  font-family: sans-serif;
+  text-rendering: optimizeLegibility;
+  --bg-color: white;
 }
 
 div {
-    margin: 0px;
-    padding: 0px;
+  margin: 0px;
+  padding: 0px;
 }
 
 body {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    min-height: 100vh;
-    background-color: var(--bg-color);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  background-color: var(--bg-color);
 }
 
 header {
-    display: flex;
-    justify-content: center;
-    height: 80px;
+  display: flex;
+  justify-content: center;
+  height: 80px;
 
-    background-image: linear-gradient(#1e415e 10%, #2b5b84 90%);
-    color: white;
+  background-image: linear-gradient(#1e415e 10%, #2b5b84 90%);
+  color: white;
 
-    img {
-        margin-right: 14px;
-        max-height: 70px;
-        position: relative;
-        top: 5px;
-    }
+  img {
+    margin-right: 14px;
+    max-height: 70px;
+    position: relative;
+    top: 5px;
+  }
 
-    h1 {
-        margin: 0px;
-        padding: 0px;
-        font-size: 32px;
-        font-weight: bold;
-        line-height: 80px;
-    }
+  h1 {
+    margin: 0px;
+    padding: 0px;
+    font-size: 32px;
+    font-weight: bold;
+    line-height: 80px;
+  }
 }
 
 section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    box-sizing: border-box;
-    width: 100%;
-    margin-top: 10px;
-    padding: 5px 10px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px;
+  padding: 5px 10px;
 
-    &>.title {
-        align-self: start;
-    }
+  & > .title {
+    align-self: start;
+  }
 }
 
 #now {
-    background-color: #ffd343;
-    color: rgb(90, 90, 90);
+  background-color: #ffd343;
+  color: rgb(90, 90, 90);
 
-    #current-clip {
-        color: rgb(64, 64, 64);
-        text-align: center;
-        font-size: 1.2em;
-        margin-top: 3px;
-    }
+  #current-clip {
+    color: rgb(64, 64, 64);
+    text-align: center;
+    font-size: 1.2em;
+    margin-top: 3px;
+  }
 }
 
 #history {
-    background-color: rgb(200, 200, 200);
-    color: rgb(42, 42, 42);
+  background-color: rgb(200, 200, 200);
+  color: rgb(42, 42, 42);
 
-    .title {
-        color: rgb(80, 80, 80);
+  .title {
+    color: rgb(80, 80, 80);
+  }
+
+  .clip {
+    margin-bottom: 4px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+
+    &:hover {
+      background-color: rgba(16, 16, 16, 0.1);
     }
+  }
 
-    .clip {
-        margin-bottom: 4px;
-        padding-top: 3px;
-        padding-bottom: 3px;
+  #history-clips {
+    text-align: center;
 
-        &:hover {
-            background-color: rgba(16, 16, 16, 0.1);
-        }
+    td:first-child {
+      padding-inline-end: 1em;
+      opacity: 0.85;
+      font-family: monospace;
     }
-
-    #history-clips {
-        text-align: center;
-
-        td:first-child {
-            padding-inline-end: 1em;
-            opacity: 0.85;
-            font-family: monospace;
-        }
-    }
+  }
 }
 
 #controls {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    justify-content: center;
-    margin-bottom: -6px;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  margin-bottom: -6px;
 
-    button {
-        display: inline-grid;
-        place-items: center;
-        box-sizing: border-box;
-        height: 42px;
-        min-width: 42px;
-        max-width: 150px;
-        flex-basis: max-content;
-        flex-grow: 1;
-        margin-bottom: 6px;
+  button {
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    height: 42px;
+    min-width: 42px;
+    max-width: 150px;
+    flex-basis: max-content;
+    flex-grow: 1;
+    margin-bottom: 6px;
 
-        font-size: 20px;
-        color: #e6e8ea;
-        background-color: #2b5b84;
-        background-image: linear-gradient(#3776ab 10%, #2b5b84 90%);
-        border-top: 1px solid #3d83be;
-        border-right: 1px solid #3776ab;
-        border-bottom: 1px solid #3776ab;
-        border-left: 1px solid #3d83be;
-        box-shadow: inset 0 0 5px rgba(55, 118, 171, 0.2);
-        text-align: center;
-        white-space: nowrap;
-        cursor: pointer;
-        border-radius: 5px;
+    font-size: 20px;
+    color: #e6e8ea;
+    background-color: #2b5b84;
+    background-image: linear-gradient(#3776ab 10%, #2b5b84 90%);
+    border-top: 1px solid #3d83be;
+    border-right: 1px solid #3776ab;
+    border-bottom: 1px solid #3776ab;
+    border-left: 1px solid #3d83be;
+    box-shadow: inset 0 0 5px rgba(55, 118, 171, 0.2);
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
+    border-radius: 5px;
 
-        &:not(:first-of-type) {
-            margin-left: 6px;
-        }
-
-        &:not(.active):hover {
-            color: white;
-            box-shadow: inset 0 0 6px rgba(100, 200, 255, 0.25);
-        }
-
-        &:not(.active):hover>img {
-            opacity: 1;
-        }
-
-        &>img {
-            opacity: 0.9;
-        }
-
-        button.active {
-            color: rgb(182, 182, 182);
-            box-shadow: inset 0 0 7px rgba(55, 118, 171, 0.75);
-            opacity: 0.75;
-        }
+    &:not(:first-of-type) {
+      margin-left: 6px;
     }
+
+    &:not(.active):hover {
+      color: white;
+      box-shadow: inset 0 0 6px rgba(100, 200, 255, 0.25);
+    }
+
+    &:not(.active):hover > img {
+      opacity: 1;
+    }
+
+    & > img {
+      opacity: 0.9;
+    }
+
+    button.active {
+      color: rgb(182, 182, 182);
+      box-shadow: inset 0 0 7px rgba(55, 118, 171, 0.75);
+      opacity: 0.75;
+    }
+  }
 }
 
 #about {
-    margin-top: 10px;
-    padding: 10px 0px;
-    color: rgb(100, 100, 100);
-    font-size: 14px;
-    text-align: center;
-    background-color: var(--bg-color);
+  margin-top: 10px;
+  padding: 10px 0px;
+  color: rgb(100, 100, 100);
+  font-size: 14px;
+  text-align: center;
+  background-color: var(--bg-color);
 }
 
 #song-list-container {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    background-color: rgba(16, 16, 16, 0.42);
-    display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: rgba(16, 16, 16, 0.42);
+  display: none;
 }
 
 #song-list-container.show {
-    display: grid;
-    place-items: center;
-    backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(2px);
 }
 
 #song-list-modal {
-    width: 650px;
-    height: 800px;
-    max-width: 100vw;
-    max-height: 100vh;
-    background-color: white;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    box-shadow: 0px 0px 20px 1px rgba(0, 0, 0, 0.25);
+  width: 650px;
+  height: 800px;
+  max-width: 100vw;
+  max-height: 100vh;
+  background-color: white;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  box-shadow: 0px 0px 20px 1px rgba(0, 0, 0, 0.25);
 }
 
 #song-list-controls {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    border-bottom: 2px solid rgb(16, 16, 16);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  border-bottom: 2px solid rgb(16, 16, 16);
 }
 
 #song-filter {
-    box-sizing: border-box;
-    height: 42px;
-    border: none;
-    padding-left: 10px;
+  box-sizing: border-box;
+  height: 42px;
+  border: none;
+  padding-left: 10px;
 }
 
 #song-list-close {
-    width: 42px;
-    height: 42px;
-    box-sizing: border-box;
-    background-color: rgb(182, 182, 182);
-    background-image: url("../img/close.svg");
-    border: none;
-    cursor: pointer;
+  width: 42px;
+  height: 42px;
+  box-sizing: border-box;
+  background-color: rgb(182, 182, 182);
+  background-image: url("../img/close.svg");
+  border: none;
+  cursor: pointer;
 }
 
 #song-list {
-    padding: 5px 0px;
-    overflow-y: scroll;
+  padding: 5px 0px;
+  overflow-y: scroll;
 }
 
 #song-list .song {
-    font-size: 1.2em;
-    padding: 5px 5px;
+  font-size: 1.2em;
+  padding: 5px 5px;
 }
 
 #song-list .song:nth-of-type(even) {
-    background-color: rgb(240, 240, 240);
+  background-color: rgb(240, 240, 240);
 }
 
 #song-list .song .folder {
-    color: rgb(64, 64, 64);
-    font-size: 0.8em;
-    margin-right: 2px;
+  color: rgb(64, 64, 64);
+  font-size: 0.8em;
+  margin-right: 2px;
 }
 
 #song-list .song .buttons {
-    display: none;
-    margin-top: 6px;
-    margin-bottom: 2px;
-    user-select: none;
+  display: none;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  user-select: none;
 }
 
 #song-list .song.expanded .buttons {
-    display: block;
+  display: block;
 }
 
 #song-list .song:not(.expanded):hover {
-    box-shadow: inset 0px -2px 3px 0px rgba(16, 16, 16, 0.05);
+  box-shadow: inset 0px -2px 3px 0px rgba(16, 16, 16, 0.05);
 }
 
 #song-list .song .buttons a::before {
-    content: " ";
-    position: relative;
-    display: inline-block;
-    text-decoration: none;
-    cursor: default;
-    width: 20px;
-    height: 20px;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    margin-right: 2px;
-    vertical-align: middle;
+  content: " ";
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  cursor: default;
+  width: 20px;
+  height: 20px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  margin-right: 2px;
+  vertical-align: middle;
 }
 
 #song-list .song .buttons a:not(:last-of-type) {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 #song-list .song a.add::before {
-    top: -1;
-    background-image: url("../img/add.svg");
+  top: -1;
+  background-image: url("../img/add.svg");
 }
 
 #song-list .song a.download::before {
-    background-image: url("../img/download.svg");
+  background-image: url("../img/download.svg");
 }
 
 @media (prefers-color-scheme: dark) {
-    body {
-        --bg-color: rgb(32, 32, 32);
-    }
+  body {
+    --bg-color: rgb(32, 32, 32);
+  }
 
-    #about {
-        color: rgb(180, 180, 180)
-    }
+  #about {
+    color: rgb(180, 180, 180);
+  }
 
-    #history {
-        background-color: rgb(48, 48, 48);
-        color: rgb(180, 180, 180);
-    }
+  #history {
+    background-color: rgb(48, 48, 48);
+    color: rgb(180, 180, 180);
+  }
 
-    #history .title {
-        color: rgb(220, 220, 220);
-    }
+  #history .title {
+    color: rgb(220, 220, 220);
+  }
 }

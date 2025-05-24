@@ -1,4 +1,3 @@
-
 import { createElement, render } from "preact";
 import App from "./components/App";
 import WavestreamerApi from "./wavestreamer-api";
