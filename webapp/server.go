@@ -22,7 +22,7 @@ var content embed.FS
 
 var startTime = time.Now()
 
-func StartServer(port int) {
+func StartServer(port int, news bool) {
 	// Strip the "dist" prefix so files are served at root (/)
 	staticFiles, err := fs.Sub(content, "dist")
 	if err != nil {
@@ -101,6 +101,11 @@ func StartServer(port int) {
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
 
+	http.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApiConfigResponse{"ok", news})
+	})
+
 	// Start server
 	go func() {
 		log.Printf("Serving on http://localhost:%d\n", port)
@@ -139,7 +144,7 @@ type ApiOkResponse struct {
 }
 
 type ApiErrorResponse struct {
-	Status  string `json:"error"`
+	Status  string `json:"status"`
 	Message string `json:"message"`
 }
 
@@ -151,4 +156,9 @@ type ApiSearchResponse struct {
 type SearchResultEntry struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type ApiConfigResponse struct {
+	Status string `json:"status"`
+	News   bool   `json:"news"`
 }

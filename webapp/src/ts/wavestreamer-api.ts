@@ -17,7 +17,7 @@ export default class WavestreamerApi {
     });
   }
 
-  public get base_url(): string {
+  private get baseUrl(): string {
     return `http://${this.host}/api`;
   }
 
@@ -46,7 +46,7 @@ export default class WavestreamerApi {
       delete init.body;
     }
 
-    const response = await fetch(this.base_url + path, init);
+    const response = await fetch(this.baseUrl + path, init);
     const obj = (await response.json()) as ApiResponse;
 
     return obj.status === "ok"
@@ -94,14 +94,15 @@ export default class WavestreamerApi {
   }
 
   public async news(): Promise<void> {
-    await this.request(
-        "/schedule/news",
-        "POST"
-    );
+    await this.request("/schedule/news", "POST");
+  }
+
+  public getConfig(): Promise<ApiConfigResponse> {
+    return this.request<ApiConfigResponse>("/config", "POST");
   }
 
   public getDownloadUrl(clip: SearchResultEntry["id"]): string {
-    return `${this.base_url}/library/download?file=${encodeURIComponent(clip)}`;
+    return `${this.baseUrl}/library/download?file=${encodeURIComponent(clip)}`;
   }
 
   private async update(): Promise<void> {
@@ -177,4 +178,9 @@ type UpdateEventListener = (data: NowData) => unknown;
 export type SearchResultEntry = {
   id: string;
   name: string;
+};
+
+type ApiConfigResponse = {
+  status: "ok";
+  news: boolean;
 };

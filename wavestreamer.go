@@ -14,7 +14,7 @@ import (
 	"github.com/tim-we/wavestreamer/webapp"
 )
 
-type Options struct {
+type AppOptions struct {
 	MusicDir    string `short:"d" long:"music-dir" description:"Path to directory containing music files"`
 	News        bool   `short:"n" long:"news" description:"Enable hourly news (Tagesschau in 100s)"`
 	WebApp      bool   `short:"w" long:"webapp" description:"Enable web app" `
@@ -29,7 +29,7 @@ var GitCommit string = "dev"
 var BuildTime string = "unknown"
 
 func main() {
-	var opts Options
+	var opts AppOptions
 	_, err := flags.Parse(&opts)
 	if err != nil {
 		os.Exit(1)
@@ -64,7 +64,7 @@ func main() {
 		if opts.WebAppPort < 1024 {
 			log.Println("Warning: Ports below 1024 require root access.")
 		}
-		webapp.StartServer(opts.WebAppPort)
+		webapp.StartServer(opts.WebAppPort, opts.News)
 	}
 
 	if !opts.NoNormalize {

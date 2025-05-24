@@ -1,4 +1,5 @@
-import { Component } from "preact";
+import { Component, type FunctionComponent } from "preact";
+import { useEffect, useState } from "preact/hooks";
 import type WavestreamerApi from "../wavestreamer-api";
 import * as SongListModal from "./SongListModal";
 
@@ -18,36 +19,36 @@ const SVG_ICONS = {
   list: listIcon,
 } as const;
 
-export default class Controls extends Component<ControlsProps> {
-  public render() {
-    const radio = this.props.radio;
+const Controls: FunctionComponent<ControlsProps> = ({ radio }) => {
+  const [newsEnabled, setNewsEnabled] = useState<boolean>(false);
 
-    return (
-      <section id="controls">
-        <Button
-          id="pause"
-          tooltip="toggle pause"
-          onClick={() => radio.pause()}
-        />
-        <Button
-          id="repeat"
-          tooltip="repeat current clip"
-          onClick={() => radio.repeat()}
-        />
-        <Button
-          id="skip"
-          tooltip="skip current clip"
-          onClick={() => radio.skip()}
-        />
-        <Button
-          id="song-list-button"
-          tooltip="song list"
-          icon="list"
-          onClick={() => {
-            SongListModal.show(radio);
-            return Promise.resolve();
-          }}
-        />
+  useEffect(() => {
+    radio.getConfig().then((config) => setNewsEnabled(config.news));
+  }, [radio]);
+
+  return (
+    <section id="controls">
+      <Button id="pause" tooltip="toggle pause" onClick={() => radio.pause()} />
+      <Button
+        id="repeat"
+        tooltip="repeat current clip"
+        onClick={() => radio.repeat()}
+      />
+      <Button
+        id="skip"
+        tooltip="skip current clip"
+        onClick={() => radio.skip()}
+      />
+      <Button
+        id="song-list-button"
+        tooltip="song list"
+        icon="list"
+        onClick={() => {
+          SongListModal.show(radio);
+          return Promise.resolve();
+        }}
+      />
+      {newsEnabled ? (
         <Button
           id="news"
           tooltip="Tagesschau in 100s"
@@ -55,10 +56,12 @@ export default class Controls extends Component<ControlsProps> {
         >
           🗞️
         </Button>
-      </section>
-    );
-  }
-}
+      ) : null}
+    </section>
+  );
+};
+
+export default Controls;
 
 type ButtonProps = {
   id?: string;
