@@ -228,7 +228,8 @@ func getLibrarySetForFile(file string) *LibrarySet {
 }
 
 func pickRandomClipWhichHasNotBeenPlayedInAWhile(clips *LibrarySet) *LibraryFile {
-	if clips.Size() == 0 {
+	if clips == nil || clips.Size() == 0 {
+		log.Println("Tried to pick a random clip from an empty library set.")
 		return nil
 	}
 

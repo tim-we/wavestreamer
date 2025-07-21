@@ -90,8 +90,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 			break
 		}
 
-		log.Printf("Now playing %s", clip.Name())
 		currentlyPlaying = clip.Name()
+		log.Printf("Now playing %s", currentlyPlaying)
 		addClipToHistory(clip)
 
 		// Reset measured loudness for new clip

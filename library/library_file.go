@@ -42,6 +42,9 @@ func NewLibraryFile(filepath string) (*LibraryFile, error) {
 }
 
 func (file *LibraryFile) CreateClip() *clips.AudioClip {
+	if file == nil {
+		return nil
+	}
 	clip, err := clips.NewAudioClip(file.filepath)
 	if err != nil {
 		log.Println(err)

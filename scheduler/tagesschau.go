@@ -128,7 +128,7 @@ func StartTagesschauScheduler() {
 				continue
 			}
 
-			if time.Now().Sub(episode.PubDate) > (24 * time.Hour) {
+			if time.Since(episode.PubDate) > (24 * time.Hour) {
 				log.Printf("No recent Tagesschau episode available (%v)\n", episode.PubDate)
 				// Lets try again later
 				continue
