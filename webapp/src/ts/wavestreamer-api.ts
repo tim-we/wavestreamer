@@ -43,6 +43,7 @@ export default class WavestreamerApi {
     };
 
     if (data === null) {
+      // biome-ignore lint/performance/noDelete: Performance is not critical here
       delete init.body;
     }
 

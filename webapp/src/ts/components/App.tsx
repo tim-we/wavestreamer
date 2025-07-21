@@ -1,4 +1,5 @@
 import type { FunctionComponent } from "preact";
+import { useEffect, useState } from "preact/hooks";
 import type WavestreamerApi from "../wavestreamer-api";
 import type { HistoryEntry } from "../wavestreamer-api";
 import About from "./About";
@@ -6,7 +7,6 @@ import Controls from "./Controls";
 import Header from "./Header";
 import History from "./History";
 import NowPlaying from "./NowPlaying";
-import { useEffect, useState } from "preact/hooks";
 
 type AppProps = {
   radio: WavestreamerApi;
