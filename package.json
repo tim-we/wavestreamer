@@ -6,10 +6,10 @@
   "scripts": {
     "build": "vite build",
     "preview": "vite preview",
-    "format": "biome format --write src",
-    "lint": "biome lint src",
-    "biome:check": "biome check src",
-    "biome:fix": "biome check --write src"
+    "format": "biome format --write webapp",
+    "lint": "biome lint webapp",
+    "biome:check": "biome check webapp",
+    "biome:fix": "biome check --write webapp"
   },
   "author": "tim-we",
   "license": "MIT",

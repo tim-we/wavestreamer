@@ -1,5 +1,10 @@
 import { type FunctionComponent, render } from "preact";
-import { unmountComponentAtNode, useEffect, useRef, useState } from "preact/compat";
+import {
+  unmountComponentAtNode,
+  useEffect,
+  useRef,
+  useState,
+} from "preact/compat";
 import type WavestreamerApi from "../wavestreamer-api";
 import type { SearchResultEntry } from "../wavestreamer-api";
 
@@ -13,7 +18,7 @@ type SLMProps = {
   radio: WavestreamerApi;
 };
 
-const SongListModal: FunctionComponent<SLMProps> = ({radio}) => {
+const SongListModal: FunctionComponent<SLMProps> = ({ radio }) => {
   const inputRef = useRef<HTMLInputElement>();
   const [clips, setClips] = useState<SearchResultEntry[]>([]);
 
@@ -36,37 +41,37 @@ const SongListModal: FunctionComponent<SLMProps> = ({radio}) => {
   }, [inputRef.current?.value]);
 
   return (
-      <div
-        id="song-list-container"
-        className="show"
-        onClick={(e) => {
-          e.stopPropagation();
-          closeSongListModal();
-        }}
-      >
-        {/** biome-ignore lint/a11y/noStaticElementInteractions: This is just a event boundary */}
-        <div id="song-list-modal" onClick={(e) => e.stopPropagation()}>
-          <div id="song-list-controls">
-            <input
-              id="song-filter"
-              type="text"
-              placeholder="filter"
-              ref={inputRef}
-            />
-            <button
-              id="song-list-close"
-              type="button"
-              onClick={closeSongListModal}
-            />
-          </div>
-          <div id="song-list">
-            {clips.map((clip) => (
-              <Clip key={clip} radio={radio} clip={clip} />
-            ))}
-          </div>
+    <div
+      id="song-list-container"
+      className="show"
+      onClick={(e) => {
+        e.stopPropagation();
+        closeSongListModal();
+      }}
+    >
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: This is just a event boundary */}
+      <div id="song-list-modal" onClick={(e) => e.stopPropagation()}>
+        <div id="song-list-controls">
+          <input
+            id="song-filter"
+            type="text"
+            placeholder="filter"
+            ref={inputRef}
+          />
+          <button
+            id="song-list-close"
+            type="button"
+            onClick={closeSongListModal}
+          />
+        </div>
+        <div id="song-list">
+          {clips.map((clip) => (
+            <Clip key={clip} radio={radio} clip={clip} />
+          ))}
         </div>
       </div>
-    );
+    </div>
+  );
 };
 
 function closeSongListModal() {
@@ -75,9 +80,9 @@ function closeSongListModal() {
 
 function songListKeydownHandler(e: KeyboardEvent) {
   if (e.key === "Escape") {
-      e.preventDefault();
-      closeSongListModal();
-    }
+    e.preventDefault();
+    closeSongListModal();
+  }
 }
 
 type ClipProps = {
