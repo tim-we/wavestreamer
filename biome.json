@@ -28,7 +28,8 @@
         "noDelete": "warn"
       },
       "a11y": {
-        "useKeyWithClickEvents": "warn"
+        "useKeyWithClickEvents": "warn",
+        "noStaticElementInteractions": "warn"
       }
     }
   },

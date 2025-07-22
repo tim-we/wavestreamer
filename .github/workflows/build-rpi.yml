@@ -32,6 +32,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Biome check
+        run: npm run biome:check
+
       - name: Install build dependencies
         run: |
           sudo apt-get update
