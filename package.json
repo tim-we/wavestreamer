@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "preview": "vite preview",
+    "build": "vite build webapp",
+    "preview": "vite preview webapp",
     "format": "biome format --write webapp",
     "biome:check": "biome check webapp",
     "biome:fix": "biome check --write webapp"

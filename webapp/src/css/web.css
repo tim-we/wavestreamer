@@ -173,12 +173,12 @@ section {
   bottom: 0px;
   background-color: rgba(16, 16, 16, 0.42);
   display: none;
-}
 
-#song-list-container.show {
-  display: grid;
-  place-items: center;
-  backdrop-filter: blur(2px);
+  &.show {
+    display: grid;
+    place-items: center;
+    backdrop-filter: blur(2px);
+  }
 }
 
 #song-list-modal {
@@ -218,58 +218,60 @@ section {
 #song-list {
   padding: 5px 0px;
   overflow-y: scroll;
+
+  .song {
+    font-size: 1.2em;
+    padding: 5px 5px;
+
+    &:nth-of-type(even) {
+      background-color: rgb(240, 240, 240);
+    }
+
+    &:not([open]):hover {
+      box-shadow: inset 0px -2px 3px 0px rgba(16, 16, 16, 0.05);
+    }
+
+    summary {
+      cursor: default;
+    }
+
+    .folder {
+      color: rgb(64, 64, 64);
+      font-size: 0.8em;
+      margin-right: 2px;
+    }
+
+    .buttons {
+      margin-top: 6px;
+      margin-bottom: 2px;
+      user-select: none;
+
+      a,
+      button {
+        &::before {
+          content: " ";
+          position: relative;
+          display: inline-block;
+          text-decoration: none;
+          cursor: default;
+          width: 20px;
+          height: 20px;
+          background-repeat: no-repeat;
+          background-size: contain;
+          background-position: center;
+          margin-right: 2px;
+          vertical-align: middle;
+        }
+
+        &:not(:last-of-type) {
+          margin-right: 10px;
+        }
+      }
+    }
+  }
 }
 
-#song-list .song {
-  font-size: 1.2em;
-  padding: 5px 5px;
-}
-
-#song-list .song:nth-of-type(even) {
-  background-color: rgb(240, 240, 240);
-}
-
-#song-list .song .folder {
-  color: rgb(64, 64, 64);
-  font-size: 0.8em;
-  margin-right: 2px;
-}
-
-#song-list .song .buttons {
-  display: none;
-  margin-top: 6px;
-  margin-bottom: 2px;
-  user-select: none;
-}
-
-#song-list .song.expanded .buttons {
-  display: block;
-}
-
-#song-list .song:not(.expanded):hover {
-  box-shadow: inset 0px -2px 3px 0px rgba(16, 16, 16, 0.05);
-}
-
-#song-list .song .buttons a::before {
-  content: " ";
-  position: relative;
-  display: inline-block;
-  text-decoration: none;
-  cursor: default;
-  width: 20px;
-  height: 20px;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  margin-right: 2px;
-  vertical-align: middle;
-}
-
-#song-list .song .buttons a:not(:last-of-type) {
-  margin-right: 10px;
-}
-
-#song-list .song a.add::before {
+#song-list .song button.add::before {
   top: -1;
   background-image: url("../img/add.svg");
 }
