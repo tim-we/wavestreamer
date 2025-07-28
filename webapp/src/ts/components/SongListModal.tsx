@@ -118,6 +118,7 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
           type="button"
           title={`download ${filename}`}
           onClick={() => downloadClip(radio, clip, filename)}
+          disabled
         >
           download
         </button>
