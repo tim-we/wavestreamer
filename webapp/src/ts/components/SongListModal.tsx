@@ -127,7 +127,11 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
   );
 };
 
-function downloadClip(radio: WavestreamerApi, clip: SearchResultEntry, filename: string): void {
+function downloadClip(
+  radio: WavestreamerApi,
+  clip: SearchResultEntry,
+  filename: string,
+): void {
   const a = document.createElement("a");
   a.href = radio.getDownloadUrl(clip.id);
   a.onclick = (e) => e.stopPropagation();

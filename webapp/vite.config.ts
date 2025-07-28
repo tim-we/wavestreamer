@@ -8,5 +8,5 @@ export default defineConfig({
   plugins: [preact()],
   define: {
     __BUILD_DATE__: JSON.stringify(now.toISOString()),
-  }
+  },
 });
