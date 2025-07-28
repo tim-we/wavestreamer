@@ -114,16 +114,23 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
         >
           add to queue
         </button>
-        <a
+        <button
           class="download"
-          download={filename}
+          type="button"
           title={`download ${filename}`}
-          onClick={(e) => e.stopPropagation()}
-          href={radio.getDownloadUrl(clip.id)}
+          onClick={() => downloadClip(radio, clip, filename)}
         >
           download
-        </a>
+        </button>
       </div>
     </details>
   );
 };
+
+function downloadClip(radio: WavestreamerApi, clip: SearchResultEntry, filename: string): void {
+  const a = document.createElement("a");
+  a.href = radio.getDownloadUrl(clip.id);
+  a.onclick = (e) => e.stopPropagation();
+  a.download = filename;
+  //a.click(); // TODO: re-enable once server side is implemented
+}
