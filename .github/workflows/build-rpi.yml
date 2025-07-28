@@ -22,17 +22,18 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version-file: webapp/package.json
+          node-version-file: package.json
           cache: npm
-          cache-dependency-path: webapp/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: NPM install
         run: npm ci
-        working-directory: webapp
 
       - name: Build
         run: npm run build
-        working-directory: webapp
+
+      - name: Biome check
+        run: npm run biome:check
 
       - name: Install build dependencies
         run: |

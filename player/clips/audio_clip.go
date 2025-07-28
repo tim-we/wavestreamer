@@ -131,8 +131,13 @@ func (clip *AudioClip) Stop() {
 }
 
 func (clip *AudioClip) Name() string {
-	if clip.meta.Artist != "" && clip.meta.Title != "" {
-		return fmt.Sprintf("%s - %s", clip.meta.Artist, clip.meta.Title)
+	if clip == nil {
+		panic("clip is nil")
+	}
+	if clip.meta != nil {
+		if clip.meta.Artist != "" && clip.meta.Title != "" {
+			return fmt.Sprintf("%s - %s", clip.meta.Artist, clip.meta.Title)
+		}
 	}
 
 	filename := removeAudioExtension(filepath.Base(clip.filepath))

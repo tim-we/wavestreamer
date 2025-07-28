@@ -1,0 +1,113 @@
+#song-list-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: rgba(16, 16, 16, 0.42);
+  display: none;
+
+  &.show {
+    display: grid;
+    place-items: center;
+    backdrop-filter: blur(2px);
+  }
+}
+
+#song-list-modal {
+  width: 650px;
+  height: 800px;
+  max-width: 100vw;
+  max-height: 100vh;
+  background-color: white;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  box-shadow: 0px 0px 20px 1px rgba(0, 0, 0, 0.25);
+}
+
+#song-list-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  border-bottom: 2px solid rgb(16, 16, 16);
+}
+
+#song-filter {
+  box-sizing: border-box;
+  height: 42px;
+  border: none;
+  padding-left: 10px;
+}
+
+#song-list-close {
+  width: 42px;
+  height: 42px;
+  box-sizing: border-box;
+  background-color: rgb(182, 182, 182);
+  background-image: url("../img/close.svg");
+  border: none;
+  cursor: pointer;
+}
+
+#song-list {
+  padding: 5px 0px;
+  overflow-y: scroll;
+
+  .song {
+    font-size: 1.2em;
+    padding: 5px 5px;
+
+    &:nth-of-type(even) {
+      background-color: rgb(240, 240, 240);
+    }
+
+    &:not([open]):hover {
+      box-shadow: inset 0px -2px 3px 0px rgba(16, 16, 16, 0.05);
+    }
+
+    summary {
+      cursor: default;
+    }
+
+    .folder {
+      color: rgb(64, 64, 64);
+      font-size: 0.8em;
+      margin-right: 2px;
+    }
+
+    .buttons {
+      margin-top: 6px;
+      margin-bottom: 2px;
+      user-select: none;
+
+      button {
+        &::before {
+          content: " ";
+          position: relative;
+          display: inline-block;
+          text-decoration: none;
+          cursor: default;
+          width: 20px;
+          height: 20px;
+          background-repeat: no-repeat;
+          background-size: contain;
+          background-position: center;
+          margin-right: 2px;
+          vertical-align: middle;
+        }
+
+        &:not(:last-of-type) {
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+}
+
+#song-list .song button.add::before {
+  top: -1;
+  background-image: url("../img/add.svg");
+}
+
+#song-list .song .download::before {
+  background-image: url("../img/download.svg");
+}

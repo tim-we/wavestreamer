@@ -1,7 +1,7 @@
-import { render, Component, createRef } from "preact";
+import { type FunctionComponent, render } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type WavestreamerApi from "../wavestreamer-api";
 import type { SearchResultEntry } from "../wavestreamer-api";
-import { unmountComponentAtNode, type MouseEvent } from "preact/compat";
 
 const portal = document.getElementById("modal-portal")!;
 
@@ -13,159 +13,128 @@ type SLMProps = {
   radio: WavestreamerApi;
 };
 
-type SLMState = {
-  clips: SearchResultEntry[];
-  expandedClipId?: string;
-};
+const SongListModal: FunctionComponent<SLMProps> = ({ radio }) => {
+  const inputRef = useRef<HTMLInputElement>();
+  const [clips, setClips] = useState<SearchResultEntry[]>([]);
 
-class SongListModal extends Component<SLMProps, SLMState> {
-  private inputRef = createRef<HTMLInputElement>();
-
-  public constructor(props: SLMProps) {
-    super(props);
-    this.state = { clips: [] };
-    this.escapeHandler = this.escapeHandler.bind(this);
-  }
-
-  public render() {
-    const radio = this.props.radio;
-
-    return (
-      <div
-        id="song-list-container"
-        className="show"
-        onClick={(e) => {
-          e.stopPropagation();
-          this.close();
-        }}
-      >
-        <div id="song-list-modal" onClick={(e) => e.stopPropagation()}>
-          <div id="song-list-controls">
-            <input
-              id="song-filter"
-              type="text"
-              placeholder="filter"
-              ref={this.inputRef}
-            />
-            <button
-              id="song-list-close"
-              type="button"
-              onClick={() => this.close()}
-            />
-          </div>
-          <div id="song-list">
-            {this.state.clips.map((clip) => (
-              <Clip
-                key={clip}
-                radio={radio}
-                clip={clip}
-                expanded={this.state.expandedClipId === clip.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const selection = window.getSelection();
-                  if (selection === null || selection.type !== "Range") {
-                    this.setState({ expandedClipId: clip.id });
-                  }
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  public componentDidMount() {
-    const input = this.inputRef.current!;
-    const radio = this.props.radio;
+  useEffect(() => {
+    const input = inputRef.current;
 
     input.addEventListener("input", async () => {
       const filter = input.value.trim();
       if (filter === "") {
-        this.clearResults();
+        setClips([]);
       } else if (filter.length > 1) {
-        this.setState({
-          clips: await radio.search(filter),
-        });
+        setClips(await radio.search(filter));
       }
     });
 
     input.focus();
 
-    document.addEventListener("keydown", this.escapeHandler);
-  }
+    document.addEventListener("keydown", songListKeydownHandler);
 
-  public componentWillUnmount() {
-    document.removeEventListener("keydown", this.escapeHandler);
-  }
+    return () => {
+      document.removeEventListener("keydown", songListKeydownHandler);
+    };
+  }, [inputRef.current?.value]);
 
-  private clearResults() {
-    this.setState({ clips: [] });
-  }
+  return (
+    <div
+      id="song-list-container"
+      className="show"
+      onClick={(e) => {
+        e.stopPropagation();
+        closeSongListModal();
+      }}
+    >
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: This is just a event boundary */}
+      <div id="song-list-modal" onClick={(e) => e.stopPropagation()}>
+        <div id="song-list-controls">
+          <input
+            id="song-filter"
+            type="text"
+            placeholder="filter"
+            ref={inputRef}
+          />
+          <button
+            id="song-list-close"
+            type="button"
+            onClick={closeSongListModal}
+          />
+        </div>
+        <div id="song-list">
+          {clips.map((clip) => (
+            <Clip key={clip} radio={radio} clip={clip} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-  private close() {
-    unmountComponentAtNode(portal);
-  }
+function closeSongListModal() {
+  // Unmount: https://github.com/preactjs/preact/issues/53
+  render("", portal);
+}
 
-  private escapeHandler(e: KeyboardEvent) {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      this.close();
-    }
+function songListKeydownHandler(e: KeyboardEvent) {
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeSongListModal();
   }
 }
 
 type ClipProps = {
   clip: SearchResultEntry;
   radio: WavestreamerApi;
-  expanded: boolean;
-  onClick: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
-class Clip extends Component<ClipProps> {
-  public render() {
-    const props = this.props;
-    const radio = props.radio;
+const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
+  const compontents = clip.name.split("/");
+  const folder = compontents.slice(0, compontents.length - 1).join("/");
+  const filename = compontents[compontents.length - 1];
 
-    const compontents = props.clip.name.split("/");
-    const folder = compontents.slice(0, compontents.length - 1).join("/");
-    const filename = compontents[compontents.length - 1];
-
-    return (
-      <div
-        className={props.expanded ? "song expanded" : "song"}
-        onClick={props.onClick}
-      >
-        <div className="main">
-          {folder.length > 0 ? (
-            <span className="folder">{`${folder}/`}</span>
-          ) : null}
-          <span className="file">{filename}</span>
-        </div>
-        <div className="buttons">
-          <a
-            className="add"
-            href="#"
-            onClick={async (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              await radio.schedule(props.clip.id);
-              alert(`${filename} added to queue.`);
-            }}
-          >
-            add to queue
-          </a>
-          <a
-            className="download"
-            download={filename}
-            title={`download ${filename}`}
-            onClick={(e) => e.stopPropagation()}
-            href={radio.getDownloadUrl(props.clip.id)}
-          >
-            download
-          </a>
-        </div>
+  return (
+    <details class="song" name="clip">
+      <summary>
+        {folder.length > 0 ? <span class="folder">{`${folder}/`}</span> : null}
+        <span class="file">{filename}</span>
+      </summary>
+      <div class="buttons">
+        <button
+          class="add"
+          type="button"
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await radio.schedule(clip.id);
+            alert(`${filename} added to queue.`);
+          }}
+        >
+          add to queue
+        </button>
+        <button
+          class="download"
+          type="button"
+          title={`download ${filename}`}
+          onClick={() => downloadClip(radio, clip, filename)}
+          disabled
+        >
+          download
+        </button>
       </div>
-    );
-  }
+    </details>
+  );
+};
+
+function downloadClip(
+  radio: WavestreamerApi,
+  clip: SearchResultEntry,
+  filename: string,
+): void {
+  const a = document.createElement("a");
+  a.href = radio.getDownloadUrl(clip.id);
+  a.onclick = (e) => e.stopPropagation();
+  a.download = filename;
+  //a.click(); // TODO: re-enable once server side is implemented
 }

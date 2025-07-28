@@ -1,6 +1,9 @@
 package player
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 type HistoryEntry struct {
 	StartTime     time.Time `json:"start"`
@@ -14,6 +17,10 @@ const historyLength = 10
 var history []HistoryEntry
 
 func addClipToHistory(clip Clip) {
+	if clip == nil {
+		log.Println("Tried to add nil clip to history.")
+		return
+	}
 	history = append(history, HistoryEntry{
 		StartTime: time.Now(),
 		Title:     clip.Name(),
