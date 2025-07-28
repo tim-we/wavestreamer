@@ -1,10 +1,5 @@
 import { type FunctionComponent, render } from "preact";
-import {
-  unmountComponentAtNode,
-  useEffect,
-  useRef,
-  useState,
-} from "preact/compat";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type WavestreamerApi from "../wavestreamer-api";
 import type { SearchResultEntry } from "../wavestreamer-api";
 
@@ -37,7 +32,10 @@ const SongListModal: FunctionComponent<SLMProps> = ({ radio }) => {
     input.focus();
 
     document.addEventListener("keydown", songListKeydownHandler);
-    // TODO remove event listener
+
+    return () => {
+      document.removeEventListener("keydown", songListKeydownHandler);
+    };
   }, [inputRef.current?.value]);
 
   return (
@@ -75,7 +73,8 @@ const SongListModal: FunctionComponent<SLMProps> = ({ radio }) => {
 };
 
 function closeSongListModal() {
-  unmountComponentAtNode(portal);
+  // Unmount: https://github.com/preactjs/preact/issues/53
+  render("", portal);
 }
 
 function songListKeydownHandler(e: KeyboardEvent) {
