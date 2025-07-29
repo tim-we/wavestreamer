@@ -111,3 +111,7 @@
 #song-list .song .download::before {
   background-image: url("../img/download.svg");
 }
+
+::highlight(search-results) {
+  background-color: yellow;
+}
