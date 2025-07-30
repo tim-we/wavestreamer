@@ -104,6 +104,7 @@ section {
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: center;
+  gap: 6px;
   margin-bottom: -6px;
 
   button {
@@ -130,10 +131,6 @@ section {
     white-space: nowrap;
     cursor: pointer;
     border-radius: 5px;
-
-    &:not(:first-of-type) {
-      margin-left: 6px;
-    }
 
     &:not(.active):hover {
       color: white;
