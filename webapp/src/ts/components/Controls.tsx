@@ -87,7 +87,7 @@ const Button: FunctionComponent<ButtonProps> = ({
     setActive(true);
     await onClick().catch((e) => {
       console.error(e);
-      alert(e.message || "operation failed");
+      alert(e.message ?? "operation failed");
     });
     setActive(false);
   };
