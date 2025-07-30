@@ -39,7 +39,7 @@ func StartServer(port int, news bool) {
 			Current:     player.GetCurrentlyPlaying(),
 			History:     player.GetHistory(),
 			LibraryInfo: ApiNowLibraryInfo{},
-			Uptime:      utils.PrettyDuration(time.Now().Sub(startTime), ""),
+			Uptime:      utils.PrettyDuration(time.Since(startTime), ""),
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)

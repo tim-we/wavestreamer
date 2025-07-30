@@ -99,32 +99,23 @@ type ClipProps = {
 
 const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
   const userQuery = useContext(UserQueryContext);
-  const folderRef = useRef<HTMLElement>();
-  const filenameRef = useRef<HTMLElement>();
-  const compontents = clip.name.split("/");
-  const folder = compontents.slice(0, compontents.length - 1).join("/");
-  const filename = compontents[compontents.length - 1];
+  const nameRef = useRef<HTMLElement>();
 
   useEffect(() => {
+    const loweredClipName = clip.name.toLocaleLowerCase();
     for (const { segment, isWordLike } of segmenter.segment(userQuery)) {
       if (!isWordLike) {
         continue;
       }
-      let index = clip.name.indexOf(segment);
+
+      const index = loweredClipName.indexOf(segment.toLocaleLowerCase());
+
       if (index < 0) {
         continue;
       }
 
-      const textNode =
-        index < folder.length - 1
-          ? folderRef.current.childNodes[0]
-          : filenameRef.current.childNodes[0];
-
-      if (index >= folder.length) {
-        index = textNode.textContent.indexOf(segment);
-      }
-
       const range = new Range();
+      const textNode = nameRef.current.childNodes[0];
       range.setStart(textNode, index);
       range.setEnd(textNode, index + segment.length);
 
@@ -135,11 +126,8 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
   return (
     <details class="song" name="clip">
       <summary>
-        {folder.length > 0 ? (
-          <span class="folder" ref={folderRef}>{`${folder}/`}</span>
-        ) : null}
-        <span class="file" ref={filenameRef}>
-          {filename}
+        <span class="file" ref={nameRef}>
+          {clip.name}
         </span>
       </summary>
       <div class="buttons">
@@ -150,7 +138,7 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
             e.preventDefault();
             e.stopPropagation();
             await radio.schedule(clip.id);
-            alert(`${filename} added to queue.`);
+            alert(`${clip.name} added to queue.`);
           }}
         >
           add to queue
@@ -158,8 +146,8 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
         <button
           class="download"
           type="button"
-          title={`download ${filename}`}
-          onClick={() => downloadClip(radio, clip, filename)}
+          title={`download ${clip.name}`}
+          onClick={() => downloadClip(radio, clip, clip.name)}
           disabled
         >
           download

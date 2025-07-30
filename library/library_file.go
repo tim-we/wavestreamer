@@ -62,7 +62,9 @@ func (file *LibraryFile) CreateClip() *clips.AudioClip {
 
 func (file *LibraryFile) Name() string {
 	// TODO: Share implementation with AudioClip
-	return fp.Base(file.filepath)
+	filename := fp.Base(file.filepath)
+	ext := fp.Ext(filename)
+	return strings.TrimSuffix(filename, ext)
 }
 
 func (file *LibraryFile) Matches(query string) bool {
