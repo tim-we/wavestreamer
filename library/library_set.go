@@ -3,25 +3,30 @@ package library
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"sync"
 
 	"github.com/google/uuid"
 )
 
+const RECENT_SIZE = 4
+
 type LibrarySet struct {
-	files map[string]*LibraryFile    // holds the data (ground truth)
-	idmap map[uuid.UUID]*LibraryFile // helper for fast lookup via id
-	list  []*LibraryFile             // for random access (derived from `files`)
-	dirty bool                       // dirty=true implies the list is outdated and must be regenerated
-	mu    sync.RWMutex               // different threads/goroutines access this struct
+	files       map[string]*LibraryFile    // holds the data (ground truth)
+	idmap       map[uuid.UUID]*LibraryFile // helper for fast lookup via id
+	list        []*LibraryFile             // for random access (derived from `files`)
+	dirty       bool                       // dirty=true implies the list is outdated and must be regenerated
+	mu          sync.RWMutex               // different threads/goroutines access this struct
+	recentPicks []*LibraryFile             // a list of recently picked songs to avoid duplicates
 }
 
 func NewLibrarySet(initialCapacity int) *LibrarySet {
 	return &LibrarySet{
-		files: make(map[string]*LibraryFile, initialCapacity),
-		idmap: make(map[uuid.UUID]*LibraryFile, initialCapacity),
-		list:  make([]*LibraryFile, initialCapacity),
-		dirty: false,
+		files:       make(map[string]*LibraryFile, initialCapacity),
+		idmap:       make(map[uuid.UUID]*LibraryFile, initialCapacity),
+		list:        make([]*LibraryFile, initialCapacity),
+		recentPicks: make([]*LibraryFile, 0, RECENT_SIZE),
+		dirty:       false,
 	}
 }
 
@@ -108,7 +113,23 @@ func (ls *LibrarySet) GetRandom() *LibraryFile {
 		panic(fmt.Errorf("no files available"))
 	}
 
-	return ls.list[rand.Intn(len(ls.list))]
+	candidate := ls.list[rand.Intn(len(ls.list))]
+
+	if len(ls.list) < 2*len(ls.recentPicks) {
+		return candidate
+	}
+
+	attempts := 1
+	for attempts < 8 && slices.Contains(ls.recentPicks, candidate) {
+		candidate = ls.list[rand.Intn(len(ls.list))]
+	}
+
+	ls.recentPicks = append([]*LibraryFile{candidate}, ls.recentPicks...)
+	if len(ls.recentPicks) > RECENT_SIZE {
+		ls.recentPicks = ls.recentPicks[:RECENT_SIZE]
+	}
+
+	return candidate
 }
 
 // GetById returns a file with the given id if it exists, nil otherwise.

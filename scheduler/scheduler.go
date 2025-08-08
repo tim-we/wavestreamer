@@ -23,14 +23,14 @@ func Start() {
 				}
 			}
 
-			// Half of the time play a host clip...
+			// Then either play a host clip...
 			if rand.Intn(100) < 50 {
 				if t := enqueueFile(library.PickRandomHostClip()); t > 0 {
 					continue
 				}
 			}
 
-			// ... the other half play some random clips.
+			// ... or play some random clip(s).
 			clipsTime := 0 * time.Second
 			clipsCount := 0
 			for clipsTime < time.Minute && clipsCount < 2 {
