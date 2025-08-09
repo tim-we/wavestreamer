@@ -46,8 +46,20 @@ jobs:
             wget \
             gcc-aarch64-linux-gnu
 
-      # For cross compiling we need to manually build both ALSA...
+      # For cross compiling we need to manually build both ALSA and PortAudio for arm64.
+      # Since those dependencies rarely change we can cache it.
+      - name: Cache ALSA source and build
+        id: cache_alsa
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/alsa/alsa-lib-1.2.10
+            build/alsa/alsa-lib-1.2.10.tar.bz2
+            build/alsa/alsa-install
+          key: alsa-lib-1.2.10
+
       - name: Download and build ALSA-lib for aarch64
+        if: steps.cache_alsa.outputs.cache-hit != 'true'
         run: |
           mkdir -p build/alsa
           cd build/alsa
@@ -59,8 +71,19 @@ jobs:
           echo "Find lib files "
           find . -name 'libasound.so*'
 
-      # ... and PortAudio for arm64
+      # Cache PortAudio source and install dir
+      - name: Cache PortAudio source and build
+        id: cache_portaudio
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/portaudio
+            build/portaudio-install
+            build/pa_stable_v190700_20210406.tgz
+          key: portaudio-190700-20210406
+
       - name: Download and build PortAudio with ALSA support for aarch64
+        if: steps.cache_portaudio.outputs.cache-hit != 'true'
         run: |
           mkdir -p build/portaudio
           cd build
