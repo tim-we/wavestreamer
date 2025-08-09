@@ -160,6 +160,10 @@ section {
   font-size: 14px;
   text-align: center;
   background-color: var(--bg-color);
+
+  a {
+    color: rgb(55, 118, 171);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
