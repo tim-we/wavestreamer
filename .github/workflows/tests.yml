@@ -19,7 +19,6 @@ jobs:
 
       - name: Install PortAudio
         run: |
-          sudo apt update
           sudo apt install -y libportaudio2 portaudio19-dev
 
       # If the webapp/dist folder is empty the go build will fail
