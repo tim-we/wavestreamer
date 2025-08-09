@@ -16,4 +16,7 @@ type Clip interface {
 
 	// Duration of the clip.
 	Duration() time.Duration
+
+	// Creates a independent copy of the clip.
+	Duplicate() Clip
 }

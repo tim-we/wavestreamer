@@ -47,6 +47,10 @@ func (clip *PauseClip) Duration() time.Duration {
 	return clip.duration
 }
 
+func (clip *PauseClip) Duplicate() player.Clip {
+	return NewPause(clip.duration)
+}
+
 func formatDuration(d time.Duration) string {
 	minutes := int(d.Minutes())
 	seconds := int(d.Seconds()) % 60

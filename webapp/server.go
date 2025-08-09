@@ -33,30 +33,52 @@ func StartServer(port int, news bool) {
 	// Serve static (embedded) files
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
 
-	// API: /now endpoint
+	// API endpoints:
+
 	http.HandleFunc("/api/now", func(w http.ResponseWriter, r *http.Request) {
+		current := player.GetCurrentlyPlaying()
+		currentClipName := "-"
+
+		if current != nil {
+			currentClipName = current.Name()
+		}
+
 		response := ApiNowResponse{
 			Status:      "ok",
-			Current:     player.GetCurrentlyPlaying(),
+			Current:     currentClipName,
 			History:     player.GetHistory(),
 			LibraryInfo: ApiNowLibraryInfo{},
 			Uptime:      utils.PrettyDuration(time.Since(startTime), ""),
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	})
 
-	// API: /skip endpoint
 	http.HandleFunc("/api/skip", func(w http.ResponseWriter, r *http.Request) {
 		player.SkipCurrent()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
 
-	// API: /pause endpoint
 	http.HandleFunc("/api/pause", func(w http.ResponseWriter, r *http.Request) {
 		player.QueueClip(clips.NewPause(10 * time.Minute))
 		player.SkipCurrent()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
+	})
+
+	http.HandleFunc("/api/repeat", func(w http.ResponseWriter, r *http.Request) {
+		current := player.GetCurrentlyPlaying()
+
+		if current == nil {
+			respondWithError(w, "nothing to repeat")
+			return
+		}
+
+		nextClip := current.Duplicate()
+		player.QueueClipNext(nextClip)
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})

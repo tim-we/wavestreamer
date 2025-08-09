@@ -61,10 +61,14 @@ const DIAL_DURATION_IN_CHUNKS = max(1, (3*config.SAMPLE_RATE/2)/config.FRAMES_PE
 // Roughly half a second. Pause between beeps and dial sound.
 const PAUSE_DURATION_IN_CHUNKS = max(1, (config.SAMPLE_RATE/2)/config.FRAMES_PER_BUFFER)
 
-func NewFakeTelephoneClip() *TelephoneDialClip {
+func NewTelephoneDialClip() *TelephoneDialClip {
 	// Pick a random telephone number
 	telNumber := telephoneNumbers[rand.Intn(len(telephoneNumbers))]
 
+	return newTelephoneDialClip(telNumber)
+}
+
+func newTelephoneDialClip(telNumber string) *TelephoneDialClip {
 	buffer := make(chan *player.AudioChunk, 16)
 
 	durationInChunks := len(telNumber)*BEEP_DURATION_IN_CHUNKS + PAUSE_DURATION_IN_CHUNKS + DIAL_DURATION_IN_CHUNKS
@@ -127,6 +131,10 @@ func (clip *TelephoneDialClip) Name() string {
 
 func (clip *TelephoneDialClip) Duration() time.Duration {
 	return clip.duration
+}
+
+func (clip *TelephoneDialClip) Duplicate() player.Clip {
+	return newTelephoneDialClip(clip.telephoneNumber)
 }
 
 func fillChunkWithFrequencies(chunk *player.AudioChunk, pair DTMFFrequencies, timeOffset int, fadeOut bool) {

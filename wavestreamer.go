@@ -48,7 +48,7 @@ func main() {
 	// Give PortAudio/ALSA/The audio system some time to start.
 	// Otherwise we get stutters in the beginning.
 	player.QueueClip(clips.NewPause(1 * time.Second))
-	player.QueueClip(clips.NewFakeTelephoneClip())
+	player.QueueClip(clips.NewTelephoneDialClip())
 	player.QueueClip(library.PickRandomClip().CreateClip())
 
 	fmt.Println("Starting scheduler...")

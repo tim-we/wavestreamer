@@ -27,16 +27,26 @@ type AudioClip struct {
 }
 
 func NewAudioClip(filepath string) (*AudioClip, error) {
+	return NewAudioClipWithMetaData(filepath, nil)
+}
+
+func NewAudioClipWithMetaData(filepath string, providedMetaData *d.AudioFileMetaData) (*AudioClip, error) {
 	if !fileExists(filepath) {
 		return nil, fmt.Errorf("file '%s' not found", filepath)
 	}
 
 	decoder := d.NewDecodingProcess(filepath)
-	meta, metaErr := d.GetFileMetadata(filepath)
 
-	if metaErr != nil {
-		decoder.Close()
-		return nil, fmt.Errorf("failed to get meta data of '%s'", filepath)
+	meta := providedMetaData
+
+	// If the meta data was already provided by the caller we don't have to call ffprobe again.
+	if providedMetaData == nil {
+		if newMeta, metaErr := d.GetFileMetadata(filepath); metaErr != nil {
+			decoder.Close()
+			return nil, fmt.Errorf("failed to get meta data of '%s'", filepath)
+		} else {
+			meta = newMeta
+		}
 	}
 
 	if err := decoder.StartDecoding(); err != nil {
@@ -159,6 +169,17 @@ func (clip *AudioClip) SetMetaData(title, artist, album string) {
 	if album != "" {
 		clip.meta.Album = album
 	}
+}
+
+func (clip *AudioClip) Duplicate() player.Clip {
+	newClip, err := NewAudioClipWithMetaData(clip.filepath, clip.meta)
+
+	if err != nil {
+		// This worked before, it should have worked now.
+		panic(err)
+	}
+
+	return newClip
 }
 
 func fileExists(filename string) bool {

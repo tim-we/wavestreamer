@@ -15,7 +15,7 @@ import (
 
 var userQueue = make([]Clip, 0, 12)
 
-var currentlyPlaying string = "?"
+var currentlyPlaying Clip = nil
 
 var skipSignal = make(chan struct{}, 1)
 
@@ -90,8 +90,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 			break
 		}
 
-		currentlyPlaying = clip.Name()
-		log.Printf("Now playing %s", currentlyPlaying)
+		currentlyPlaying = clip
+		log.Printf("Now playing %s", currentlyPlaying.Name())
 		addClipToHistory(clip)
 
 		// Reset measured loudness for new clip
@@ -121,16 +121,22 @@ func Start(clipProvider func() Clip, normalize bool) {
 			}
 		}
 
-		currentlyPlaying = "-"
+		currentlyPlaying = nil
 
 	}
 }
 
 func QueueClip(clip Clip) {
+	if clip == nil {
+		return
+	}
 	userQueue = append(userQueue, clip)
 }
 
 func QueueClipNext(clip Clip) {
+	if clip == nil {
+		return
+	}
 	userQueue = append([]Clip{clip}, userQueue...)
 }
 
@@ -138,7 +144,7 @@ func QueueSize() int {
 	return len(userQueue)
 }
 
-func GetCurrentlyPlaying() string {
+func GetCurrentlyPlaying() Clip {
 	return currentlyPlaying
 }
 
