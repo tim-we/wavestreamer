@@ -122,6 +122,7 @@ func (ls *LibrarySet) GetRandom() *LibraryFile {
 	attempts := 1
 	for attempts < 8 && slices.Contains(ls.recentPicks, candidate) {
 		candidate = ls.list[rand.Intn(len(ls.list))]
+		attempts++
 	}
 
 	ls.recentPicks = append([]*LibraryFile{candidate}, ls.recentPicks...)
