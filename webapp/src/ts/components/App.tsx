@@ -28,6 +28,7 @@ const App: FunctionComponent<AppProps> = ({ radio }) => {
         <History data={now ? now.history : []} />
         <section id="stats" />
       </div>
+      <div class="space-filler"></div>
       <About />
     </>
   );

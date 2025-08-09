@@ -1,22 +1,33 @@
 html,
 body {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   font-family: sans-serif;
   text-rendering: optimizeLegibility;
   --bg-color: white;
+  overflow: hidden;
 }
 
 div {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
   min-height: 100vh;
   background-color: var(--bg-color);
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+  .space-filler {
+    flex-basis: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+  }
 }
 
 header {
@@ -99,7 +110,7 @@ section {
   }
 }
 
-#about {
+footer {
   margin-top: 10px;
   padding: 10px 0px;
   color: rgb(100, 100, 100);
