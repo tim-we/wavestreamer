@@ -17,8 +17,8 @@
     "preact": "^10.27.0"
   },
   "engines": {
-    "node": ">=22",
-    "npm": ">=10"
+    "node": ">=24",
+    "npm": ">=11"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.4",

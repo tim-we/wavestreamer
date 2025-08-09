@@ -2,7 +2,7 @@
 
 [![Build for Raspberry Pi](https://github.com/tim-we/wavestreamer/actions/workflows/build-rpi.yml/badge.svg)](https://github.com/tim-we/wavestreamer/actions/workflows/build-rpi.yml)
 ![Go Version](https://img.shields.io/github/go-mod/go-version/tim-we/wavestreamer)
-![Node.js Version](https://img.shields.io/badge/node-22-brightgreen)
+![Node.js Version](https://img.shields.io/badge/node-24-brightgreen)
 
 
 
