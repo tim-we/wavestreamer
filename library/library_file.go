@@ -67,6 +67,10 @@ func (file *LibraryFile) Name() string {
 	return strings.TrimSuffix(filename, ext)
 }
 
+func (file *LibraryFile) Path() string {
+	return file.filepath
+}
+
 func (file *LibraryFile) Matches(query string) bool {
 	if file == nil {
 		return false

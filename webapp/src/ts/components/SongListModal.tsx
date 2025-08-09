@@ -148,7 +148,6 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
           type="button"
           title={`download ${clip.name}`}
           onClick={() => downloadClip(radio, clip, clip.name)}
-          disabled
         >
           download
         </button>
@@ -166,5 +165,5 @@ function downloadClip(
   a.href = radio.getDownloadUrl(clip.id);
   a.onclick = (e) => e.stopPropagation();
   a.download = filename;
-  //a.click(); // TODO: re-enable once server side is implemented
+  a.click();
 }

@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
@@ -69,6 +70,26 @@ func StartServer(port int, news bool) {
 		json.NewEncoder(w).Encode(ApiSearchResponse{"ok", results})
 	})
 
+	http.HandleFunc("/api/library/download", func(w http.ResponseWriter, r *http.Request) {
+		rawFile := r.URL.Query().Get("file")
+		fileId, err := uuid.Parse(rawFile)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			respondWithError(w, "invalid or missing 'file' query parameter")
+			return
+		}
+
+		libFile := library.GetFileById(fileId)
+		if libFile == nil {
+			w.WriteHeader(http.StatusNotFound)
+			respondWithError(w, "file not found")
+			return
+		}
+		// Set Content-Disposition header to force download and specify filename
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filepath.Base(libFile.Path())))
+		http.ServeFile(w, r, libFile.Path())
+	})
+
 	http.HandleFunc("/api/schedule", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
@@ -122,6 +143,11 @@ func searchResultsAsDTOs(results []*library.LibraryFile) []SearchResultEntry {
 		}
 	}
 	return stringResults
+}
+
+func respondWithError(w http.ResponseWriter, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ApiErrorResponse{"error", message})
 }
 
 type ApiNowResponse struct {
