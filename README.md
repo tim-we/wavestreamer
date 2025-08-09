@@ -5,7 +5,6 @@
 ![Node.js Version](https://img.shields.io/badge/node-24-brightgreen)
 
 
-
 **wavestreamer** is a lightweight music playback system written in Go, designed to run continuously on a Raspberry Pi.
 
 It is the spiritual successor to [py-radio](https://github.com/tim-we/py-radio/), rewritten from scratch for better performance, maintainability, and flexibility.
@@ -34,11 +33,17 @@ it just automatically starts the program after the Pi boots.
     sudo apt install libportaudio2 ffmpeg screen
     ```
 
-2. Copy files from `pi-files`
+2. Grab the latest build from the latest GitHub Actions workflow run
+    - Workflow runs: https://github.com/tim-we/wavestreamer/actions/workflows/build-rpi.yml
+    - Download `wavestreamer-arm64` artifact
+    - Extract archive
+    - Copy `wavestreamer` executable to the home folder (e.g. `/home/pi`)
+
+3. (Optional) Copy files from `pi-files`
     - Copy `start-radio.sh` to the home folder (e.g. `/home/pi`)
     - Copy `radio-service` to `/etc/systemd/system/radio.service` and update the paths inside
 
-3. Setup service:
+4. (Optional) Setup service:
     - `sudo systemctl daemon-reexec`
     - `sudo systemctl daemon-reload`
     - `sudo systemctl enable radio.service`
