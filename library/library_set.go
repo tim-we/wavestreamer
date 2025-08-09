@@ -115,7 +115,7 @@ func (ls *LibrarySet) GetRandom() *LibraryFile {
 
 	candidate := ls.list[rand.Intn(len(ls.list))]
 
-	if len(ls.list) < 2*len(ls.recentPicks) {
+	if len(ls.list) < 2*RECENT_SIZE {
 		return candidate
 	}
 
