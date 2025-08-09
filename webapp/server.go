@@ -62,7 +62,14 @@ func StartServer(port int, news bool) {
 	})
 
 	http.HandleFunc("/api/pause", func(w http.ResponseWriter, r *http.Request) {
-		player.QueueClip(clips.NewPause(10 * time.Minute))
+		current := player.GetCurrentlyPlaying()
+
+		// If the current clip is a Pause we don't schedule another one,
+		// we skip the current one (see below)
+		if _, isPause := current.(*clips.PauseClip); current == nil || !isPause {
+			player.QueueClip(clips.NewPause(10 * time.Minute))
+		}
+
 		player.SkipCurrent()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
