@@ -43,9 +43,12 @@ func StartServer(port int, news bool) {
 			currentClipName = current.Name()
 		}
 
+		_, isPause := current.(*clips.PauseClip)
+
 		response := ApiNowResponse{
 			Status:      "ok",
 			Current:     currentClipName,
+			IsPause:     isPause,
 			History:     player.GetHistory(),
 			LibraryInfo: ApiNowLibraryInfo{},
 			Uptime:      utils.PrettyDuration(time.Since(startTime), ""),
@@ -182,6 +185,7 @@ func respondWithError(w http.ResponseWriter, message string) {
 type ApiNowResponse struct {
 	Status      string                `json:"status"`
 	Current     string                `json:"current"`
+	IsPause     bool                  `json:"isPause"`
 	History     []player.HistoryEntry `json:"history"`
 	LibraryInfo ApiNowLibraryInfo     `json:"library"`
 	Uptime      string                `json:"uptime"`

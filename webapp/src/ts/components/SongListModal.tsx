@@ -1,7 +1,7 @@
 import { createContext, type FunctionComponent, render } from "preact";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import type WavestreamerApi from "../wavestreamer-api";
 import type { SearchResultEntry } from "../wavestreamer-api";
+import * as WavestreamerApi from "../wavestreamer-api";
 
 const portal = document.getElementById("modal-portal")!;
 const highlight = new Highlight();
@@ -9,15 +9,11 @@ const UserQueryContext = createContext("");
 const segmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 CSS.highlights.set("search-results", highlight);
 
-export function show(radio: WavestreamerApi) {
-  render(<SongListModal radio={radio} />, portal);
+export function show() {
+  render(<SongListModal />, portal);
 }
 
-type SLMProps = {
-  radio: WavestreamerApi;
-};
-
-const SongListModal: FunctionComponent<SLMProps> = ({ radio }) => {
+const SongListModal: FunctionComponent = () => {
   const inputRef = useRef<HTMLInputElement>();
   const [clips, setClips] = useState<SearchResultEntry[]>([]);
 
@@ -29,7 +25,7 @@ const SongListModal: FunctionComponent<SLMProps> = ({ radio }) => {
       if (filter === "") {
         setClips([]);
       } else if (filter.length > 1) {
-        setClips(await radio.search(filter));
+        setClips(await WavestreamerApi.search(filter));
       }
     };
 
@@ -71,7 +67,7 @@ const SongListModal: FunctionComponent<SLMProps> = ({ radio }) => {
         <div id="song-list">
           <UserQueryContext.Provider value={inputRef.current?.value ?? ""}>
             {clips.map((clip) => (
-              <Clip key={clip.id} radio={radio} clip={clip} />
+              <Clip key={clip.id} clip={clip} />
             ))}
           </UserQueryContext.Provider>
         </div>
@@ -94,10 +90,9 @@ function songListKeydownHandler(e: KeyboardEvent) {
 
 type ClipProps = {
   clip: SearchResultEntry;
-  radio: WavestreamerApi;
 };
 
-const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
+const Clip: FunctionComponent<ClipProps> = ({ clip }) => {
   const userQuery = useContext(UserQueryContext);
   const nameRef = useRef<HTMLElement>();
 
@@ -137,7 +132,7 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
           onClick={async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            await radio.schedule(clip.id);
+            await WavestreamerApi.schedule(clip.id);
             alert(`${clip.name} added to queue.`);
           }}
         >
@@ -147,7 +142,7 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
           class="download"
           type="button"
           title={`download ${clip.name}`}
-          onClick={() => downloadClip(radio, clip, clip.name)}
+          onClick={() => downloadClip(clip, clip.name)}
         >
           download
         </button>
@@ -156,13 +151,9 @@ const Clip: FunctionComponent<ClipProps> = ({ clip, radio }) => {
   );
 };
 
-function downloadClip(
-  radio: WavestreamerApi,
-  clip: SearchResultEntry,
-  filename: string,
-): void {
+function downloadClip(clip: SearchResultEntry, filename: string): void {
   const a = document.createElement("a");
-  a.href = radio.getDownloadUrl(clip.id);
+  a.href = WavestreamerApi.getDownloadUrl(clip.id);
   a.onclick = (e) => e.stopPropagation();
   a.download = filename;
   a.click();

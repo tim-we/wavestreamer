@@ -4,12 +4,8 @@ import listIcon from "../../img/list.svg";
 import pauseIcon from "../../img/pause.svg";
 import repeatIcon from "../../img/repeat.svg";
 import skipIcon from "../../img/skip.svg";
-import type WavestreamerApi from "../wavestreamer-api";
+import * as WavestreamerApi from "../wavestreamer-api";
 import * as SongListModal from "./SongListModal";
-
-type ControlsProps = {
-  radio: WavestreamerApi;
-};
 
 const SVG_ICONS = {
   pause: pauseIcon,
@@ -18,27 +14,31 @@ const SVG_ICONS = {
   list: listIcon,
 } as const;
 
-const Controls: FunctionComponent<ControlsProps> = ({ radio }) => {
+const Controls: FunctionComponent = () => {
   const [newsEnabled, setNewsEnabled] = useState<boolean>(false);
 
   useEffect(() => {
-    radio.getConfig().then((config) => setNewsEnabled(config.news));
-  }, [radio]);
+    WavestreamerApi.getConfig().then((config) => setNewsEnabled(config.news));
+  }, []);
 
   return (
     <section id="controls">
-      <Button id="pause" tooltip="toggle pause" onClick={() => radio.pause()} />
+      <Button
+        id="pause"
+        tooltip="toggle pause"
+        onClick={() => WavestreamerApi.pause()}
+      />
       <Button
         id="repeat"
         label="repeat"
         tooltip="repeat current clip"
-        onClick={() => radio.repeat()}
+        onClick={() => WavestreamerApi.repeat()}
       />
       <Button
         id="skip"
         label="skip"
         tooltip="skip current clip"
-        onClick={() => radio.skip()}
+        onClick={() => WavestreamerApi.skip()}
       />
       <Button
         id="song-list-button"
@@ -46,7 +46,7 @@ const Controls: FunctionComponent<ControlsProps> = ({ radio }) => {
         tooltip="song list"
         icon="list"
         onClick={() => {
-          SongListModal.show(radio);
+          SongListModal.show();
           return Promise.resolve();
         }}
       />
@@ -54,7 +54,7 @@ const Controls: FunctionComponent<ControlsProps> = ({ radio }) => {
         <Button
           id="news"
           tooltip="Tagesschau in 100s"
-          onClick={() => radio.news()}
+          onClick={() => WavestreamerApi.news()}
         >
           🗞️
         </Button>

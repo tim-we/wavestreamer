@@ -1,14 +1,15 @@
 import type { FunctionComponent } from "preact";
+import { nowDataSignal } from "../wavestreamer-api";
 
-type NPProps = {
-  clip?: string;
+const NowPlaying: FunctionComponent<unknown> = () => {
+  const clip = nowDataSignal.value?.current ?? "-";
+
+  return (
+    <section id="now">
+      <div class="title">Now playing:</div>
+      <div id="current-clip">{clip}</div>
+    </section>
+  );
 };
-
-const NowPlaying: FunctionComponent<NPProps> = ({ clip }) => (
-  <section id="now">
-    <div class="title">Now playing:</div>
-    <div id="current-clip">{clip ? clip : "-"}</div>
-  </section>
-);
 
 export default NowPlaying;

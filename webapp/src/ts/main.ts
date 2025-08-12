@@ -1,8 +1,8 @@
 import { createElement, render } from "preact";
 import App from "./components/App";
-import WavestreamerApi from "./wavestreamer-api";
+import * as WavestreamerApi from "./wavestreamer-api";
 
 const root = document.getElementById("root")!;
-const radio = new WavestreamerApi();
+WavestreamerApi.init();
 
-render(createElement(App, { radio }), root);
+render(createElement(App, {}), root);

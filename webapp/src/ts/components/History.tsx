@@ -1,12 +1,19 @@
 import type { FunctionComponent } from "preact";
-import type { HistoryEntry } from "../wavestreamer-api";
+import { nowDataSignal } from "../wavestreamer-api";
 
-type HistoryProps = {
-  data: HistoryEntry[];
-};
+const History: FunctionComponent<unknown> = () => {
+  const nowData = nowDataSignal.value;
 
-const History: FunctionComponent<HistoryProps> = function History({ data }) {
-  const history = data.slice().reverse();
+  if (!nowData) {
+    return null;
+  }
+
+  const data = nowData.history ?? [];
+  const history = data.toReversed().slice(1);
+
+  if (history.length === 0) {
+    return null;
+  }
 
   return (
     <section id="history">
