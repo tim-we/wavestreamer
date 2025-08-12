@@ -2,6 +2,7 @@ import type { FunctionComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import listIcon from "../../img/list.svg";
 import pauseIcon from "../../img/pause.svg";
+import playIcon from "../../img/play.svg";
 import repeatIcon from "../../img/repeat.svg";
 import skipIcon from "../../img/skip.svg";
 import * as WavestreamerApi from "../wavestreamer-api";
@@ -9,6 +10,7 @@ import * as SongListModal from "./SongListModal";
 
 const SVG_ICONS = {
   pause: pauseIcon,
+  play: playIcon,
   repeat: repeatIcon,
   skip: skipIcon,
   list: listIcon,
@@ -24,7 +26,7 @@ const Controls: FunctionComponent = () => {
   return (
     <section id="controls">
       <Button
-        id="pause"
+        id={WavestreamerApi.nowDataSignal.value?.isPause ? "play" : "pause"}
         tooltip="toggle pause"
         onClick={() => WavestreamerApi.pause()}
       />
