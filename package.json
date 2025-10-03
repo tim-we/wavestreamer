@@ -12,19 +12,19 @@
   },
   "author": "tim-we",
   "license": "MIT",
-  "description": "",
+  "description": "A music player simulating a radio with a Go backend.",
   "dependencies": {
-    "@preact/signals": "^2.2.1",
-    "preact": "^10.27.0"
+    "@preact/signals": "2.3.1",
+    "preact": "10.27.2"
   },
   "engines": {
     "node": ">=24",
     "npm": ">=11"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.1.4",
-    "@preact/preset-vite": "^2.10.2",
-    "typescript": "^5.8.3",
-    "vite": "^7.1.5"
+    "@biomejs/biome": "2.2.5",
+    "@preact/preset-vite": "2.10.2",
+    "typescript": "5.9.3",
+    "vite": "7.1.9"
   }
 }
