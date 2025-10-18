@@ -6,8 +6,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/tim-we/wavestreamer/config"
@@ -144,15 +142,8 @@ func (clip *AudioClip) Name() string {
 	if clip == nil {
 		panic("clip is nil")
 	}
-	if clip.meta != nil {
-		if clip.meta.Artist != "" && clip.meta.Title != "" {
-			return fmt.Sprintf("%s - %s", clip.meta.Artist, clip.meta.Title)
-		}
-	}
 
-	filename := removeAudioExtension(filepath.Base(clip.filepath))
-
-	return filename
+	return player.GetDisplayName(clip.filepath, clip.meta)
 }
 
 func (clip *AudioClip) Duration() time.Duration {
@@ -192,16 +183,4 @@ func absf32(x float32) float32 {
 		return -x
 	}
 	return x
-}
-
-func removeAudioExtension(filename string) string {
-	ext := filepath.Ext(filename)
-	switch strings.ToLower(ext) {
-	case ".mp3", ".ogg", ".flac", ".wav", ".aac", ".m4a", ".opus":
-		// Remove known audio extensions.
-		return strings.TrimSuffix(filename, ext)
-	default:
-		// Unknown extension, return unchanged.
-		return filename
-	}
 }

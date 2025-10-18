@@ -42,6 +42,11 @@ func main() {
 		return
 	}
 
+	if len(opts.MusicDir) == 0 {
+		fmt.Println("Required argument -d or --music-dir not set.")
+		os.Exit(1)
+	}
+
 	fmt.Println("Using music directory:", opts.MusicDir)
 	library.WatchRootDir(opts.MusicDir)
 

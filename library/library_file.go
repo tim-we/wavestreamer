@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
 	"github.com/tim-we/wavestreamer/player/decoder"
 
@@ -61,10 +62,7 @@ func (file *LibraryFile) CreateClip() *clips.AudioClip {
 }
 
 func (file *LibraryFile) Name() string {
-	// TODO: Share implementation with AudioClip
-	filename := fp.Base(file.filepath)
-	ext := fp.Ext(filename)
-	return strings.TrimSuffix(filename, ext)
+	return player.GetDisplayName(file.filepath, file.meta)
 }
 
 func (file *LibraryFile) Path() string {
