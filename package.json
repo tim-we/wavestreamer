@@ -14,7 +14,7 @@
   "license": "MIT",
   "description": "A music player simulating a radio with a Go backend.",
   "dependencies": {
-    "@preact/signals": "2.3.1",
+    "@preact/signals": "2.3.2",
     "preact": "10.27.2"
   },
   "engines": {
@@ -22,9 +22,9 @@
     "npm": ">=11"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.5",
+    "@biomejs/biome": "2.2.6",
     "@preact/preset-vite": "2.10.2",
     "typescript": "5.9.3",
-    "vite": "7.1.9"
+    "vite": "7.1.10"
   }
 }
