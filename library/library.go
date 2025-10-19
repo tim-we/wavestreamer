@@ -1,11 +1,13 @@
 package library
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -65,7 +67,7 @@ func WatchRootDir(root string) {
 
 	if err != nil {
 		// If the initial scan fails we panic.
-		panic(fmt.Errorf("Error scanning the directory '%v' for files: %v\n", root, err))
+		panic(fmt.Errorf("error scanning the directory '%v' for files: %v", root, err))
 	}
 
 	fmt.Printf(
@@ -188,20 +190,60 @@ func PickRandomHostClip() *LibraryFile {
 	return pickRandomClipWhichHasNotBeenPlayedInAWhile(hostClips)
 }
 
-func Search(query string) []*LibraryFile {
+// Search the library for clips matching the query. The number of results will be limited by the given limit.
+func Search(query string, limit int) []*LibraryFile {
 	modifiedQuery := strings.Trim(strings.ToLower(query), " ")
 
 	if len(modifiedQuery) == 0 {
 		return []*LibraryFile{}
 	}
 
+	// Prepare search
 	parts := strings.Split(modifiedQuery, " ")
 
-	// TODO: consider additional filtering
-	results := append(songFiles.search(parts), clipFiles.search(parts)...)
-	results = append(results, hostClips.search(parts)...)
+	// Prepare parallel search
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	return results
+	results := make(chan *LibraryFile, 32)
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	// Perform parallel search:
+	go func() {
+		defer wg.Done()
+		songFiles.search(parts, ctx, results)
+	}()
+
+	go func() {
+		defer wg.Done()
+		clipFiles.search(parts, ctx, results)
+	}()
+
+	go func() {
+		defer wg.Done()
+		hostClips.search(parts, ctx, results)
+	}()
+
+	// Close channel when all searches complete
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// TODO: consider additional filtering
+
+	collected := make([]*LibraryFile, 0, limit)
+	for result := range results {
+		collected = append(collected, result)
+		if len(collected) >= limit {
+			// Stop searches
+			cancel()
+			break
+		}
+	}
+
+	return collected
 }
 
 func GetFileById(clipId uuid.UUID) *LibraryFile {

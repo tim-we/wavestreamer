@@ -1,6 +1,7 @@
 package library
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"slices"
@@ -35,7 +36,7 @@ func (ls *LibrarySet) AddOrUpdate(path string) error {
 	file, err := NewLibraryFile(path)
 
 	if err != nil {
-		return fmt.Errorf("failed to load new library file %s. Error: %v\n", path, err)
+		return fmt.Errorf("failed to load new library file %s. Error: %v", path, err)
 	}
 
 	ls.mu.Lock()
@@ -146,9 +147,7 @@ func (ls *LibrarySet) Size() int {
 	return len(ls.files)
 }
 
-func (ls *LibrarySet) search(queryParts []string) []*LibraryFile {
-	results := make([]*LibraryFile, 0, 16)
-
+func (ls *LibrarySet) search(queryParts []string, ctx context.Context, results chan<- *LibraryFile) {
 	ls.mu.RLock()
 	defer ls.mu.RUnlock()
 
@@ -165,8 +164,11 @@ clipLoop:
 				continue clipLoop
 			}
 		}
-		results = append(results, clip)
-	}
 
-	return results
+		select {
+		case <-ctx.Done():
+			return
+		case results <- clip:
+		}
+	}
 }

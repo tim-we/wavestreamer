@@ -97,7 +97,7 @@ func StartServer(port int, news bool) {
 		// Parse query parameters and get the value of `query`
 		query := r.URL.Query().Get("query")
 		// Collect results
-		results := searchResultsAsDTOs(library.Search(query))
+		results := searchResultsAsDTOs(library.Search(query, 100))
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiSearchResponse{"ok", results})
 	})
