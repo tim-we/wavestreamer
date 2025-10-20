@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"runtime"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/tim-we/wavestreamer/player/decoder"
 )
 
 const RECENT_SIZE = 4
@@ -82,8 +85,16 @@ func (ls *LibrarySet) Rename(oldPath, newPath string) {
 	}
 }
 
-// Regenerate internal list WITHOUT locking.
-func (ls *LibrarySet) regenerateList() {
+// Regenerate internal list. This function acquires a RW lock.
+func (ls *LibrarySet) regenerateListIfNecessary() {
+	ls.mu.Lock()
+	defer ls.mu.Unlock()
+
+	if !ls.dirty {
+		// Nothing changed, nothing to update.
+		return
+	}
+
 	ls.list = make([]*LibraryFile, 0, len(ls.files))
 	for _, f := range ls.files {
 		ls.list = append(ls.list, f)
@@ -94,21 +105,15 @@ func (ls *LibrarySet) regenerateList() {
 // UpdateInternals should be called after all modifications have been performed.
 // It refreshes the slice used for random access.
 func (ls *LibrarySet) UpdateInternals() {
-	ls.mu.Lock()
-	defer ls.mu.Unlock()
-
-	ls.regenerateList()
+	ls.regenerateListIfNecessary()
 }
 
 // GetRandom returns a random file.
 func (ls *LibrarySet) GetRandom() *LibraryFile {
+	ls.regenerateListIfNecessary()
+
 	ls.mu.RLock()
 	defer ls.mu.RUnlock()
-
-	if ls.dirty {
-		// List is outdated so we need to regenerate it.
-		ls.regenerateList()
-	}
 
 	if len(ls.list) == 0 {
 		panic(fmt.Errorf("no files available"))
@@ -148,13 +153,10 @@ func (ls *LibrarySet) Size() int {
 }
 
 func (ls *LibrarySet) search(queryParts []string, ctx context.Context, results chan<- *LibraryFile) {
+	ls.regenerateListIfNecessary()
+
 	ls.mu.RLock()
 	defer ls.mu.RUnlock()
-
-	if ls.dirty {
-		// List is outdated so we need to regenerate it.
-		ls.regenerateList()
-	}
 
 clipLoop:
 	for _, clip := range ls.list {
@@ -169,6 +171,63 @@ clipLoop:
 		case <-ctx.Done():
 			return
 		case results <- clip:
+		}
+	}
+}
+
+const PROCESSING_CHUNK_SIZE = 10
+
+func (ls *LibrarySet) loadMissingMetaData() {
+	filesWithMissingData := ls.getFilesWithMissingMetaData()
+
+	runtime.Gosched()
+
+	for i := 0; i < len(filesWithMissingData); i += PROCESSING_CHUNK_SIZE {
+		end := min(i+PROCESSING_CHUNK_SIZE, len(filesWithMissingData))
+
+		// Load meta data in chunks
+		ls.loadMetaDataForChunk(filesWithMissingData[i:end])
+
+		time.Sleep(11 * time.Millisecond)
+	}
+}
+
+func (ls *LibrarySet) getFilesWithMissingMetaData() []*LibraryFile {
+	ls.regenerateListIfNecessary()
+
+	ls.mu.RLock()
+	defer ls.mu.RUnlock()
+
+	filesWithMissingData := make([]*LibraryFile, 0, len(ls.list))
+
+	for _, file := range ls.list {
+		if file.meta == nil {
+			filesWithMissingData = append(filesWithMissingData, file)
+		}
+	}
+
+	return filesWithMissingData
+}
+
+func (ls *LibrarySet) loadMetaDataForChunk(files []*LibraryFile) {
+	metaDataList := make([]*decoder.AudioFileMetaData, len(files))
+
+	// Load meta data
+	for i, file := range files {
+		if newMeta, metaErr := decoder.GetFileMetadata(file.filepath); metaErr == nil {
+			metaDataList[i] = newMeta
+		}
+		runtime.Gosched()
+	}
+
+	// Lock only for a short moment
+	ls.mu.Lock()
+	defer ls.mu.Unlock()
+
+	// Store results
+	for i, file := range files {
+		if metaDataList[i] != nil {
+			file.meta = metaDataList[i]
 		}
 	}
 }

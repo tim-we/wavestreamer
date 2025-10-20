@@ -82,6 +82,14 @@ func WatchRootDir(root string) {
 	}
 
 	go watchFoldersForChanges(folders)
+
+	go func() {
+		songFiles.loadMissingMetaData()
+		clipFiles.loadMissingMetaData()
+		hostClips.loadMissingMetaData()
+
+		log.Println("Finished loading meta data.")
+	}()
 }
 
 func watchFoldersForChanges(folders []string) {
