@@ -63,6 +63,12 @@ func InitGPIOButton(pinName string) {
 
 	// Goroutine 1: Detect GPIO pulses
 	go func() {
+		// Handle case where button is already pressed at startup
+		if pin.Read() == gpio.High {
+			log.Printf("[GPIO] Button %s already pressed at startup", pinName)
+			events <- buttonPulse
+		}
+
 		for {
 			// Indefinitely wait for a rising edge
 			pin.WaitForEdge(-1)
