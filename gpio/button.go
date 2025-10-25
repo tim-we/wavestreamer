@@ -30,6 +30,13 @@ const (
 	longPressThreshold = 1 * time.Second
 )
 
+type buttonEvent int
+
+const (
+	buttonPulse buttonEvent = iota
+	buttonReleased
+)
+
 func InitGPIOButton(pinName string) {
 	// Initialize periph.io
 	if _, err := host.Init(); err != nil {
@@ -51,11 +58,11 @@ func InitGPIOButton(pinName string) {
 		log.Fatal("Failed to configure pin:", err)
 	}
 
-	go func() {
-		buttonPressed := pin.Read() == gpio.High
-		var releaseTimer *time.Timer
-		var pressStartTime time.Time
+	// Channel for thread-safe communication between goroutines
+	events := make(chan buttonEvent, 10)
 
+	// Goroutine 1: Detect GPIO pulses
+	go func() {
 		for {
 			// Indefinitely wait for a rising edge
 			pin.WaitForEdge(-1)
@@ -65,24 +72,47 @@ func InitGPIOButton(pinName string) {
 				continue
 			}
 
-			// When pressed the button is sending repeated pulses.
-			if buttonPressed {
-				// Button already pressed - just reset the timer
-				releaseTimer.Reset(pulseTimeout)
-				continue
-			}
+			// Send pulse event
+			events <- buttonPulse
+		}
+	}()
 
-			// First pulse detected - button just pressed
-			buttonPressed = true
-			pressStartTime = time.Now()
-			log.Printf("[GPIO] Button %s pressed", pinName)
+	// Goroutine 2: Process button events with state management
+	go func() {
+		buttonPressed := false
+		var releaseTimer *time.Timer
+		var pressStartTime time.Time
 
-			// Queue Pause and skip current song (= start pause)
-			player.QueueClipNext(clips.NewPause(10 * time.Minute))
-			player.SkipCurrent()
+		for event := range events {
+			switch event {
+			case buttonPulse:
+				if buttonPressed {
+					// Button already pressed - just reset the timer
+					if releaseTimer != nil {
+						releaseTimer.Reset(pulseTimeout)
+					}
+				} else {
+					// First pulse detected - button just pressed
+					buttonPressed = true
+					pressStartTime = time.Now()
+					log.Printf("[GPIO] Button %s pressed", pinName)
 
-			// Start the release timer
-			releaseTimer = time.AfterFunc(pulseTimeout, func() {
+					// Queue Pause and skip current song (= start pause)
+					player.QueueClipNext(clips.NewPause(10 * time.Minute))
+					player.SkipCurrent()
+
+					// Start the release timer
+					releaseTimer = time.AfterFunc(pulseTimeout, func() {
+						events <- buttonReleased
+					})
+				}
+
+			case buttonReleased:
+				if !buttonPressed {
+					// Ignore spurious release events
+					continue
+				}
+
 				// No pulses received for pulseTimeout milliseconds.
 				// We assume this means the button was released.
 				buttonPressed = false
@@ -95,7 +125,7 @@ func InitGPIOButton(pinName string) {
 					log.Printf("[GPIO] Quick release detected - canceling pause")
 					player.SkipCurrent()
 				}
-			})
+			}
 		}
 	}()
 }
