@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jessevdk/go-flags"
+	"github.com/tim-we/wavestreamer/gpio"
 	"github.com/tim-we/wavestreamer/library"
 	"github.com/tim-we/wavestreamer/player"
 	"github.com/tim-we/wavestreamer/player/clips"
@@ -20,6 +21,7 @@ type AppOptions struct {
 	WebApp      bool   `short:"w" long:"webapp" description:"Enable web app" `
 	WebAppPort  int    `short:"p" long:"port" description:"Web App Port" default:"6969"`
 	GPIO        bool   `short:"i" long:"gpio" description:"Enable GPIO controls"`
+	GPIOPin     string `long:"gpio-pin" description:"GPIO data signal pin. Default: GPIO17"`
 	NoNormalize bool   `long:"no-normalize" description:"Disable automatic loudness normalization"`
 	Version     bool   `short:"v" long:"version" description:"Display version & build information"`
 }
@@ -70,6 +72,11 @@ func main() {
 			log.Println("Warning: Ports below 1024 require root access.")
 		}
 		webapp.StartServer(opts.WebAppPort, opts.News)
+	}
+
+	if opts.GPIO {
+		fmt.Println("Initializing GPIO...")
+		gpio.InitGPIOButton(opts.GPIOPin)
 	}
 
 	if !opts.NoNormalize {
