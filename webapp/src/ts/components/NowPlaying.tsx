@@ -6,7 +6,7 @@ const NowPlaying: FunctionComponent<unknown> = () => {
 
   return (
     <section id="now">
-      <div class="title">Now playing:</div>
+      <div class="title">🎶 Now playing:</div>
       <div id="current-clip">{clip}</div>
     </section>
   );

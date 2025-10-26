@@ -17,7 +17,7 @@ const History: FunctionComponent<unknown> = () => {
 
   return (
     <section id="history">
-      <div class="title">Recent history:</div>
+      <div class="title">🕐 Recent history:</div>
       <table id="history-clips">
         <tbody>
           {history.map((entry) => {

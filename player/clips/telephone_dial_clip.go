@@ -126,7 +126,7 @@ func (clip *TelephoneDialClip) Stop() {
 }
 
 func (clip *TelephoneDialClip) Name() string {
-	return fmt.Sprintf("Telephone Dial (%s)", clip.telephoneNumber)
+	return fmt.Sprintf("📞 Telephone Dial (%s)", clip.telephoneNumber)
 }
 
 func (clip *TelephoneDialClip) Duration() time.Duration {
