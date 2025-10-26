@@ -6,9 +6,11 @@ const buildDate = new Date(__BUILD_DATE__);
 
 const About: FunctionComponent = () => (
   <footer id="about">
-    The code for this project is&nbsp;
-    <a href="https://github.com/tim-we/wavestreamer">available on GitHub</a>.
-    Build date {buildDate.toLocaleDateString()}.
+    <p>
+      The code for this project is&nbsp;
+      <a href="https://github.com/tim-we/wavestreamer">available on GitHub</a>.
+    </p>
+    <p>Build date {buildDate.toLocaleDateString()}.</p>
   </footer>
 );
 export default About;
