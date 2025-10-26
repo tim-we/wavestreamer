@@ -16,7 +16,7 @@ const historyLength = 10
 
 var history []HistoryEntry
 
-func addClipToHistory(clip Clip) {
+func addClipToHistory(clip Clip, skipped bool) {
 	if clip == nil {
 		log.Println("Tried to add nil clip to history.")
 		return
@@ -29,6 +29,7 @@ func addClipToHistory(clip Clip) {
 	history = append(history, HistoryEntry{
 		StartTime: time.Now(),
 		Title:     clip.Name(),
+		Skipped:   skipped,
 	})
 	if len(history) > historyLength {
 		history = history[1:] // remove the oldest entry

@@ -92,14 +92,17 @@ func Start(clipProvider func() Clip, normalize bool) {
 
 		currentlyPlaying = clip
 		log.Printf("Now playing %s", currentlyPlaying.Name())
+		skipped := false
 
 		// Reset measured loudness for new clip
 		var inputLoudness float32 = config.TARGET_MIN_RMS
 		var lastGain float32 = 1.0
 
+		// Play the clip (in short chunks)
 		for {
 			if shouldSkipCurrentClip() {
 				clip.Stop()
+				skipped = true
 				break
 			}
 
@@ -116,11 +119,12 @@ func Start(clipProvider func() Clip, normalize bool) {
 			}
 
 			if !hasMore {
+				// We have reached the end of clip
 				break
 			}
 		}
 
-		addClipToHistory(currentlyPlaying)
+		addClipToHistory(currentlyPlaying, skipped)
 		currentlyPlaying = nil
 	}
 }
