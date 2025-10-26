@@ -92,7 +92,6 @@ func Start(clipProvider func() Clip, normalize bool) {
 
 		currentlyPlaying = clip
 		log.Printf("Now playing %s", currentlyPlaying.Name())
-		addClipToHistory(clip)
 
 		// Reset measured loudness for new clip
 		var inputLoudness float32 = config.TARGET_MIN_RMS
@@ -121,8 +120,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 			}
 		}
 
+		addClipToHistory(currentlyPlaying)
 		currentlyPlaying = nil
-
 	}
 }
 

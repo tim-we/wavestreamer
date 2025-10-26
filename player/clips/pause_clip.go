@@ -11,6 +11,7 @@ import (
 type PauseClip struct {
 	duration time.Duration
 	progress time.Duration
+	hidden   bool
 }
 
 var emptyChunk = player.AudioChunk{
@@ -25,6 +26,7 @@ func NewPause(duration time.Duration) *PauseClip {
 	clip := PauseClip{
 		duration: duration,
 		progress: 0,
+		hidden:   duration <= time.Second,
 	}
 
 	return &clip
@@ -36,6 +38,11 @@ func (clip *PauseClip) NextChunk() (*player.AudioChunk, bool) {
 }
 
 func (clip *PauseClip) Stop() {
+	if clip.progress <= time.Second {
+		// If the pause was skipped immediately it most likely wasn't a real pause.
+		// See gpio/button.go.
+		clip.hidden = true
+	}
 	clip.progress = clip.duration
 }
 
@@ -49,6 +56,10 @@ func (clip *PauseClip) Duration() time.Duration {
 
 func (clip *PauseClip) Duplicate() player.Clip {
 	return NewPause(clip.duration)
+}
+
+func (clip *PauseClip) Hidden() bool {
+	return clip.hidden
 }
 
 func formatDuration(d time.Duration) string {

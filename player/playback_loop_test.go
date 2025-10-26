@@ -28,3 +28,5 @@ func (clip *testClip) Name() string { return "Test Clip" }
 func (clip *testClip) Duration() time.Duration { return 0 }
 
 func (clip *testClip) Duplicate() Clip { return &testClip{} }
+
+func (clip *testClip) Hidden() bool { return false }

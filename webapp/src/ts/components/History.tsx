@@ -9,7 +9,7 @@ const History: FunctionComponent<unknown> = () => {
   }
 
   const data = nowData.history ?? [];
-  const history = data.toReversed().slice(1);
+  const history = data.toReversed();
 
   if (history.length === 0) {
     return null;

@@ -137,6 +137,10 @@ func (clip *TelephoneDialClip) Duplicate() player.Clip {
 	return newTelephoneDialClip(clip.telephoneNumber)
 }
 
+func (clip *TelephoneDialClip) Hidden() bool {
+	return true
+}
+
 func fillChunkWithFrequencies(chunk *player.AudioChunk, pair DTMFFrequencies, timeOffset int, fadeOut bool) {
 	freqA := float64(pair.Lower)
 	freqB := float64(pair.Higher)

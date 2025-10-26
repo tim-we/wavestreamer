@@ -21,6 +21,11 @@ func addClipToHistory(clip Clip) {
 		log.Println("Tried to add nil clip to history.")
 		return
 	}
+
+	if clip.Hidden() {
+		return
+	}
+
 	history = append(history, HistoryEntry{
 		StartTime: time.Now(),
 		Title:     clip.Name(),

@@ -19,4 +19,7 @@ type Clip interface {
 
 	// Creates a independent copy of the clip.
 	Duplicate() Clip
+
+	// Whether the clip should be hidden from the history
+	Hidden() bool
 }

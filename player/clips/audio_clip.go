@@ -173,6 +173,10 @@ func (clip *AudioClip) Duplicate() player.Clip {
 	return newClip
 }
 
+func (clip *AudioClip) Hidden() bool {
+	return false
+}
+
 func fileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	return !errors.Is(err, os.ErrNotExist)
