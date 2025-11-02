@@ -116,7 +116,7 @@ jobs:
           go build -v -ldflags "-X main.GitCommit=$COMMIT -X main.BuildTime=$BUILD_TIME" -o wavestreamer ./wavestreamer.go
 
       - name: Upload binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: wavestreamer-arm64
           path: wavestreamer
