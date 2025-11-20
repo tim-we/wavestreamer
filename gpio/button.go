@@ -117,7 +117,7 @@ func InitGPIOButton(pinName string) {
 					longPressTimer = time.AfterFunc(longPressThreshold, func() {
 						// TODO: This is hacky PoC code. Should be improved.
 						player.QueueClipNext(clips.NewBeep())
-						player.QueueClipNext(clips.NewPause(10 * time.Minute))
+						player.QueueClip(clips.NewPause(10 * time.Minute))
 						player.SkipCurrent()
 					})
 				}
