@@ -104,8 +104,9 @@ func InitGPIOButton(pinName string) {
 					pressStartTime = time.Now()
 					log.Printf("[GPIO] Button %s pressed", pinName)
 
-					// Queue Pause and skip current song (= start pause)
+					// Queue Beep + Pause and skip current song (= start pause)
 					player.QueueClipNext(clips.NewPause(10 * time.Minute))
+					player.QueueClipNext(clips.NewBeep())
 					player.SkipCurrent()
 
 					// Start the release timer
