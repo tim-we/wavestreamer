@@ -87,6 +87,7 @@ func InitGPIOButton(pinName string) {
 	go func() {
 		buttonPressed := false
 		var releaseTimer *time.Timer
+		var longPressTimer *time.Timer
 		var pressStartTime time.Time
 
 		for event := range events {
@@ -111,12 +112,24 @@ func InitGPIOButton(pinName string) {
 					releaseTimer = time.AfterFunc(pulseTimeout, func() {
 						events <- buttonReleased
 					})
+
+					// Start long press timer
+					longPressTimer = time.AfterFunc(longPressThreshold, func() {
+						// TODO: This is hacky PoC code. Should be improved.
+						player.QueueClipNext(clips.NewBeep())
+						player.QueueClipNext(clips.NewPause(10 * time.Minute))
+						player.SkipCurrent()
+					})
 				}
 
 			case buttonReleased:
 				if !buttonPressed {
 					// Ignore spurious release events
 					continue
+				}
+
+				if longPressTimer != nil {
+					longPressTimer.Stop()
 				}
 
 				// No pulses received for pulseTimeout milliseconds.
