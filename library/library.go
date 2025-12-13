@@ -268,6 +268,9 @@ func getLibrarySetForFile(file string) *LibrarySet {
 	if matches, _ := doublestar.Match("**/music/**/*", file); matches {
 		return songFiles
 	}
+	if matches, _ := doublestar.Match("**/night/**/*", file); matches {
+		return songFiles
+	}
 	if matches, _ := doublestar.Match("**/hosts/**/*", file); matches {
 		return hostClips
 	}
