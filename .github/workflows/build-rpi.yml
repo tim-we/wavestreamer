@@ -56,7 +56,7 @@ jobs:
       # Since those dependencies rarely change we can cache it.
       - name: Cache ALSA source and build
         id: cache_alsa
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             build/alsa/alsa-lib-1.2.10
@@ -80,7 +80,7 @@ jobs:
       # Cache PortAudio source and install dir
       - name: Cache PortAudio source and build
         id: cache_portaudio
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             build/portaudio
