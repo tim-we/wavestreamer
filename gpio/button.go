@@ -2,6 +2,7 @@ package gpio
 
 import (
 	"log"
+	"sync"
 	"time"
 
 	"github.com/tim-we/wavestreamer/player"
@@ -30,12 +31,15 @@ const (
 	longPressThreshold = 1 * time.Second
 )
 
-type buttonEvent int
+type ButtonEvent int
 
 const (
-	buttonPulse buttonEvent = iota
-	buttonReleased
+	ButtonPressed ButtonEvent = iota
+	ButtonReleased
 )
+
+// TODO: There is a race condition that needs to be resolved.
+// The skip may not skip the intended clip, it could attempt to skip the beep (short & long press).
 
 func InitGPIOButton(pinName string) {
 	// Initialize periph.io
@@ -58,15 +62,17 @@ func InitGPIOButton(pinName string) {
 		log.Fatal("Failed to configure pin:", err)
 	}
 
-	// Channel for thread-safe communication between goroutines
-	events := make(chan buttonEvent, 10)
+	events := make(chan ButtonEvent, 10)
 
-	// Goroutine 1: Detect GPIO pulses
+	// Goroutine 1: Convert GPIO pulses to Button events (pressed/released)
 	go func() {
-		// Handle case where button is already pressed at startup
+		var releaseTimer *time.Timer
+		var timerMutex sync.Mutex
+
 		if pin.Read() == gpio.High {
 			log.Printf("[GPIO] Button %s already pressed at startup", pinName)
-			events <- buttonPulse
+			log.Printf("[GPIO] Button might be stuck - ignoring all button input")
+			return
 		}
 
 		for {
@@ -78,70 +84,67 @@ func InitGPIOButton(pinName string) {
 				continue
 			}
 
-			// Send pulse event
-			events <- buttonPulse
+			timerMutex.Lock()
+			if releaseTimer != nil {
+				releaseTimer.Reset(pulseTimeout)
+				timerMutex.Unlock()
+
+				// Avoid sending multiple pressed events
+				continue
+			}
+
+			// We assume the button has been released after no high edges after pulseTimeout
+			releaseTimer = time.AfterFunc(pulseTimeout, func() {
+				events <- ButtonReleased
+
+				timerMutex.Lock()
+				releaseTimer = nil
+				timerMutex.Unlock()
+			})
+			timerMutex.Unlock()
+
+			events <- ButtonPressed
 		}
 	}()
 
 	// Goroutine 2: Process button events with state management
 	go func() {
-		buttonPressed := false
-		var releaseTimer *time.Timer
-		var longPressTimer *time.Timer
 		var pressStartTime time.Time
+		var longPressTimer *time.Timer
 
 		for event := range events {
 			switch event {
-			case buttonPulse:
-				if buttonPressed {
-					// Button already pressed - just reset the timer
-					if releaseTimer != nil {
-						releaseTimer.Reset(pulseTimeout)
-					}
-				} else {
-					// First pulse detected - button just pressed
-					buttonPressed = true
-					pressStartTime = time.Now()
-					log.Printf("[GPIO] Button %s pressed", pinName)
+			case ButtonPressed:
+				log.Printf("[GPIO] Button %s pressed", pinName)
+				pressStartTime = time.Now()
 
-					// Queue Beep + Pause and skip current song (= start pause)
-					player.QueueClipNext(clips.NewPause(10 * time.Minute))
+				// Queue Beep + Pause... (in reverse order because "next" queuing)
+				player.QueueClipNext(clips.NewPause(longPressThreshold + 500*time.Millisecond))
+				player.QueueClipNext(clips.NewBeep())
+				// ... and skip current song (= start pause)
+				player.SkipCurrent()
+
+				longPressTimer = time.AfterFunc(longPressThreshold, func() {
+					// Indicate long press by playing a beep
 					player.QueueClipNext(clips.NewBeep())
+					// And schedule the long pause
+					player.QueueClip(clips.NewPause(10 * time.Minute))
+					// Skip the initial short pause to play beep
 					player.SkipCurrent()
-
-					// Start the release timer
-					releaseTimer = time.AfterFunc(pulseTimeout, func() {
-						events <- buttonReleased
-					})
-
-					// Start long press timer
-					longPressTimer = time.AfterFunc(longPressThreshold, func() {
-						// TODO: This is hacky PoC code. Should be improved.
-						player.QueueClipNext(clips.NewBeep())
-						player.QueueClip(clips.NewPause(10 * time.Minute))
-						player.SkipCurrent()
-					})
+				})
+			case ButtonReleased:
+				if longPressTimer == nil {
+					// This should never happen but we can handle it trivially
+					break
 				}
+				longPressTimer.Stop()
 
-			case buttonReleased:
-				if !buttonPressed {
-					// Ignore spurious release events
-					continue
-				}
-
-				if longPressTimer != nil {
-					longPressTimer.Stop()
-				}
-
-				// No pulses received for pulseTimeout milliseconds.
-				// We assume this means the button was released.
-				buttonPressed = false
 				pressDuration := time.Since(pressStartTime)
-
 				log.Printf("[GPIO] Button %s released (held for %v)", pinName, pressDuration)
 
-				// If released quickly (< 1 second), cancel the pause by skipping it
+				// Handle short press. Long presses are handled in the longPressTimer callback.
 				if pressDuration < longPressThreshold {
+					// Skip pause, user just wants to skip the current clip.
 					log.Printf("[GPIO] Quick release detected - canceling pause")
 					player.SkipCurrent()
 				}
