@@ -119,7 +119,7 @@ func InitGPIOButton(pinName string) {
 				pressStartTime = time.Now()
 
 				// Queue Beep + Pause... (in reverse order because "next" queuing)
-				player.QueueClipNext(clips.NewPause(longPressThreshold + 500*time.Millisecond))
+				player.QueueClipNext(clips.NewPause(0))
 				player.QueueClipNext(clips.NewBeep())
 				// ... and skip current song (= start pause)
 				player.SkipCurrent()
