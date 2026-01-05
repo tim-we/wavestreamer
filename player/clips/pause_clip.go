@@ -9,9 +9,10 @@ import (
 )
 
 type PauseClip struct {
-	duration time.Duration
-	progress time.Duration
-	hidden   bool
+	duration        time.Duration
+	progress        time.Duration
+	hidden          bool
+	manuallyStopped bool
 }
 
 var emptyChunk = player.AudioChunk{
@@ -22,11 +23,13 @@ var emptyChunk = player.AudioChunk{
 
 const emptyChunkDuration = (config.FRAMES_PER_BUFFER * time.Second) / config.SAMPLE_RATE
 
+// NewPause creates a new Pause clip with the given duration.
+// Pass 0 to create an indefinite pause clip.
 func NewPause(duration time.Duration) *PauseClip {
 	clip := PauseClip{
 		duration: duration,
 		progress: 0,
-		hidden:   duration <= time.Second,
+		hidden:   duration < 2*time.Second,
 	}
 
 	return &clip
@@ -34,19 +37,33 @@ func NewPause(duration time.Duration) *PauseClip {
 
 func (clip *PauseClip) NextChunk() (*player.AudioChunk, bool) {
 	clip.progress += emptyChunkDuration
-	return &emptyChunk, clip.progress < clip.duration
+	hasMore := clip.progress < clip.duration
+	if clip.duration == 0 {
+		// Indefinite clip
+		hasMore = true
+	}
+	if clip.manuallyStopped {
+		hasMore = false
+	}
+	return &emptyChunk, hasMore
 }
 
 func (clip *PauseClip) Stop() {
+	clip.manuallyStopped = true
+
 	if clip.progress <= time.Second {
-		// If the pause was skipped immediately it most likely wasn't a real pause.
-		// See gpio/button.go.
+		// Hide sub-second pauses from the UI. Those typically occur during short GPIO button presses.
 		clip.hidden = true
 	}
-	clip.progress = clip.duration
+	if clip.duration > 0 {
+		clip.progress = clip.duration
+	}
 }
 
 func (clip *PauseClip) Name() string {
+	if clip.duration == 0 {
+		return "Pause"
+	}
 	return fmt.Sprintf("Pause %s", formatDuration(clip.duration))
 }
 
