@@ -38,9 +38,6 @@ const (
 	ButtonReleased
 )
 
-// TODO: There is a race condition that needs to be resolved.
-// The skip may not skip the intended clip, it could attempt to skip the beep (short & long press).
-
 func InitGPIOButton(pinName string) {
 	// Initialize periph.io
 	if _, err := host.Init(); err != nil {
@@ -112,12 +109,14 @@ func InitGPIOButton(pinName string) {
 		var pressStartTime time.Time
 		var longPressTimer *time.Timer
 		var shortPause *clips.PauseClip
+		var shortPauseMutex sync.Mutex
 
 		for event := range events {
 			switch event {
 			case ButtonPressed:
 				log.Printf("[GPIO] Button %s pressed", pinName)
 				pressStartTime = time.Now()
+				// Create indefinite pause which will be skipped later
 				shortPause = clips.NewPause(0)
 
 				// Queue Beep + Pause... (in reverse order because "next" queuing)
@@ -132,11 +131,13 @@ func InitGPIOButton(pinName string) {
 					// Indicate long press by playing a beep
 					player.QueueClipNext(clips.NewBeep())
 
+					shortPauseMutex.Lock()
 					if shortPause != nil {
 						// Skip the initial short pause to play beep and start the long pause
 						shortPause.Stop()
 						shortPause = nil
 					}
+					shortPauseMutex.Unlock()
 				})
 			case ButtonReleased:
 				if longPressTimer == nil {
@@ -153,10 +154,12 @@ func InitGPIOButton(pinName string) {
 					// Skip pause, user just wants to skip the current clip.
 					log.Printf("[GPIO] Quick release detected - canceling pause")
 
+					shortPauseMutex.Lock()
 					if shortPause != nil {
 						shortPause.Stop()
 						shortPause = nil
 					}
+					shortPauseMutex.Unlock()
 				}
 			}
 		}
