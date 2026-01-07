@@ -15,7 +15,7 @@
   "description": "A music player simulating a radio with a Go backend.",
   "dependencies": {
     "@preact/signals": "2.5.1",
-    "preact": "10.27.2"
+    "preact": "10.28.2"
   },
   "engines": {
     "node": ">=24",
