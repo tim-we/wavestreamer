@@ -81,6 +81,10 @@ func WatchRootDir(root string) {
 		fmt.Printf("%d files could not be classified.\n", unknownFiles)
 	}
 
+	if songFiles.Size() == 0 {
+		panic("No music to play!")
+	}
+
 	go watchFoldersForChanges(folders)
 
 	go func() {
