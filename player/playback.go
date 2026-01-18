@@ -15,11 +15,11 @@ import (
 
 var userQueue = make([]Clip, 0, 12)
 
-var priorityQueue = make(chan Clip, 1)
+var priorityQueue = make(chan Clip, 2)
 
 var currentlyPlaying Clip = nil
 
-var skipSignal = make(chan struct{}, 1)
+var mainLoop *PlaybackLoop
 
 func Start(clipProvider func() Clip, normalize bool) {
 	if err := portaudio.Initialize(); err != nil {
@@ -50,7 +50,7 @@ func Start(clipProvider func() Clip, normalize bool) {
 
 	// Default & priority playback loops
 	priorityLoop := NewPlaybackLoop("Priority Loop", normalize, func() Clip { return <-priorityQueue })
-	mainLoop := NewPlaybackLoop("Main Loop", normalize, nextClipProvider)
+	mainLoop = NewPlaybackLoop("Main Loop", normalize, nextClipProvider)
 
 	playCallback := func(out [][]float32) {
 		select {
@@ -123,7 +123,9 @@ func GetCurrentlyPlaying() Clip {
 }
 
 func SkipCurrent() {
-	skipSignal <- struct{}{}
+	if mainLoop != nil {
+		mainLoop.Skip()
+	}
 }
 
 func PlayPriorityClip(clip Clip) {
