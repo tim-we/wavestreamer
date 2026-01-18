@@ -21,6 +21,7 @@ func NewPlaybackLoop(name string, normalize bool, clipProvider func() Clip) *Pla
 	return &PlaybackLoop{
 		NextAudioChunk: make(chan *AudioChunk, 2),
 		name:           name,
+		clipProvider:   clipProvider,
 		normalize:      normalize,
 		skipSignal:     make(chan struct{}, 1),
 	}

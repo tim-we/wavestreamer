@@ -15,24 +15,13 @@ import (
 
 var userQueue = make([]Clip, 0, 12)
 
+var priorityQueue = make(chan Clip, 1)
+
 var currentlyPlaying Clip = nil
 
 var skipSignal = make(chan struct{}, 1)
 
 func Start(clipProvider func() Clip, normalize bool) {
-	nextClipProvider := func() Clip {
-		if len(userQueue) > 0 {
-			clip := userQueue[0]
-			userQueue = userQueue[1:]
-			return clip
-		}
-		if clip := clipProvider(); clip != nil {
-			return clip
-		}
-		// TODO: what do we do now?
-		return nil
-	}
-
 	if err := portaudio.Initialize(); err != nil {
 		log.Fatal(err)
 	}
@@ -47,8 +36,20 @@ func Start(clipProvider func() Clip, normalize bool) {
 		log.Fatal("No audio devices found.")
 	}
 
+	nextClipProvider := func() Clip {
+		if len(userQueue) > 0 {
+			clip := userQueue[0]
+			userQueue = userQueue[1:]
+			return clip
+		}
+		if clip := clipProvider(); clip != nil {
+			return clip
+		}
+		return nil
+	}
+
 	// Default & priority playback loops
-	priorityLoop := NewPlaybackLoop("Priority Loop", normalize, func() Clip { return nil })
+	priorityLoop := NewPlaybackLoop("Priority Loop", normalize, func() Clip { return <-priorityQueue })
 	mainLoop := NewPlaybackLoop("Main Loop", normalize, nextClipProvider)
 
 	playCallback := func(out [][]float32) {
@@ -126,28 +127,7 @@ func SkipCurrent() {
 }
 
 func PlayPriorityClip(clip Clip) {
-	go func() {
-		for {
-			chunk, hasMore := clip.NextChunk()
-
-			if chunk == nil {
-				break
-			}
-
-			if !hasMore {
-				break
-			}
-		}
-	}()
-}
-
-func shouldSkipCurrentClip() bool {
-	select {
-	case <-skipSignal:
-		return true
-	default:
-		return false
-	}
+	priorityQueue <- clip
 }
 
 func computeTargetGain(chunk *AudioChunk, inputLoudness float32) float32 {
