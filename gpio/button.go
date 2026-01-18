@@ -119,17 +119,15 @@ func InitGPIOButton(pinName string) {
 				// Create indefinite pause which will be skipped later
 				shortPause = clips.NewPause(0)
 
-				// Queue Beep + Pause... (in reverse order because "next" queuing)
 				player.QueueClipNext(shortPause)
-				player.QueueClipNext(clips.NewBeep())
-				// ... and skip current song (= start pause)
 				player.SkipCurrent()
+				player.PlayPriorityClip(clips.NewBeep())
 
 				longPressTimer = time.AfterFunc(longPressThreshold, func() {
 					// And schedule the long pause
 					player.QueueClipNext(clips.NewPause(10 * time.Minute))
 					// Indicate long press by playing a beep
-					player.QueueClipNext(clips.NewBeep())
+					player.PlayPriorityClip(clips.NewBeep())
 
 					shortPauseMutex.Lock()
 					if shortPause != nil {
