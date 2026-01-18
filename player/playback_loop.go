@@ -27,13 +27,13 @@ func NewPlaybackLoop(name string, normalize bool, clipProvider func() Clip) *Pla
 	}
 }
 
-func (queue *PlaybackLoop) Run() {
+func (loop *PlaybackLoop) Run() {
 	for {
-		clip := queue.clipProvider()
+		clip := loop.clipProvider()
 		skipped := false
 
 		if clip == nil {
-			log.Printf("No more clips to play in queue %s.", queue.name)
+			log.Printf("No more clips to play in %s.", loop.name)
 			break
 		}
 
@@ -43,7 +43,7 @@ func (queue *PlaybackLoop) Run() {
 
 		for {
 			// Check if there is a skip signal
-			if utils.TryDropOne(queue.skipSignal) {
+			if utils.TryDropOne(loop.skipSignal) {
 				clip.Stop()
 				skipped = true
 				break
@@ -56,34 +56,34 @@ func (queue *PlaybackLoop) Run() {
 				break
 			}
 
-			if queue.normalize {
+			if loop.normalize {
 				inputLoudness = computeCurrentLoudness(inputLoudness, chunk)
 				gain := computeTargetGain(chunk, inputLoudness)
 				chunk.ApplyGain(lastGain, gain)
 				lastGain = gain
 			}
 
-			queue.NextAudioChunk <- chunk
+			loop.NextAudioChunk <- chunk
 		}
 
-		if queue.clipEndCallback != nil {
-			queue.clipEndCallback(clip, skipped)
+		if loop.clipEndCallback != nil {
+			loop.clipEndCallback(clip, skipped)
 		}
 	}
 }
 
-func (queue *PlaybackLoop) Skip() {
-	queue.skipSignal <- struct{}{}
+func (loop *PlaybackLoop) Skip() {
+	loop.skipSignal <- struct{}{}
 }
 
-func (queue *PlaybackLoop) GetCurrentClip() Clip {
-	return queue.currentClip
+func (loop *PlaybackLoop) GetCurrentClip() Clip {
+	return loop.currentClip
 }
 
-func (queue *PlaybackLoop) OnClipEnd(callback func(Clip, bool)) {
-	if queue.clipEndCallback != nil {
+func (loop *PlaybackLoop) OnClipEnd(callback func(Clip, bool)) {
+	if loop.clipEndCallback != nil {
 		panic("OnClipEnd should only be called once")
 	}
 
-	queue.clipEndCallback = callback
+	loop.clipEndCallback = callback
 }
