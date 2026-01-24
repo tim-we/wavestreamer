@@ -1,0 +1,21 @@
+{
+  "name": "wavestreamer Development",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24"
+    },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.25.6"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "golang.go"
+      ]
+    }
+  },
+  "postCreateCommand": "go version && node --version"
+}
