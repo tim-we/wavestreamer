@@ -14,21 +14,25 @@ type BeepClip struct {
 	buffer chan *player.AudioChunk
 }
 
+// All audio chunks of the beep will be the same.
+// Therefore we can compute it once and cache it.
+var beepChunk *player.AudioChunk
+
 func NewBeep() *BeepClip {
 	buffer := make(chan *player.AudioChunk, NUMBER_OF_CHUNKS)
+	defer close(buffer)
 
-	go func() {
-		defer close(buffer)
-
-		for range NUMBER_OF_CHUNKS {
-			chunk := player.AudioChunk{
-				Left:  make([]float32, config.FRAMES_PER_BUFFER),
-				Right: make([]float32, config.FRAMES_PER_BUFFER),
-			}
-			generateWave(&chunk)
-			buffer <- &chunk
+	if beepChunk == nil {
+		beepChunk = &player.AudioChunk{
+			Left:  make([]float32, config.FRAMES_PER_BUFFER),
+			Right: make([]float32, config.FRAMES_PER_BUFFER),
 		}
-	}()
+		generateWave(beepChunk)
+	}
+
+	for range NUMBER_OF_CHUNKS {
+		buffer <- beepChunk
+	}
 
 	return &BeepClip{buffer: buffer}
 }
