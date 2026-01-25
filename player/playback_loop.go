@@ -29,22 +29,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 		if clip := clipProvider(); clip != nil {
 			return clip
 		}
-		// TODO: what do we do now?
+
 		return nil
-	}
-
-	if err := portaudio.Initialize(); err != nil {
-		log.Fatal(err)
-	}
-	defer portaudio.Terminate()
-
-	devices, dev_err := portaudio.Devices()
-	if dev_err != nil {
-		log.Fatal(dev_err)
-	}
-
-	if len(devices) == 0 {
-		log.Fatal("No audio devices found.")
 	}
 
 	nextAudioChunk := make(chan *AudioChunk, 2)
@@ -63,18 +49,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 		}
 	}
 
-	// Set up the PortAudio stream with a fixed buffer size
-	stream, err := portaudio.OpenDefaultStream(
-		0,                        // not reading any inputs (microphones)
-		config.CHANNELS,          // output channels
-		config.SAMPLE_RATE,       // output sample rate
-		config.FRAMES_PER_BUFFER, // output buffer size
-		playCallback,             // output buffer filling callback
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	stream := initPortAudioStream(playCallback)
+	defer portaudio.Terminate()
 	defer stream.Close()
 
 	if err := stream.Start(); err != nil {
