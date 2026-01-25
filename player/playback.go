@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/gordonklaus/portaudio"
-	"github.com/tim-we/wavestreamer/config"
 	"github.com/tim-we/wavestreamer/utils"
 )
 
@@ -22,20 +21,6 @@ var currentlyPlaying Clip = nil
 var mainLoop *PlaybackLoop
 
 func Start(clipProvider func() Clip, normalize bool) {
-	if err := portaudio.Initialize(); err != nil {
-		log.Fatal(err)
-	}
-	defer portaudio.Terminate()
-
-	devices, dev_err := portaudio.Devices()
-	if dev_err != nil {
-		log.Fatal(dev_err)
-	}
-
-	if len(devices) == 0 {
-		log.Fatal("No audio devices found.")
-	}
-
 	nextClipProvider := func() Clip {
 		if len(userQueue) > 0 {
 			clip := userQueue[0]
@@ -72,18 +57,9 @@ func Start(clipProvider func() Clip, normalize bool) {
 		}
 	}
 
-	// Set up the PortAudio stream with a fixed buffer size
-	stream, err := portaudio.OpenDefaultStream(
-		0,                        // not reading any inputs (microphones)
-		config.CHANNELS,          // output channels
-		config.SAMPLE_RATE,       // output sample rate
-		config.FRAMES_PER_BUFFER, // output buffer size
-		playCallback,             // output buffer filling callback
-	)
+	stream := initPortAudioStream(playCallback)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	defer portaudio.Terminate()
 	defer stream.Close()
 
 	if err := stream.Start(); err != nil {
