@@ -17,9 +17,13 @@ type PlaybackLoop struct {
 	clipEndCallback func(Clip, bool)
 }
 
-func NewPlaybackLoop(name string, normalize bool, clipProvider func() Clip) *PlaybackLoop {
+func NewPlaybackLoop(name string, normalize bool, clipProvider func() Clip, bufferSize int) *PlaybackLoop {
+	if bufferSize < 1 {
+		log.Fatalf("Invalid buffer size for loop %s. Bufer size: %d", name, bufferSize)
+	}
+
 	return &PlaybackLoop{
-		NextAudioChunk: make(chan *AudioChunk, 2),
+		NextAudioChunk: make(chan *AudioChunk, bufferSize),
 		name:           name,
 		clipProvider:   clipProvider,
 		normalize:      normalize,

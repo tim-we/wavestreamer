@@ -32,10 +32,11 @@ func Start(clipProvider func() Clip, normalize bool) {
 	}
 
 	// Default & priority playback loops
-	priorityLoop := NewPlaybackLoop("Priority Loop", false, func() Clip { return <-priorityQueue })
-	mainLoop = NewPlaybackLoop("Main Loop", normalize, nextClipProvider)
+	priorityLoop := NewPlaybackLoop("Priority Loop", false, func() Clip { return <-priorityQueue }, 4)
+	mainLoop = NewPlaybackLoop("Main Loop", normalize, nextClipProvider, 2)
 
 	playCallback := func(out [][]float32) {
+		// Check priority queue first:
 		select {
 		case chunk := <-priorityLoop.NextAudioChunk:
 			copy(out[0], chunk.Left)
@@ -43,6 +44,13 @@ func Start(clipProvider func() Clip, normalize bool) {
 			// Priority chunks should replace normal ones.
 			// Otherwise you would hear the remaining chunks after a pause beep.
 			utils.DropOne(mainLoop.NextAudioChunk)
+			return
+		default:
+			// No priority clips.
+		}
+
+		// There are no priority clips so we proceed with the main queue:
+		select {
 		case chunk := <-mainLoop.NextAudioChunk:
 			copy(out[0], chunk.Left)
 			copy(out[1], chunk.Right)
