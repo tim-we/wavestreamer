@@ -23,6 +23,7 @@ func NewPlaybackLoop(name string, normalize bool, clipProvider func() Clip) *Pla
 		name:           name,
 		clipProvider:   clipProvider,
 		normalize:      normalize,
+		skipSignal:     make(chan struct{}, 1),
 	}
 }
 
@@ -37,6 +38,7 @@ func (loop *PlaybackLoop) Run() {
 		}
 
 		log.Printf("Now playing %s", clip.Name())
+		loop.currentClip = clip
 
 		// Reset measured loudness for new clip
 		var inputLoudness float32 = config.TARGET_MIN_RMS
