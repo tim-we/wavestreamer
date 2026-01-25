@@ -8,7 +8,8 @@ import (
 	"github.com/tim-we/wavestreamer/player"
 )
 
-const NUMBER_OF_CHUNKS = 10
+// Beep should be a quarter of a second long
+const NUMBER_OF_CHUNKS = config.SAMPLE_RATE / 4 / config.FRAMES_PER_BUFFER
 
 type BeepClip struct {
 	buffer chan *player.AudioChunk
