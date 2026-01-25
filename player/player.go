@@ -18,6 +18,8 @@ var priorityQueue = make(chan Clip, 2)
 
 var mainLoop *PlaybackLoop
 
+var beepClipProvider func() Clip
+
 func Start(clipProvider func() Clip, normalize bool) {
 	nextClipProvider := func() Clip {
 		if len(userQueue) > 0 {
@@ -103,12 +105,26 @@ func GetCurrentlyPlaying() Clip {
 	return mainLoop.GetCurrentClip()
 }
 
-func SkipCurrent() {
-	if mainLoop != nil {
-		mainLoop.Skip()
+func SkipCurrent(silent bool) {
+	if mainLoop == nil {
+		// This should not happen...
+		return
 	}
+
+	if !silent && beepClipProvider != nil {
+		PlayPriorityClip(beepClipProvider())
+	}
+
+	mainLoop.Skip()
 }
 
 func PlayPriorityClip(clip Clip) {
+	if clip == nil {
+		return
+	}
 	priorityQueue <- clip
+}
+
+func SetBeepProvider(provider func() Clip) {
+	beepClipProvider = provider
 }

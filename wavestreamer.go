@@ -85,18 +85,21 @@ func main() {
 	if !opts.NoNormalize {
 		fmt.Println("Loudness normalization is enabled (default).")
 	}
+
+	// To avoid circular dependencies we have to create the beep clip here.
+	player.SetBeepProvider(func() player.Clip { return clips.NewBeep() })
+
 	fmt.Println("Starting playback loop...")
 	player.Start(scheduler.GetNextClip, !opts.NoNormalize)
 
 	fmt.Println("Player stopped.")
 }
 
-
 // CheckFFmpegDependencies verifies that ffmpeg and ffprobe are available in PATH.
 // Panics if either binary is not found.
 func CheckFFmpegDependencies() {
 	binaries := []string{"ffmpeg", "ffprobe"}
-	
+
 	for _, binary := range binaries {
 		if _, err := exec.LookPath(binary); err != nil {
 			panic(fmt.Sprintf("%s not found: %v", binary, err))

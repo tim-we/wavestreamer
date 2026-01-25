@@ -117,8 +117,8 @@ func InitGPIOButton(pinName string) {
 
 				// Schedule the long pause
 				player.QueueClipNext(clips.NewPause(10 * time.Minute))
-				player.PlayPriorityClip(clips.NewBeep())
-				player.SkipCurrent()
+				// Skip current clip (silent=false -> plays beep)
+				player.SkipCurrent(false)
 
 				longPressTimer = time.AfterFunc(longPressThreshold, func() {
 					// Indicate long press by playing a beep

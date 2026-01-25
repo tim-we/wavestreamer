@@ -59,7 +59,7 @@ func StartServer(port int, news bool) {
 	})
 
 	http.HandleFunc("/api/skip", func(w http.ResponseWriter, r *http.Request) {
-		player.SkipCurrent()
+		player.SkipCurrent(true)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
@@ -73,7 +73,7 @@ func StartServer(port int, news bool) {
 			player.QueueClip(clips.NewPause(10 * time.Minute))
 		}
 
-		player.SkipCurrent()
+		player.SkipCurrent(true)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
