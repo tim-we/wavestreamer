@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/jessevdk/go-flags"
@@ -43,6 +44,8 @@ func main() {
 		fmt.Printf("Build time: %s\n", BuildTime)
 		return
 	}
+
+	CheckFFmpegDependencies()
 
 	if len(opts.MusicDir) == 0 {
 		fmt.Println("Required argument -d or --music-dir not set.")
@@ -86,4 +89,17 @@ func main() {
 	player.Start(scheduler.GetNextClip, !opts.NoNormalize)
 
 	fmt.Println("Player stopped.")
+}
+
+
+// CheckFFmpegDependencies verifies that ffmpeg and ffprobe are available in PATH.
+// Panics if either binary is not found.
+func CheckFFmpegDependencies() {
+	binaries := []string{"ffmpeg", "ffprobe"}
+	
+	for _, binary := range binaries {
+		if _, err := exec.LookPath(binary); err != nil {
+			panic(fmt.Sprintf("%s not found: %v", binary, err))
+		}
+	}
 }
