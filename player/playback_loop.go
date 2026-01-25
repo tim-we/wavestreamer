@@ -23,7 +23,6 @@ func NewPlaybackLoop(name string, normalize bool, clipProvider func() Clip) *Pla
 		name:           name,
 		clipProvider:   clipProvider,
 		normalize:      normalize,
-		skipSignal:     make(chan struct{}, 1),
 	}
 }
 
@@ -36,6 +35,8 @@ func (loop *PlaybackLoop) Run() {
 			log.Printf("No more clips to play in %s.", loop.name)
 			break
 		}
+
+		log.Printf("Now playing %s", clip.Name())
 
 		// Reset measured loudness for new clip
 		var inputLoudness float32 = config.TARGET_MIN_RMS
@@ -73,7 +74,13 @@ func (loop *PlaybackLoop) Run() {
 }
 
 func (loop *PlaybackLoop) Skip() {
-	loop.skipSignal <- struct{}{}
+	select {
+	case loop.skipSignal <- struct{}{}:
+		// Skip signal sent
+	default:
+		// Skip already pending, ignore
+	}
+
 }
 
 func (loop *PlaybackLoop) GetCurrentClip() Clip {

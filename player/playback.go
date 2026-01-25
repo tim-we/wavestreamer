@@ -16,8 +16,6 @@ var userQueue = make([]Clip, 0, 12)
 
 var priorityQueue = make(chan Clip, 2)
 
-var currentlyPlaying Clip = nil
-
 var mainLoop *PlaybackLoop
 
 func Start(clipProvider func() Clip, normalize bool) {
@@ -69,7 +67,6 @@ func Start(clipProvider func() Clip, normalize bool) {
 
 	mainLoop.clipEndCallback = func(clip Clip, skipped bool) {
 		addClipToHistory(clip, skipped)
-		currentlyPlaying = nil
 	}
 
 	go priorityLoop.Run()
@@ -95,7 +92,7 @@ func QueueSize() int {
 }
 
 func GetCurrentlyPlaying() Clip {
-	return currentlyPlaying
+	return mainLoop.GetCurrentClip()
 }
 
 func SkipCurrent() {
