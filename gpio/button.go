@@ -108,6 +108,7 @@ func InitGPIOButton(pinName string) {
 	go func() {
 		var pressStartTime time.Time
 		var longPressTimer *time.Timer
+		var pause *clips.PauseClip
 
 		for event := range events {
 			switch event {
@@ -115,8 +116,10 @@ func InitGPIOButton(pinName string) {
 				log.Printf("[GPIO] Button %s pressed", pinName)
 				pressStartTime = time.Now()
 
+				// Create long pause and store reference so we can skip it later
+				pause = clips.NewPause(10 * time.Minute)
 				// Schedule the long pause
-				player.QueueClipNext(clips.NewPause(10 * time.Minute))
+				player.QueueClipNext(pause)
 				// Skip current clip (silent=false -> plays beep)
 				player.SkipCurrent(false)
 
@@ -138,6 +141,7 @@ func InitGPIOButton(pinName string) {
 				if pressDuration < longPressThreshold {
 					// Skip pause, user just wants to skip the current clip.
 					log.Printf("[GPIO] Quick release detected - canceling pause")
+					pause.Stop()
 				}
 			}
 		}
