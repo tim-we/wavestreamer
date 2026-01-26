@@ -59,7 +59,7 @@ func StartServer(port int, news bool) {
 	})
 
 	http.HandleFunc("/api/skip", func(w http.ResponseWriter, r *http.Request) {
-		player.SkipCurrent(true)
+		player.SkipCurrent(false)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
 	})
