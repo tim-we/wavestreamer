@@ -12,7 +12,7 @@ import (
 	"github.com/tim-we/wavestreamer/utils"
 )
 
-var userQueue = make([]Clip, 0, 12)
+var userQueue = utils.NewConcurrentQueue[Clip](12)
 
 var priorityQueue = make(chan Clip, 2)
 
@@ -22,9 +22,8 @@ var beepClipProvider func() Clip
 
 func Start(clipProvider func() Clip, normalize bool) {
 	nextClipProvider := func() Clip {
-		if len(userQueue) > 0 {
-			clip := userQueue[0]
-			userQueue = userQueue[1:]
+		if !userQueue.IsEmpty() {
+			clip, _ := userQueue.GetNext()
 			return clip
 		}
 		if clip := clipProvider(); clip != nil {
@@ -87,18 +86,18 @@ func QueueClip(clip Clip) {
 	if clip == nil {
 		return
 	}
-	userQueue = append(userQueue, clip)
+	userQueue.Add(clip)
 }
 
 func QueueClipNext(clip Clip) {
 	if clip == nil {
 		return
 	}
-	userQueue = append([]Clip{clip}, userQueue...)
+	userQueue.Prepend(clip)
 }
 
 func QueueSize() int {
-	return len(userQueue)
+	return userQueue.Size()
 }
 
 func GetCurrentlyPlaying() Clip {
