@@ -2,6 +2,7 @@ package player
 
 import (
 	"log"
+	"time"
 
 	"github.com/tim-we/wavestreamer/config"
 	"github.com/tim-we/wavestreamer/utils"
@@ -44,6 +45,10 @@ func (loop *PlaybackLoop) Run() {
 		var inputLoudness float32 = config.TARGET_MIN_RMS
 		var lastGain float32 = 1.0
 
+		// We perform this check only once per clip. That way it is a cheap operation and
+		// does not cause weird audio glitches when we dynamically toggle features like normalization.
+		reduceCPULoad := utils.ShouldReduceCPU()
+
 		for {
 			// Check if there is a skip signal
 			if utils.TryDropOne(loop.skipSignal) {
@@ -59,7 +64,7 @@ func (loop *PlaybackLoop) Run() {
 				break
 			}
 
-			if loop.normalize {
+			if !reduceCPULoad && loop.normalize {
 				inputLoudness = computeCurrentLoudness(inputLoudness, chunk)
 				gain := computeTargetGain(chunk, inputLoudness)
 				chunk.ApplyGain(lastGain, gain)
@@ -71,6 +76,10 @@ func (loop *PlaybackLoop) Run() {
 
 		if loop.clipEndCallback != nil {
 			loop.clipEndCallback(clip, skipped)
+		}
+
+		if reduceCPULoad {
+			time.Sleep(20 * time.Millisecond)
 		}
 	}
 }
