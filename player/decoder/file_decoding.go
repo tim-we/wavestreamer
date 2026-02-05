@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 
 	"github.com/tim-we/wavestreamer/config"
@@ -21,8 +22,11 @@ type DecodingProcess struct {
 }
 
 func NewDecodingProcess(filepath string) DecodingProcess {
+	threads := max(1, runtime.NumCPU()/2)
+
 	cmd := exec.Command(
 		"ffmpeg",
+		"-threads", strconv.Itoa(threads),
 		"-i", filepath, // input file
 		"-f", "s16le", // output format (signed 16bit integer little endian)
 		"-ac", strconv.Itoa(config.CHANNELS),
