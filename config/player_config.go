@@ -3,7 +3,7 @@ package config
 const SAMPLE_RATE = 44100
 
 // The size of an AudioChunk. A frame consists of a sample for each channel.
-const FRAMES_PER_BUFFER = 512
+const FRAMES_PER_BUFFER = 1024
 
 // Unfortunately the number of channels cannot be changed (easily),
 // as it requires changes in other places (for example AudioChunk) as well.
