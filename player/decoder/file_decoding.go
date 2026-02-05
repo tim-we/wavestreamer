@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/tim-we/wavestreamer/config"
+	"github.com/tim-we/wavestreamer/utils"
 )
 
 type DecodingProcess struct {
@@ -23,6 +24,10 @@ type DecodingProcess struct {
 
 func NewDecodingProcess(filepath string) DecodingProcess {
 	threads := max(1, runtime.NumCPU()/2)
+
+	if threads > 1 && utils.ShouldReduceCPU() {
+		threads = 1
+	}
 
 	cmd := exec.Command(
 		"ffmpeg",
