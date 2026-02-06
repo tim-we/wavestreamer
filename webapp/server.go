@@ -3,6 +3,7 @@ package webapp
 import (
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log"
@@ -58,13 +59,12 @@ func StartServer(port int, news bool) {
 		json.NewEncoder(w).Encode(response)
 	})
 
-	http.HandleFunc("/api/skip", func(w http.ResponseWriter, r *http.Request) {
+	addJsonEndpoint("/api/skip", func(r *http.Request) (any, error) {
 		player.SkipCurrent(false)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
+		return ApiOkResponse{"ok"}, nil
 	})
 
-	http.HandleFunc("/api/pause", func(w http.ResponseWriter, r *http.Request) {
+	addJsonEndpoint("/api/pause", func(r *http.Request) (any, error) {
 		current := player.GetCurrentlyPlaying()
 
 		// If the current clip is a Pause we don't schedule another one,
@@ -74,47 +74,40 @@ func StartServer(port int, news bool) {
 		}
 
 		player.SkipCurrent(true)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
+		return ApiOkResponse{"ok"}, nil
 	})
 
-	http.HandleFunc("/api/repeat", func(w http.ResponseWriter, r *http.Request) {
+	addJsonEndpoint("/api/repeat", func(r *http.Request) (any, error) {
 		current := player.GetCurrentlyPlaying()
-
 		if current == nil {
-			respondWithError(w, "nothing to repeat")
-			return
+			return nil, errors.New("nothing to repeat")
 		}
 
 		nextClip := current.Duplicate()
 		player.QueueClipNext(nextClip)
 
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
+		return ApiOkResponse{"ok"}, nil
 	})
 
-	http.HandleFunc("/api/library/search", func(w http.ResponseWriter, r *http.Request) {
+	addJsonEndpoint("/api/library/search", func(r *http.Request) (any, error) {
 		// Parse query parameters and get the value of `query`
 		query := r.URL.Query().Get("query")
 		// Collect results
 		results := searchResultsAsDTOs(library.Search(query, 100))
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ApiSearchResponse{"ok", results})
+		return ApiSearchResponse{"ok", results}, nil
 	})
 
 	http.HandleFunc("/api/library/download", func(w http.ResponseWriter, r *http.Request) {
 		rawFile := r.URL.Query().Get("file")
 		fileId, err := uuid.Parse(rawFile)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			respondWithError(w, "invalid or missing 'file' query parameter")
+			respondWithError(w, http.StatusBadRequest, "invalid or missing 'file' query parameter")
 			return
 		}
 
 		libFile := library.GetFileById(fileId)
 		if libFile == nil {
-			w.WriteHeader(http.StatusNotFound)
-			respondWithError(w, "file not found")
+			respondWithError(w, http.StatusNotFound, "file not found")
 			return
 		}
 		// Set Content-Disposition header to force download and specify filename
@@ -122,41 +115,35 @@ func StartServer(port int, news bool) {
 		http.ServeFile(w, r, libFile.Path())
 	})
 
-	http.HandleFunc("/api/schedule", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		encoder := json.NewEncoder(w)
+	addJsonEndpoint("/api/schedule", func(r *http.Request) (any, error) {
 		if err := r.ParseForm(); err != nil {
-			encoder.Encode(ApiErrorResponse{"error", fmt.Sprintf("%v", err)})
-			return
+			return nil, err
 		}
 		if !r.Form.Has("file") {
-			encoder.Encode(ApiErrorResponse{"error", "File field not set."})
-			return
+			return nil, errors.New("File field not set.")
 		}
 		rawClipId := r.Form.Get("file")
 		fileId, parseErr := uuid.Parse(rawClipId)
 		if parseErr != nil {
-			encoder.Encode(ApiErrorResponse{"error", "Invalid id value."})
-			return
+			return nil, errors.New("Invalid id value.")
 		}
 		file := library.GetFileById(fileId)
 		if file == nil {
-			encoder.Encode(ApiErrorResponse{"error", "File not found."})
-			return
+			// TODO: 404 code
+			return nil, errors.New("File not found.")
 		}
 		player.QueueClip(file.CreateClip())
-		encoder.Encode(ApiOkResponse{"ok"})
+		return ApiOkResponse{"ok"}, nil
 	})
 
-	http.HandleFunc("/api/schedule/news", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+	addJsonEndpoint("/api/schedule/news", func(r *http.Request) (any, error) {
+		// TODO: avoid double scheduling
 		scheduler.ScheduleTagesschauNow()
-		json.NewEncoder(w).Encode(ApiOkResponse{"ok"})
+		return ApiOkResponse{"ok"}, nil
 	})
 
-	http.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ApiConfigResponse{"ok", news})
+	addJsonEndpoint("/api/config", func(r *http.Request) (any, error) {
+		return ApiConfigResponse{"ok", news}, nil
 	})
 
 	// Start server
@@ -177,7 +164,27 @@ func searchResultsAsDTOs(results []*library.LibraryFile) []SearchResultEntry {
 	return stringResults
 }
 
-func respondWithError(w http.ResponseWriter, message string) {
+func addJsonEndpoint(path string, handler func(r *http.Request) (any, error)) {
+	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		encoder := json.NewEncoder(w)
+		result, err := handler(r)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			encoder.Encode(ApiErrorResponse{"error", err.Error()})
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+
+		encoder.Encode(result)
+	})
+}
+
+func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(ApiErrorResponse{"error", message})
 }
