@@ -9,13 +9,14 @@ import (
 )
 
 type PlaybackLoop struct {
-	NextAudioChunk  chan *AudioChunk
-	currentClip     Clip
-	name            string
-	skipSignal      chan struct{}
-	clipProvider    func() Clip
-	normalize       bool
-	clipEndCallback func(Clip, bool)
+	NextAudioChunk    chan *AudioChunk
+	ClipStartCallback func(Clip)
+	currentClip       Clip
+	name              string
+	skipSignal        chan struct{}
+	clipProvider      func() Clip
+	normalize         bool
+	clipEndCallback   func(Clip, bool)
 }
 
 func NewPlaybackLoop(name string, normalize bool, clipProvider func() Clip) *PlaybackLoop {
@@ -38,7 +39,9 @@ func (loop *PlaybackLoop) Run() {
 			break
 		}
 
-		log.Printf("Now playing %s", clip.Name())
+		if loop.ClipStartCallback != nil {
+			loop.ClipStartCallback(clip)
+		}
 		loop.currentClip = clip
 
 		// Reset measured loudness for new clip

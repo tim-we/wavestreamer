@@ -35,6 +35,7 @@ func Start(clipProvider func() Clip, normalize bool) {
 	// Default & priority playback loops
 	priorityLoop := NewPlaybackLoop("Priority Loop", false, func() Clip { return <-priorityQueue })
 	mainLoop = NewPlaybackLoop("Main Loop", normalize, nextClipProvider)
+	mainLoop.ClipStartCallback = func(clip Clip) { log.Printf("Now playing %s", clip.Name()) }
 
 	playCallback := func(out [][]float32) {
 		// Check priority queue first:
