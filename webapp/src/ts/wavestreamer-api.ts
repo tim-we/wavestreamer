@@ -2,17 +2,17 @@ import { signal } from "@preact/signals";
 
 const baseUrl = `http://${window.location.host}/api`;
 
-export const nowDataSignal = signal<NowData | null>(null);
+export const nowDataSignal = signal<NowPlayingEvent | null>(null);
 
-const timeouts: Map<RadioEvent, number> = new Map();
+export async function init(): Promise<void> {
+  // initial update
+  const data = await now();
 
-export function init() {
-  // setup auto updates
-  scheduleUpdate();
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      scheduleUpdate();
-    }
+  // notify listeners
+  nowDataSignal.value = data.now;
+
+  subscribe((data) => {
+    nowDataSignal.value = data;
   });
 }
 
@@ -22,12 +22,10 @@ export function now(): Promise<ApiNowResponse> {
 
 export async function skip(): Promise<void> {
   await request("/skip", "PUT");
-  scheduleUpdate();
 }
 
 export async function pause(): Promise<void> {
   await request("/pause", "POST");
-  scheduleUpdate();
 }
 
 export async function repeat(): Promise<void> {
@@ -57,6 +55,14 @@ export async function news(): Promise<void> {
   await request("/schedule/news", "POST");
 }
 
+export function subscribe(callback: (data: NowPlayingEvent) => unknown): void {
+  const source = new EventSource(`${baseUrl}/events`);
+  source.addEventListener("now-playing", (e) => {
+    const data = JSON.parse(e.data);
+    callback(data);
+  });
+}
+
 async function request<T extends ApiBaseResponse>(
   path: string,
   method: HTTPMethod = "GET",
@@ -82,16 +88,6 @@ async function request<T extends ApiBaseResponse>(
     : Promise.reject(obj as ApiErrorResponse);
 }
 
-function scheduleUpdate(): void {
-  // clear last timeout
-  const timeout = timeouts.get("update");
-  if (timeout) {
-    window.clearTimeout(timeout);
-  }
-
-  window.setTimeout(update, 10);
-}
-
 export function getConfig(): Promise<ApiConfigResponse> {
   return request<ApiConfigResponse>("/config", "POST");
 }
@@ -100,29 +96,7 @@ export function getDownloadUrl(clip: SearchResultEntry["id"]): string {
   return `${baseUrl}/library/download?file=${encodeURIComponent(clip)}`;
 }
 
-async function update(): Promise<void> {
-  // clear timeout in case this was called manually
-  const timeout = timeouts.get("update");
-  if (timeout) {
-    window.clearTimeout(timeout);
-  }
-
-  // update
-  const data = await now();
-
-  // notify listeners
-  nowDataSignal.value = data;
-
-  // schedule next update
-  window.setTimeout(
-    update.bind(this),
-    document.visibilityState === "visible" ? 3141 : 6666,
-  );
-}
-
 type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE";
-
-type RadioEvent = "update";
 
 type RequestInitData = RequestInit & { follow: "error" };
 
@@ -142,11 +116,15 @@ type ApiSearchResponse = {
 };
 
 type NowData = {
+  now: NowPlayingEvent;
+  library: { hosts: number; music: number; other: number };
+  uptime: string;
+};
+
+type NowPlayingEvent = {
   current: string;
   isPause: boolean;
   history: HistoryEntry[];
-  library: { hosts: number; music: number; other: number };
-  uptime: string;
 };
 
 export type HistoryEntry = {
