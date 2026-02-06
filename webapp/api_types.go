@@ -3,12 +3,16 @@ package webapp
 import "github.com/tim-we/wavestreamer/player"
 
 type ApiNowResponse struct {
-	Status      string                `json:"status"`
-	Current     string                `json:"current"`
-	IsPause     bool                  `json:"isPause"`
-	History     []player.HistoryEntry `json:"history"`
-	LibraryInfo ApiNowLibraryInfo     `json:"library"`
-	Uptime      string                `json:"uptime"`
+	Status      string              `json:"status"`
+	Now         *ApiNowPlayingEvent `json:"now"`
+	LibraryInfo ApiNowLibraryInfo   `json:"library"`
+	Uptime      string              `json:"uptime"`
+}
+
+type ApiNowPlayingEvent struct {
+	Current string                `json:"current"`
+	IsPause bool                  `json:"isPause"`
+	History []player.HistoryEntry `json:"history"`
 }
 
 type ApiNowLibraryInfo struct {

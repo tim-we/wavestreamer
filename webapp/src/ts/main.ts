@@ -3,6 +3,6 @@ import App from "./components/App";
 import * as WavestreamerApi from "./wavestreamer-api";
 
 const root = document.getElementById("root")!;
-WavestreamerApi.init();
+void WavestreamerApi.init();
 
 render(createElement(App, {}), root);

@@ -6,6 +6,7 @@ package player
 import "C"
 
 import (
+	"context"
 	"log"
 
 	"github.com/gordonklaus/portaudio"
@@ -20,7 +21,11 @@ var mainLoop *PlaybackLoop
 
 var beepClipProvider func() Clip
 
+var eventBus *utils.EventBus[PlayerEvent]
+
 func Start(clipProvider func() Clip, normalize bool) {
+	eventBus = utils.NewEventBus[PlayerEvent](4, 4)
+
 	nextClipProvider := func() Clip {
 		if !userQueue.IsEmpty() {
 			clip, _ := userQueue.GetNext()
@@ -35,7 +40,12 @@ func Start(clipProvider func() Clip, normalize bool) {
 	// Default & priority playback loops
 	priorityLoop := NewPlaybackLoop("Priority Loop", false, func() Clip { return <-priorityQueue })
 	mainLoop = NewPlaybackLoop("Main Loop", normalize, nextClipProvider)
-	mainLoop.ClipStartCallback = func(clip Clip) { log.Printf("Now playing %s", clip.Name()) }
+	mainLoop.ClipStartCallback = func(clip Clip) {
+		log.Printf("Now playing %s", clip.Name())
+		eventBus.Publish(NowPlayingEvent{
+			CurrentClip: clip,
+		})
+	}
 
 	playCallback := func(out [][]float32) {
 		// Check priority queue first:
@@ -127,4 +137,8 @@ func PlayPriorityClip(clip Clip) {
 
 func SetBeepProvider(provider func() Clip) {
 	beepClipProvider = provider
+}
+
+func Subscribe(ctx context.Context) <-chan PlayerEvent {
+	return eventBus.SubscribeContext(ctx)
 }

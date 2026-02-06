@@ -36,27 +36,58 @@ func StartServer(port int, news bool) {
 
 	// API endpoints:
 
-	http.HandleFunc("/api/now", func(w http.ResponseWriter, r *http.Request) {
+	addJsonEndpoint("/api/now", func(r *http.Request) (any, error) {
 		current := player.GetCurrentlyPlaying()
-		currentClipName := "-"
 
-		if current != nil {
-			currentClipName = current.Name()
-		}
-
-		_, isPause := current.(*clips.PauseClip)
-
-		response := ApiNowResponse{
+		return ApiNowResponse{
 			Status:      "ok",
-			Current:     currentClipName,
-			IsPause:     isPause,
-			History:     player.GetHistory(),
+			Now:         createNowPlaying(current),
 			LibraryInfo: ApiNowLibraryInfo{},
 			Uptime:      utils.PrettyDuration(time.Since(startTime), ""),
+		}, nil
+	})
+
+	http.HandleFunc("/api/events", func(w http.ResponseWriter, r *http.Request) {
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			respondWithError(w, http.StatusInternalServerError, "streaming unsupported")
+			return
+		}
+		if utils.ShouldReduceCPU() {
+			respondWithError(w, http.StatusNotAcceptable, "Currently not available.")
+			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+
+		events := player.Subscribe(r.Context())
+
+		// Send a SSE comment to let the browser know the connection has been established
+		fmt.Fprint(w, ": connected\n\n")
+		flusher.Flush()
+
+		for unknownEvent := range events {
+			var data any
+
+			switch ev := unknownEvent.(type) {
+			case player.NowPlayingEvent:
+				data = createNowPlaying(ev.CurrentClip)
+			default:
+				break
+			}
+
+			data, err := json.Marshal(data)
+			if err != nil {
+				log.Printf("Failed to marshal JSON: %v", err)
+				break
+			}
+
+			fmt.Fprintf(w, "event: %s\n", unknownEvent.Type())
+			fmt.Fprintf(w, "data: %s\n\n", data)
+			flusher.Flush()
+		}
 	})
 
 	addJsonEndpoint("/api/skip", func(r *http.Request) (any, error) {
@@ -164,9 +195,26 @@ func searchResultsAsDTOs(results []*library.LibraryFile) []SearchResultEntry {
 	return stringResults
 }
 
+func createNowPlaying(current player.Clip) *ApiNowPlayingEvent {
+	currentClipName := "-"
+
+	if current != nil {
+		currentClipName = current.Name()
+	}
+
+	_, isPause := current.(*clips.PauseClip)
+
+	return &ApiNowPlayingEvent{
+		Current: currentClipName,
+		IsPause: isPause,
+		History: player.GetHistory(),
+	}
+}
+
 func addJsonEndpoint(path string, handler func(r *http.Request) (any, error)) {
 	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-cache")
 
 		encoder := json.NewEncoder(w)
 		result, err := handler(r)
