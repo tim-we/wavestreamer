@@ -3,16 +3,27 @@ import { signal } from "@preact/signals";
 const baseUrl = `http://${window.location.host}/api`;
 
 export const nowDataSignal = signal<NowPlayingEvent | null>(null);
+export const connectedSignal = signal<boolean>(true);
 
 export async function init(): Promise<void> {
   // initial update
   const data = await now();
 
   // notify listeners
+  connectedSignal.value = true;
   nowDataSignal.value = data.now;
 
-  subscribe((data) => {
-    nowDataSignal.value = data;
+  // subscribe to further events
+  const source = new EventSource(`${baseUrl}/events`);
+  source.addEventListener("open", () => {
+    connectedSignal.value = true;
+  });
+  source.addEventListener("error", () => {
+    connectedSignal.value = source.readyState === EventSource.OPEN;
+  });
+  source.addEventListener("now-playing", (e) => {
+    connectedSignal.value = true;
+    nowDataSignal.value = JSON.parse(e.data);
   });
 }
 
@@ -53,14 +64,6 @@ export async function schedule(fileId: SearchResultEntry["id"]): Promise<void> {
 
 export async function news(): Promise<void> {
   await request("/schedule/news", "POST");
-}
-
-export function subscribe(callback: (data: NowPlayingEvent) => unknown): void {
-  const source = new EventSource(`${baseUrl}/events`);
-  source.addEventListener("now-playing", (e) => {
-    const data = JSON.parse(e.data);
-    callback(data);
-  });
 }
 
 async function request<T extends ApiBaseResponse>(

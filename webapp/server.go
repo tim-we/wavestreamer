@@ -72,7 +72,7 @@ func StartServer(port int, news bool) {
 			var data any
 
 			switch ev := unknownEvent.(type) {
-			case player.NowPlayingEvent:
+			case *player.NowPlayingEvent:
 				data = createNowPlaying(ev.CurrentClip)
 			default:
 				break

@@ -31,9 +31,10 @@ body {
 }
 
 header {
+  position: relative;
   display: flex;
   justify-content: center;
-  height: 80px;
+  min-height: 80px;
 
   background-image: linear-gradient(#1e415e 10%, #2b5b84 90%);
   color: white;
@@ -51,6 +52,25 @@ header {
     font-size: 32px;
     font-weight: bold;
     line-height: 80px;
+  }
+
+  .error {
+    position: absolute;
+    inset: 0;
+    inset-block-end: auto;
+    background-color: #c61f28;
+    color: white;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    padding: 0.2rem;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+    translate: 0 0;
+    transition: translate 0.2s;
+    transition-delay: translate 0.5s;
+
+    @starting-style {
+      translate: 0 -100%;
+    }
   }
 }
 

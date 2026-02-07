@@ -42,7 +42,7 @@ func Start(clipProvider func() Clip, normalize bool) {
 	mainLoop = NewPlaybackLoop("Main Loop", normalize, nextClipProvider)
 	mainLoop.ClipStartCallback = func(clip Clip) {
 		log.Printf("Now playing %s", clip.Name())
-		eventBus.Publish(NowPlayingEvent{
+		eventBus.Publish(&NowPlayingEvent{
 			CurrentClip: clip,
 		})
 	}
