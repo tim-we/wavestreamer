@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/gordonklaus/portaudio"
+	"github.com/tim-we/wavestreamer/config"
 	"github.com/tim-we/wavestreamer/utils"
 )
 
@@ -22,6 +23,8 @@ var mainLoop *PlaybackLoop
 var beepClipProvider func() Clip
 
 var eventBus *utils.EventBus[PlayerEvent]
+
+var zeroByteSlice = make([]float32, config.FRAMES_PER_BUFFER)
 
 func Start(clipProvider func() Clip, normalize bool) {
 	eventBus = utils.NewEventBus[PlayerEvent](4, 4)
@@ -68,10 +71,8 @@ func Start(clipProvider func() Clip, normalize bool) {
 			copy(out[1], chunk.Right)
 		default:
 			// Handle underflow (e.g., fill with silence)
-			for i := range out[0] {
-				out[0][i] = 0
-				out[1][i] = 0
-			}
+			copy(out[0], zeroByteSlice)
+			copy(out[1], zeroByteSlice)
 		}
 	}
 
