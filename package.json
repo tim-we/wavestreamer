@@ -14,16 +14,16 @@
   "license": "MIT",
   "description": "A music player simulating a radio with a Go backend.",
   "dependencies": {
-    "@preact/signals": "2.6.1",
-    "preact": "10.28.2"
+    "@preact/signals": "2.8.1",
+    "preact": "10.28.4"
   },
   "engines": {
     "node": ">=24",
     "npm": ">=11"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.3",
-    "@preact/preset-vite": "2.10.2",
+    "@biomejs/biome": "2.4.3",
+    "@preact/preset-vite": "2.10.3",
     "typescript": "5.9.3",
     "vite": "7.3.1"
   }
