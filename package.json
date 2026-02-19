@@ -22,7 +22,7 @@
     "npm": ">=11"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.12",
+    "@biomejs/biome": "^2.4.3",
     "@preact/preset-vite": "2.10.2",
     "typescript": "5.9.3",
     "vite": "7.3.1"
