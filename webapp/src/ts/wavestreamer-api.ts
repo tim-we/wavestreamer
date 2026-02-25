@@ -14,6 +14,21 @@ export async function init(): Promise<void> {
   nowDataSignal.value = data.now;
 
   // subscribe to further events
+  let source = connect();
+
+  // Mobile browsers suspend background tabs, which can silently kill the SSE connection
+  // without triggering a reconnect. Re-connect when the tab becomes visible again.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      // Check if the EventSource is in a broken state
+      if (source.readyState === EventSource.CLOSED) {
+        source = connect();
+      }
+    }
+  });
+}
+
+function connect(): EventSource {
   const source = new EventSource(`${baseUrl}/events`);
   source.addEventListener("open", () => {
     connectedSignal.value = true;
@@ -25,6 +40,7 @@ export async function init(): Promise<void> {
     connectedSignal.value = true;
     nowDataSignal.value = JSON.parse(e.data);
   });
+  return source;
 }
 
 export function now(): Promise<ApiNowResponse> {
