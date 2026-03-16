@@ -68,6 +68,16 @@ func StartServer(port int, news bool) {
 		fmt.Fprint(w, ": connected\n\n")
 		flusher.Flush()
 
+		// Send initial now-playing state immediately after connecting
+		if clip := player.GetCurrentlyPlaying(); clip != nil {
+			data, err := json.Marshal(createNowPlaying(clip))
+			if err == nil {
+				fmt.Fprintf(w, "event: %s\n", "now-playing")
+				fmt.Fprintf(w, "data: %s\n\n", data)
+				flusher.Flush()
+			}
+		}
+
 		for unknownEvent := range events {
 			var data any
 
