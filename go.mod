@@ -1,6 +1,6 @@
 module github.com/tim-we/wavestreamer
 
-go 1.25.6
+go 1.25.8
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
@@ -12,4 +12,4 @@ require (
 	periph.io/x/host/v3 v3.8.5
 )
 
-require golang.org/x/sys v0.40.0 // indirect
+require golang.org/x/sys v0.42.0 // indirect
