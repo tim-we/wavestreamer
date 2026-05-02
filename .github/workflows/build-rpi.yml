@@ -93,9 +93,10 @@ jobs:
         run: |
           mkdir -p build/portaudio
           cd build
-          wget http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
+          # wget http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
+          wget -O pa_stable_v190700_20210406.tgz https://github.com/PortAudio/portaudio/archive/refs/tags/v19.7.0.tar.gz
           tar xzf pa_stable_v190700_20210406.tgz
-          cd portaudio
+          cd portaudio-19.7.0
           ./configure --host=aarch64-linux-gnu \
             --prefix=$PWD/../portaudio-install \
             --with-alsa \
