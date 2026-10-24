@@ -1,9 +1,9 @@
 import type { FunctionComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import listIcon from "../../img/list.svg";
 import pauseIcon from "../../img/pause.svg";
 import playIcon from "../../img/play.svg";
 import repeatIcon from "../../img/repeat.svg";
+import searchIcon from "../../img/search.svg";
 import skipIcon from "../../img/skip.svg";
 import * as WavestreamerApi from "../wavestreamer-api";
 import * as SongListModal from "./SongListModal";
@@ -13,7 +13,7 @@ const SVG_ICONS = {
   play: playIcon,
   repeat: repeatIcon,
   skip: skipIcon,
-  list: listIcon,
+  search: searchIcon,
 } as const;
 
 const Controls: FunctionComponent = () => {
@@ -44,9 +44,9 @@ const Controls: FunctionComponent = () => {
       />
       <Button
         id="song-list-button"
-        label="song list"
-        tooltip="song list"
-        icon="list"
+        label="search"
+        tooltip="Search songs"
+        icon="search"
         onClick={() => {
           SongListModal.show();
           return Promise.resolve();
@@ -71,7 +71,7 @@ type ButtonProps = {
   id?: string;
   label?: string;
   tooltip: string;
-  icon?: "pause" | "repeat" | "skip" | "list";
+  icon?: keyof typeof SVG_ICONS;
   onClick: () => Promise<unknown>;
 };
 
@@ -100,7 +100,8 @@ const Button: FunctionComponent<ButtonProps> = ({
     classes.push("active");
   }
 
-  const iconSrc = SVG_ICONS[icon ?? id];
+  const iconId = (icon ?? id) as keyof typeof SVG_ICONS;
+  const iconSrc = iconId in SVG_ICONS ? SVG_ICONS[iconId] : undefined;
 
   return (
     <button
