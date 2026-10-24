@@ -8,7 +8,8 @@
     "preview": "vite preview webapp",
     "format": "biome format --write webapp",
     "biome:check": "biome check webapp",
-    "biome:fix": "biome check --write webapp"
+    "biome:fix": "biome check --write webapp",
+    "typecheck": "tsc --build --noEmit"
   },
   "author": "tim-we",
   "license": "MIT",
