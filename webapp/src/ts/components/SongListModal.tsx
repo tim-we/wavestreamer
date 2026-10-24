@@ -14,11 +14,11 @@ export function show() {
 }
 
 const SongListModal: FunctionComponent = () => {
-  const inputRef = useRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [clips, setClips] = useState<SearchResultEntry[]>([]);
 
   useEffect(() => {
-    const input = inputRef.current;
+    const input = inputRef.current!;
     const inputListener = async () => {
       highlight.clear();
       const filter = input.value.trim();
@@ -94,7 +94,7 @@ type ClipProps = {
 
 const Clip: FunctionComponent<ClipProps> = ({ clip }) => {
   const userQuery = useContext(UserQueryContext);
-  const nameRef = useRef<HTMLElement>();
+  const nameRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const loweredClipName = clip.name.toLocaleLowerCase();
@@ -110,7 +110,7 @@ const Clip: FunctionComponent<ClipProps> = ({ clip }) => {
       }
 
       const range = new Range();
-      const textNode = nameRef.current.childNodes[0];
+      const textNode = nameRef.current!.childNodes[0];
       range.setStart(textNode, index);
       range.setEnd(textNode, index + segment.length);
 
