@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <title>List</title>
     <g transform="translate(5,0)">
         <g transform="translate(0,20)">
             <rect x="0" y="0" width="10" height="10" fill="white"/>

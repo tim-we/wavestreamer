@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <!-- <rect x="0" y="0" width="100" height="100" fill="rgb(127,127,127)" /> -->
+    <title>Wavestreamer Logo</title>
 
     <polygon points="35,40 75,30 85,50 88,5.85 30,25" fill="rgb(74, 92, 255)"/>
 

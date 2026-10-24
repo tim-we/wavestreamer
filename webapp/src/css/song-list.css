@@ -27,7 +27,6 @@
   transition: scale 0.25s;
 
   @starting-style {
-    /* biome-ignore lint/suspicious/noDuplicateProperties: Biome does not seem to support starting style */
     scale: 0.9 0;
   }
 }
